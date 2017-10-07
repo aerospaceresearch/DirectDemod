@@ -1,6 +1,7 @@
-import numpy as np
-import matplotlib.pylab as plt
 import os
+import sys
+
+import numpy as np
 
 
 def loading_file(filename):
@@ -16,10 +17,13 @@ def loading_file(filename):
     return signal
 
 
-
 # loading in the iq imput file
 # adjusting the uint values by -127 to match the recorded IQ values to reality
-filename = os.path.join("samples","earth_aprs1200_1signal_1peak_SDRSharp_20170816_105454Z_144800000Hz_IQ.wav")
+if len(sys.argv) == 1:
+    filename = os.path.join("samples", "earth_aprs1200_1signal_1peak_SDRSharp_20170816_105454Z_144800000Hz_IQ.wav")
+else:
+    filename = sys.argv[1]
+
 signal = loading_file(filename)
 signal = -127 + signal[:]
 
@@ -39,11 +43,5 @@ for chunk in range(0, len(signal), chunk_size):
 
     # and multiply it with your signal
     signal_shifted = signal_chunk * frequency_correction
-
-
-
-
-
-
 
 print("finished")
