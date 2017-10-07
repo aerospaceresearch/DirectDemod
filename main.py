@@ -106,6 +106,56 @@ def low_pass(signal):
     return lowpassed
 
 
+def deemph_filter(lowpassed):
+    avg = 0
+    d = 0
+    lp = np.zeros(len(lowpassed))
+    # de-emph IIR # avg = avg * (1 - alpha) + sample * alpha
+
+    for i in range(0, len(lp), 1):
+        d = lowpassed[i] - avg
+        if (d > 0):
+            avg += (d + deemph_a / 2) / deemph_a
+        else:
+            avg += (d - deemph_a / 2) / deemph_a
+
+        lp[i] = avg
+
+    return lp
+
+
+def low_pass_real(input):
+    # simple square window FIR
+
+    i2 = 0
+    i = 0
+
+    fast = rate_out
+    slow = rate_out2
+
+    prev_lpr_index = 0
+    now_lpr = 0
+
+    result_len = len(input)
+    result = []
+
+    while i < result_len:
+
+        now_lpr += input[i]
+        i += 1
+        prev_lpr_index += slow
+        if prev_lpr_index < fast:
+            continue
+
+        result.append(now_lpr / (fast/slow))
+        prev_lpr_index -= fast
+        now_lpr = 0
+        i2 += 1
+
+    result_len = i2
+    return result
+
+
 # all the inputs
 ## basics
 filename_sample = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav")
@@ -119,7 +169,6 @@ frequency_offset = 0
 ## audio
 rate_in = 22050
 downsample = (samplerate // rate_in + 1) * 2
-print(downsample)
 capture_rate = rate_in * downsample
 rate_out = rate_in
 rate_out2 = 22050
@@ -140,7 +189,6 @@ signal = -127 + signal[:]
 
 
 ## converting signal to complex signal, but chunkwise
-c = 0
 for chunk in range(0, len(signal), chunk_size):
     signal_chunk = signal[chunk + 0 : chunk + chunk_size : 2] + 1j*signal[chunk + 1 : chunk + chunk_size : 2]
 
@@ -154,19 +202,28 @@ for chunk in range(0, len(signal), chunk_size):
 
     # now comes "the audio" part. it is inspired by the rtl_fm.exe.
     # for now, we downconvert. at a later point, we will keep the original sampling rate
-    print(chunk, len(signal_shifted), len(signal))
     for i in range(0, len(signal_shifted), 1):
         # filling it back into the original variable.
         # keeps amput on mamory lower, but if we need to use the value again for another requency band, we need to
         # do that again. So there will be a to-do, to make this better, in THE FUTURE! ;)
         signal[chunk + i*2] = signal_shifted.real[i]
         signal[chunk + i*2 + 1] = signal_shifted.imag[i]
-        c += 1
 
 signal_demod = fm_demod(signal)
 
+
+deemph_a = int(round(1.0/((1.0-np.exp(-1.0/(rate_out * 75e-6))))))
+signal_deemphed = deemph_filter(signal_demod)
+
+
+signal_final = low_pass_real(signal_deemphed)
+
+
 # visual check of the demodulated output
-plt.plot(signal_demod)
+plt.plot(signal_demod, label="demod")
+plt.plot(signal_deemphed, label="deemphed")
+plt.plot(signal_final, label="final")
+plt.legend()
 plt.show()
 
 print("finished, for now")
