@@ -20,7 +20,7 @@ def loading_file(filename):
 # loading in the iq imput file
 # adjusting the uint values by -127 to match the recorded IQ values to reality
 if len(sys.argv) == 1:
-    filename = os.path.join("samples", "earth_aprs1200_1signal_1peak_SDRSharp_20170816_105454Z_144800000Hz_IQ.wav")
+    filename = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav")
 else:
     filename = sys.argv[1]
 
