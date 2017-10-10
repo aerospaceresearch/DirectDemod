@@ -234,4 +234,64 @@ plt.plot(signal_final, label="final")
 plt.legend()
 plt.show()
 
+
+# 1200 baud AFSK demodulator
+
+## inspired by
+## https://github.com/EliasOenal/multimon-ng/blob/master/demod_afsk12.c
+## https://sites.google.com/site/wayneholder/attiny-4-5-9-10-assembly-ide-and-programmer/bell-202-1200-baud-demodulator-in-an-attiny10
+
+baudrate = 1200.0
+buffer_size = int(np.round(rate_out2 / baudrate))
+mark_frequency = 1200.0
+space_frequency = 2200.0
+
+# creating the “correlation list" for the comparison frequencies of the digital frequency filers
+corr_mark_i = np.zeros(buffer_size)
+corr_mark_q = np.zeros(buffer_size)
+corr_space_i = np.zeros(buffer_size)
+corr_space_q = np.zeros(buffer_size)
+
+# filling the "correlation list" with sampled waveform for the two frequencies.
+for i in range(buffer_size):
+    mark_angle = (i * 1.0 / rate_out2) / (1 / mark_frequency) * 2 * np.pi
+    corr_mark_i[i] = np.cos(mark_angle)
+    corr_mark_q[i] = np.sin(mark_angle)
+
+    space_angle = (i * 1.0 / rate_out2) / (1 / space_frequency) * 2 * np.pi
+    corr_space_i[i] = np.cos(space_angle)
+    corr_space_q[i] = np.sin(space_angle)
+
+
+# nornalizing the signal between -1 and +1
+signal_normalized = np.divide(signal_final, 2**15)
+
+
+# comparing the signal to the cosine and sine parts to both frequencies in the "correlation lists"
+binary_filter = np.zeros(len(signal_normalized))
+
+for sample in range(len(signal_normalized)-buffer_size):
+    corr_mi = 0
+    corr_mq = 0
+    corr_si = 0
+    corr_sq = 0
+
+    for sub in range(buffer_size):
+        corr_mi = corr_mi + signal_normalized[sample + sub] * corr_mark_i[sub]
+        corr_mq = corr_mq + signal_normalized[sample + sub] * corr_mark_q[sub]
+
+        corr_si = corr_si + signal_normalized[sample + sub] * corr_space_i[sub]
+        corr_sq = corr_sq + signal_normalized[sample + sub] * corr_space_q[sub]
+
+    binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
+    binary_filter[sample] = np.sign(binary_filter[sample])
+
+
+# visual check of the demodulated output
+plt.plot(binary_filter, label="code")
+plt.plot(np.divide(signal_normalized, np.max(signal_normalized)), label="final")
+plt.legend()
+plt.show()
+
+
 print("finished, for now")
