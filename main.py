@@ -158,140 +158,141 @@ def low_pass_real(input):
     return result
 
 
-# all the inputs
-## basics
-filename_sample = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav")
+if __name__ == '__main__':
+    # all the inputs
+    ## basics
+    filename_sample = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav")
 
-## input data conversion
-samplerate = 2048000
-chunk_period = 4
-chunk_size = samplerate * 2 * chunk_period
-frequency_offset = 0
+    ## input data conversion
+    samplerate = 2048000
+    chunk_period = 4
+    chunk_size = samplerate * 2 * chunk_period
+    frequency_offset = 0
 
-## audio
-rate_in = 22050
-downsample = (samplerate // rate_in + 1) * 2
-capture_rate = rate_in * downsample
-rate_out = rate_in
-rate_out2 = 22050
-
-
-# now, let's start this and have some fun
+    ## audio
+    rate_in = 22050
+    downsample = (samplerate // rate_in + 1) * 2
+    capture_rate = rate_in * downsample
+    rate_out = rate_in
+    rate_out2 = 22050
 
 
-## loading in the iq imput file
-## adjusting the uint values by -127 to match the recorded IQ values to reality
-if len(sys.argv) == 1:
-    filename = filename_sample
-else:
-    filename = sys.argv[1]
-
-signal = loading_file(filename)
-signal = -127 + signal[:]
+    # now, let's start this and have some fun
 
 
-## converting signal to complex signal, but chunkwise
-for chunk in range(0, len(signal), chunk_size):
-    signal_chunk = signal[chunk + 0 : chunk + chunk_size : 2] + 1j*signal[chunk + 1 : chunk + chunk_size : 2]
-
-    if frequency_offset != 0.0:
-        # in case you think there could be a doppler shift or you commanded an frequency offset for the recording
-        # you can correct the shift in frequency with the following digital complex expontential
-        frequency_correction = np.exp(-1.0j * 2.0 * np.pi * frequency_offset / samplerate * np.arange(len(signal_chunk)))
-
-        # and multiply it with your signal
-        signal_shifted = signal_chunk * frequency_correction
+    ## loading in the iq imput file
+    ## adjusting the uint values by -127 to match the recorded IQ values to reality
+    if len(sys.argv) == 1:
+        filename = filename_sample
     else:
-        signal_shifted = signal_chunk
+        filename = sys.argv[1]
+
+    signal = loading_file(filename)
+    signal = -127 + signal[:]
 
 
-    # now comes "the audio" part. it is inspired by the rtl_fm.exe.
-    # for now, we downconvert. at a later point, we will keep the original sampling rate
-    for i in range(0, len(signal_shifted), 1):
-        # filling it back into the original variable.
-        # keeps amput on mamory lower, but if we need to use the value again for another requency band, we need to
-        # do that again. So there will be a to-do, to make this better, in THE FUTURE! ;)
-        signal[chunk + i*2] = signal_shifted.real[i]
-        signal[chunk + i*2 + 1] = signal_shifted.imag[i]
+    ## converting signal to complex signal, but chunkwise
+    for chunk in range(0, len(signal), chunk_size):
+        signal_chunk = signal[chunk + 0 : chunk + chunk_size : 2] + 1j*signal[chunk + 1 : chunk + chunk_size : 2]
 
-signal_demod = fm_demod(signal)
+        if frequency_offset != 0.0:
+            # in case you think there could be a doppler shift or you commanded an frequency offset for the recording
+            # you can correct the shift in frequency with the following digital complex expontential
+            frequency_correction = np.exp(-1.0j * 2.0 * np.pi * frequency_offset / samplerate * np.arange(len(signal_chunk)))
 
-
-deemph_a = int(round(1.0 / ((1.0 - np.exp(-1.0 / (rate_out * 75e-6))))))
-signal_deemphed = deemph_filter(signal_demod)
-
-
-signal_final = low_pass_real(signal_deemphed)
-signal_final = np.array(signal_final, dtype=np.int16)
-
-# for all of us interesting to hear it beep
-sc_write("signal.wav", rate_out2, signal_final)
-
-# visual check of the demodulated output
-plt.plot(signal_demod, label="demod")
-plt.plot(signal_deemphed, label="deemphed")
-plt.plot(signal_final, label="final")
-plt.legend()
-plt.show()
+            # and multiply it with your signal
+            signal_shifted = signal_chunk * frequency_correction
+        else:
+            signal_shifted = signal_chunk
 
 
-# 1200 baud AFSK demodulator
+        # now comes "the audio" part. it is inspired by the rtl_fm.exe.
+        # for now, we downconvert. at a later point, we will keep the original sampling rate
+        for i in range(0, len(signal_shifted), 1):
+            # filling it back into the original variable.
+            # keeps amput on mamory lower, but if we need to use the value again for another requency band, we need to
+            # do that again. So there will be a to-do, to make this better, in THE FUTURE! ;)
+            signal[chunk + i*2] = signal_shifted.real[i]
+            signal[chunk + i*2 + 1] = signal_shifted.imag[i]
 
-## inspired by
-## https://github.com/EliasOenal/multimon-ng/blob/master/demod_afsk12.c
-## https://sites.google.com/site/wayneholder/attiny-4-5-9-10-assembly-ide-and-programmer/bell-202-1200-baud-demodulator-in-an-attiny10
-
-baudrate = 1200.0
-buffer_size = int(np.round(rate_out2 / baudrate))
-mark_frequency = 1200.0
-space_frequency = 2200.0
-
-# creating the “correlation list" for the comparison frequencies of the digital frequency filers
-corr_mark_i = np.zeros(buffer_size)
-corr_mark_q = np.zeros(buffer_size)
-corr_space_i = np.zeros(buffer_size)
-corr_space_q = np.zeros(buffer_size)
-
-# filling the "correlation list" with sampled waveform for the two frequencies.
-for i in range(buffer_size):
-    mark_angle = (i * 1.0 / rate_out2) / (1 / mark_frequency) * 2 * np.pi
-    corr_mark_i[i] = np.cos(mark_angle)
-    corr_mark_q[i] = np.sin(mark_angle)
-
-    space_angle = (i * 1.0 / rate_out2) / (1 / space_frequency) * 2 * np.pi
-    corr_space_i[i] = np.cos(space_angle)
-    corr_space_q[i] = np.sin(space_angle)
+    signal_demod = fm_demod(signal)
 
 
-# nornalizing the signal between -1 and +1
-signal_normalized = np.divide(signal_final, 2**15)
+    deemph_a = int(round(1.0 / ((1.0 - np.exp(-1.0 / (rate_out * 75e-6))))))
+    signal_deemphed = deemph_filter(signal_demod)
 
 
-# comparing the signal to the cosine and sine parts to both frequencies in the "correlation lists"
-binary_filter = np.zeros(len(signal_normalized))
+    signal_final = low_pass_real(signal_deemphed)
+    signal_final = np.array(signal_final, dtype=np.int16)
 
-for sample in range(len(signal_normalized)-buffer_size):
-    corr_mi = 0
-    corr_mq = 0
-    corr_si = 0
-    corr_sq = 0
+    # for all of us interesting to hear it beep
+    sc_write("signal.wav", rate_out2, signal_final)
 
-    for sub in range(buffer_size):
-        corr_mi = corr_mi + signal_normalized[sample + sub] * corr_mark_i[sub]
-        corr_mq = corr_mq + signal_normalized[sample + sub] * corr_mark_q[sub]
-
-        corr_si = corr_si + signal_normalized[sample + sub] * corr_space_i[sub]
-        corr_sq = corr_sq + signal_normalized[sample + sub] * corr_space_q[sub]
-
-    binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
-    binary_filter[sample] = np.sign(binary_filter[sample])
+    # visual check of the demodulated output
+    plt.plot(signal_demod, label="demod")
+    plt.plot(signal_deemphed, label="deemphed")
+    plt.plot(signal_final, label="final")
+    plt.legend()
+    plt.show()
 
 
-# visual check of the demodulated output
-plt.plot(binary_filter, label="code")
-plt.plot(np.divide(signal_normalized, np.max(signal_normalized)), label="final")
-plt.legend()
-plt.show()
+    # 1200 baud AFSK demodulator
+
+    ## inspired by
+    ## https://github.com/EliasOenal/multimon-ng/blob/master/demod_afsk12.c
+    ## https://sites.google.com/site/wayneholder/attiny-4-5-9-10-assembly-ide-and-programmer/bell-202-1200-baud-demodulator-in-an-attiny10
+
+    baudrate = 1200.0
+    buffer_size = int(np.round(rate_out2 / baudrate))
+    mark_frequency = 1200.0
+    space_frequency = 2200.0
+
+    # creating the “correlation list" for the comparison frequencies of the digital frequency filers
+    corr_mark_i = np.zeros(buffer_size)
+    corr_mark_q = np.zeros(buffer_size)
+    corr_space_i = np.zeros(buffer_size)
+    corr_space_q = np.zeros(buffer_size)
+
+    # filling the "correlation list" with sampled waveform for the two frequencies.
+    for i in range(buffer_size):
+        mark_angle = (i * 1.0 / rate_out2) / (1 / mark_frequency) * 2 * np.pi
+        corr_mark_i[i] = np.cos(mark_angle)
+        corr_mark_q[i] = np.sin(mark_angle)
+
+        space_angle = (i * 1.0 / rate_out2) / (1 / space_frequency) * 2 * np.pi
+        corr_space_i[i] = np.cos(space_angle)
+        corr_space_q[i] = np.sin(space_angle)
 
 
-print("finished, for now")
+    # nornalizing the signal between -1 and +1
+    signal_normalized = np.divide(signal_final, 2**15)
+
+
+    # comparing the signal to the cosine and sine parts to both frequencies in the "correlation lists"
+    binary_filter = np.zeros(len(signal_normalized))
+
+    for sample in range(len(signal_normalized)-buffer_size):
+        corr_mi = 0
+        corr_mq = 0
+        corr_si = 0
+        corr_sq = 0
+
+        for sub in range(buffer_size):
+            corr_mi = corr_mi + signal_normalized[sample + sub] * corr_mark_i[sub]
+            corr_mq = corr_mq + signal_normalized[sample + sub] * corr_mark_q[sub]
+
+            corr_si = corr_si + signal_normalized[sample + sub] * corr_space_i[sub]
+            corr_sq = corr_sq + signal_normalized[sample + sub] * corr_space_q[sub]
+
+        binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
+        binary_filter[sample] = np.sign(binary_filter[sample])
+
+
+    # visual check of the demodulated output
+    plt.plot(binary_filter, label="code")
+    plt.plot(np.divide(signal_normalized, np.max(signal_normalized)), label="final")
+    plt.legend()
+    plt.show()
+
+
+    print("finished, for now")
