@@ -3,6 +3,8 @@ import sys
 
 import numpy as np
 import matplotlib.pylab as plt
+from scipy.io.wavfile import write as sc_write
+
 
 # inspired by
 ## https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_fm.c
@@ -162,7 +164,7 @@ filename_sample = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz
 
 ## input data conversion
 samplerate = 2048000
-chunk_period = 1
+chunk_period = 4
 chunk_size = samplerate * 2 * chunk_period
 frequency_offset = 0
 
@@ -192,12 +194,15 @@ signal = -127 + signal[:]
 for chunk in range(0, len(signal), chunk_size):
     signal_chunk = signal[chunk + 0 : chunk + chunk_size : 2] + 1j*signal[chunk + 1 : chunk + chunk_size : 2]
 
-    # in case you think there could be a doppler shift or you commanded an frequency offset for the recording
-    # you can correct the shift in frequency with the following digital complex expontential
-    frequency_correction = np.exp(-1.0j * 2.0 * np.pi * frequency_offset / samplerate * np.arange(len(signal_chunk)))
+    if frequency_offset != 0.0:
+        # in case you think there could be a doppler shift or you commanded an frequency offset for the recording
+        # you can correct the shift in frequency with the following digital complex expontential
+        frequency_correction = np.exp(-1.0j * 2.0 * np.pi * frequency_offset / samplerate * np.arange(len(signal_chunk)))
 
-    # and multiply it with your signal
-    signal_shifted = signal_chunk * frequency_correction
+        # and multiply it with your signal
+        signal_shifted = signal_chunk * frequency_correction
+    else:
+        signal_shifted = signal_chunk
 
 
     # now comes "the audio" part. it is inspired by the rtl_fm.exe.
@@ -212,12 +217,15 @@ for chunk in range(0, len(signal), chunk_size):
 signal_demod = fm_demod(signal)
 
 
-deemph_a = int(round(1.0/((1.0-np.exp(-1.0/(rate_out * 75e-6))))))
+deemph_a = int(round(1.0 / ((1.0 - np.exp(-1.0 / (rate_out * 75e-6))))))
 signal_deemphed = deemph_filter(signal_demod)
 
 
 signal_final = low_pass_real(signal_deemphed)
+signal_final = np.array(signal_final, dtype=np.int16)
 
+# for all of us interesting to hear it beep
+sc_write("signal.wav", rate_out2, signal_final)
 
 # visual check of the demodulated output
 plt.plot(signal_demod, label="demod")
