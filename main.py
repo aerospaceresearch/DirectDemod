@@ -337,48 +337,38 @@ if __name__ == '__main__':
 
     elif len(starting_flag_positions) == 1:
         # lazy, need to fill this
+        starting_flag_found.append(starting_flag_positions[0])
         print("only one starting flag found at", starting_flag_positions[0])
 
     elif len(starting_flag_positions) >= 2:
         flag_distance = 600 # just a gut feeling. works for me
         for flag in range(len(starting_flag_positions) - 1):
             if starting_flag_positions[flag + 1] - starting_flag_positions[flag] >= flag_distance:
-                runner = 0
-                while binary_filter[starting_flag_positions[flag] + runner] == binary_filter[
-                                    starting_flag_positions[flag]  + runner + 1]:
-                    runner += 1
-
-                # visual check again
-                plt.plot(binary_filter[starting_flag_positions[flag] : starting_flag_positions[flag] + 500],
-                         label="binary filter")
-                plt.plot(correlation_start[starting_flag_positions[flag] : starting_flag_positions[flag] + 500],
-                         label="correlation of starting flag over binary filter")
-                plt.plot([runner], [1], "*", label="end of start flag")
-                plt.title("each starting flag")
-                plt.legend()
-                plt.show()
-
-                print("found the starting flag at position", starting_flag_positions[flag], runner)
+                starting_flag_found.append(starting_flag_positions[flag])
+                print("found the starting flag at position", starting_flag_positions[flag])
 
 
         if starting_flag_positions[-1] - starting_flag_positions[-2] >= flag_distance:
-            runner = 0
-            while binary_filter[starting_flag_positions[-1] + runner] == binary_filter[
-                                starting_flag_positions[-1] + runner + 1]:
-                runner += 1
+            starting_flag_found.append(starting_flag_positions[-1])
+            print("found the starting flag at position", starting_flag_positions[-1])
 
 
-            # visual check again
-            plt.plot(binary_filter[starting_flag_positions[-1]: starting_flag_positions[-1] + 500],
-                     label="binary filter")
-            plt.plot(correlation_start[starting_flag_positions[-1]: starting_flag_positions[-1] + 500],
-                     label="correlation of starting flag over binary filter")
-            plt.plot([runner], [1], "*", label="end of start flag")
-            plt.title("each starting flag")
-            plt.legend()
-            plt.show()
+    for flag in range(len(starting_flag_found)):
+        # finding the end of the needle
+        runner = 0
+        while binary_filter[starting_flag_found[flag] + runner] == binary_filter[
+                            starting_flag_found[flag] + runner + 1]:
+            runner += 1
 
-            print("found the starting flag at position", starting_flag_positions[-1], runner)
+        # visual check again
+        plt.plot(binary_filter[starting_flag_found[flag]: starting_flag_found[flag] + 500],
+                 label="binary filter")
+        plt.plot(correlation_start[starting_flag_found[flag]: starting_flag_found[flag] + 500],
+                 label="correlation of starting flag over binary filter")
+        plt.plot([runner], [1], "*", label="end of start flag")
+        plt.title("each starting flag")
+        plt.legend()
+        plt.show()
 
 
 
