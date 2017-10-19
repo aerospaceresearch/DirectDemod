@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 import numpy as np
 import matplotlib.pylab as plt
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     frequency_offset = 0
 
     ## audio
-    rate_in = 22050
+    rate_in = 22050 # bandpass
     downsample = (samplerate // rate_in + 1) * 2
     capture_rate = rate_in * downsample
     rate_out = rate_in
@@ -184,6 +185,7 @@ if __name__ == '__main__':
     ## adjusting the uint values by -127 to match the recorded IQ values to reality
     if len(sys.argv) == 1:
         filename = filename_sample
+        frequency_offset = -1500.0
     else:
         filename = sys.argv[1]
 
@@ -229,11 +231,13 @@ if __name__ == '__main__':
     sc_write("signal.wav", rate_out2, signal_final)
 
     # visual check of the demodulated output
+    '''
     plt.plot(signal_demod, label="demod")
     plt.plot(signal_deemphed, label="deemphed")
     plt.plot(signal_final, label="final")
     plt.legend()
     plt.show()
+    '''
 
 
     # 1200 baud AFSK demodulator
@@ -285,14 +289,103 @@ if __name__ == '__main__':
             corr_sq = corr_sq + signal_normalized[sample + sub] * corr_space_q[sub]
 
         binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
-        binary_filter[sample] = np.sign(binary_filter[sample])
+        #binary_filter[sample] = np.sign(binary_filter[sample])
+
+    binary_filter = np.sign(binary_filter)
 
 
-    # visual check of the demodulated output
-    plt.plot(binary_filter, label="code")
-    plt.plot(np.divide(signal_normalized, np.max(signal_normalized)), label="final")
+    # visual check of the fm demodulated output
+    plt.plot(binary_filter, label="binary filter")
+    plt.plot(np.divide(signal_normalized, np.max(signal_normalized)), label="fm demodulated signal")
+    plt.title("fm demodulated signal and binary filter")
     plt.legend()
     plt.show()
 
 
+    # finding the starting flag
+    starting_flag_start = [0, 1, 1, 1, 1, 1, 1]
+    needle_start = []
+    for i in range(len(starting_flag_start)):
+        for j in range(buffer_size):
+            if starting_flag_start[i] == 0:
+                needle_start.append(-1)
+            elif starting_flag_start[i] == 1:
+                needle_start.append(1)
+
+    time1 = time.time()
+    correlation_start = np.divide(np.correlate(binary_filter, needle_start, mode="same"), len(needle_start))
+    "it took me", time.time() - time1, "seconds"
+
+
+
+    # finding the positions of the starting flags
+    starting_flag_positions = []
+    time1 = time.time()
+    for step in range(0, len(correlation_start) - len(needle_start), len(needle_start)):
+        correlation_chunk = correlation_start[step: step + len(needle_start)]
+
+        if np.max(correlation_chunk) >= 0.90:
+            starting_flag_positions.append(step + np.argmax(correlation_chunk))
+
+    print("it took me", time.time() - time1, "seconds")
+    time1 = time.time()
+
+    # filtering out the repetitions, that are to close to each other...
+    starting_flag_found = []
+    if len(starting_flag_positions) == 0:
+        print("no flag, no start. sorry")
+
+    elif len(starting_flag_positions) == 1:
+        # lazy, need to fill this
+        print("only one starting flag found at", starting_flag_positions[0])
+
+    elif len(starting_flag_positions) >= 2:
+        flag_distance = 600 # just a gut feeling. works for me
+        for flag in range(len(starting_flag_positions) - 1):
+            if starting_flag_positions[flag + 1] - starting_flag_positions[flag] >= flag_distance:
+                runner = 0
+                while binary_filter[starting_flag_positions[flag] + runner] == binary_filter[
+                                    starting_flag_positions[flag]  + runner + 1]:
+                    runner += 1
+
+                # visual check again
+                plt.plot(binary_filter[starting_flag_positions[flag] : starting_flag_positions[flag] + 500],
+                         label="binary filter")
+                plt.plot(correlation_start[starting_flag_positions[flag] : starting_flag_positions[flag] + 500],
+                         label="correlation of starting flag over binary filter")
+                plt.plot([runner], [1], "*", label="end of start flag")
+                plt.title("each starting flag")
+                plt.legend()
+                plt.show()
+
+                print("found the starting flag at position", starting_flag_positions[flag], runner)
+
+
+        if starting_flag_positions[-1] - starting_flag_positions[-2] >= flag_distance:
+            runner = 0
+            while binary_filter[starting_flag_positions[-1] + runner] == binary_filter[
+                                starting_flag_positions[-1] + runner + 1]:
+                runner += 1
+
+
+            # visual check again
+            plt.plot(binary_filter[starting_flag_positions[-1]: starting_flag_positions[-1] + 500],
+                     label="binary filter")
+            plt.plot(correlation_start[starting_flag_positions[-1]: starting_flag_positions[-1] + 500],
+                     label="correlation of starting flag over binary filter")
+            plt.plot([runner], [1], "*", label="end of start flag")
+            plt.title("each starting flag")
+            plt.legend()
+            plt.show()
+
+            print("found the starting flag at position", starting_flag_positions[-1], runner)
+
+
+
+    # visual check for full signal
+    plt.plot(binary_filter, label="binary filter")
+    plt.plot(correlation_start, label="correlation of starting flag over binary filter")
+    plt.title("full binary filter of signal")
+    plt.legend()
+    plt.show()
     print("finished, for now")
