@@ -163,6 +163,7 @@ if __name__ == '__main__':
     # all the inputs
     ## basics
     filename_sample = os.path.join("samples", "SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav")
+    frequency_offset_sample = -1500.0
 
     ## input data conversion
     samplerate = 2048000
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     ## adjusting the uint values by -127 to match the recorded IQ values to reality
     if len(sys.argv) == 1:
         filename = filename_sample
-        frequency_offset = -1500.0
+        frequency_offset = frequency_offset_sample
     else:
         filename = sys.argv[1]
 
