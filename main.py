@@ -306,12 +306,18 @@ if __name__ == '__main__':
     # finding the starting flag
     starting_flag_start = [0, 1, 1, 1, 1, 1, 1]
     needle_start = []
+    needle_small = []
     for i in range(len(starting_flag_start)):
         for j in range(buffer_size):
             if starting_flag_start[i] == 0:
                 needle_start.append(-1)
             elif starting_flag_start[i] == 1:
                 needle_start.append(1)
+
+        if starting_flag_start[i] == 0:
+            needle_small.append(-1)
+        elif starting_flag_start[i] == 1:
+            needle_small.append(1)
 
     time1 = time.time()
     correlation_start = np.divide(np.correlate(binary_filter, needle_start, mode="same"), len(needle_start))
@@ -346,7 +352,7 @@ if __name__ == '__main__':
         for flag in range(len(starting_flag_positions) - 1):
             if starting_flag_positions[flag + 1] - starting_flag_positions[flag] >= flag_distance:
                 starting_flag_found.append(starting_flag_positions[flag])
-                print("found the starting flag at position", starting_flag_positions[flag])
+                print("for starting flag #", flag, ", found the starting flag at position", starting_flag_positions[flag])
 
 
         if starting_flag_positions[-1] - starting_flag_positions[-2] >= flag_distance:
@@ -371,6 +377,9 @@ if __name__ == '__main__':
         plt.legend()
         plt.show()
 
+        # updating the found start with the real start
+        starting_flag_found[flag] = starting_flag_found[flag] + runner
+
 
 
     # visual check for full signal
@@ -379,4 +388,57 @@ if __name__ == '__main__':
     plt.title("full binary filter of signal")
     plt.legend()
     plt.show()
+
+    # making bits and bytes
+    for flag in range(len(starting_flag_found)):
+        nrzi = []
+        nrzi_quality = []
+
+        # synch to the first pullup
+        start = 2
+        while binary_filter[starting_flag_found[flag] + start] != 1:
+            start += 1
+
+        step = 0
+        runner = 0
+        correlation_sum = 0
+        while step < 3000 and correlation_sum < len(needle_small):
+            bit_quality = np.mean(binary_filter[starting_flag_found[flag] + start + runner:
+            starting_flag_found[flag] + start + runner + buffer_size])
+            bit_quality_next = np.mean(binary_filter[starting_flag_found[flag] + start + runner + buffer_size:
+            starting_flag_found[flag] + start + runner + buffer_size * 2])
+            #print(step, np.sign(bit_quality), bit_quality, runner)
+            nrzi.append(np.sign(bit_quality))
+            nrzi_quality.append(bit_quality)
+
+            if len(nrzi) >= 7:
+                correlation_sum = np.max(np.correlate(nrzi[-8: -1], needle_small, mode="same"))
+
+            if np.sign(bit_quality) < np.sign(bit_quality_next):
+                #print("synching step at step", step)
+                runner += buffer_size // 2
+                while binary_filter[starting_flag_found[flag] + start + runner] != 1:
+                    runner += 1
+
+            else:
+                runner += buffer_size
+
+            step += 1
+
+        plt.plot(binary_filter[starting_flag_found[flag]: starting_flag_found[flag] + buffer_size * 100], label="binary filter")
+        plt.plot([start], [1], "*", label="start of NRZI")
+        plt.title("start of NRZI signal")
+        plt.legend()
+        plt.show()
+
+        correlation_end = np.correlate(nrzi, needle_small, mode="same")
+        plt.plot(nrzi, label="nrzi bits")
+        plt.plot(correlation_end, label="nrzi correlation to frame end flag")
+        plt.title("NRZI bits and its end")
+        plt.legend()
+        plt.show()
+
+        print("for starting flag #", flag, ", this is your non-return-to-zero-inverted code", nrzi)
+
+
     print("finished, for now")
