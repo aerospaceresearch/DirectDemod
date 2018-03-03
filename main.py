@@ -1,7 +1,8 @@
 import os
 import sys
 import time
-
+import matplotlib
+matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pylab as plt
 from scipy.io.wavfile import write as sc_write
