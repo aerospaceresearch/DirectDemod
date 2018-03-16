@@ -29,9 +29,6 @@ def fm_demod(signal):
     pre_r = 0
     pre_j = 0
 
-    i = 0
-    pcm = 0
-
     # low-passing
     lp = low_pass(signal)
     lp_len = len(lp)  # must stay double the size of result, due to later for loop
@@ -61,13 +58,27 @@ def multiply(ar, aj, br, bj):
     cj = aj * br + ar * bj
     return cr, cj
 
-
 def polar_discriminant(ar, aj, br, bj):
     cr, cj = multiply(ar, aj, br, -bj)
     angle = np.arctan2(cj, cr)
     return (angle / np.pi * (1 << 14))
     # return (angle * 180.0 / np.pi)
 
+def fast_atan2(x, y):
+    pi4 = (1 << 12)  # since pi = 1 << 14
+    pi34 = 3 * pi4
+    if(x==0 && y==0):
+        return 0
+    if(x >= 0):
+        angle = pi4  - pi4 * (x-abs(y)) / (x+abs(y))
+    else:
+        angle = pi34 - pi4 * (x+abs(y)) / (abs(y)-x)
+    angle *= abs(y)/y
+    return angle
+
+def polar_disc_fast(ar, aj, br, bj):
+    cr, cj = multiply(ar, aj, br, -bj)
+    return fast_atan2(cr, cj)
 
 def low_pass(signal):
     # simple square window FIR
