@@ -12,6 +12,11 @@ from scipy.io.wavfile import write as sc_write
 # https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_fm.c
 # thank you!
 
+
+# Look up table size
+atan_lut_size = 131072 # =512 kB
+atan_lut_coeff = 8
+
 def loading_file(filename):
 
     if filename.find(".wav") > -1:
@@ -26,16 +31,13 @@ def loading_file(filename):
 
 
 def fm_demod(signal):
-    pre_r = 0
-    pre_j = 0
-
     # low-passing
     lp = low_pass(signal)
     lp_len = len(lp)  # must stay double the size of result, due to later for loop
 
     result = np.zeros(len(lp)//2)
 
-    pcm = polar_discriminant(lp[0], lp[1], pre_r, pre_j)
+    pcm = polar_discriminant(lp[0], lp[1], 0, 0)
     result[0] = int(pcm)
 
     for i in range(2, lp_len-1, 2):
@@ -58,52 +60,78 @@ def multiply(ar, aj, br, bj):
     cj = aj * br + ar * bj
     return cr, cj
 
+
 def polar_discriminant(ar, aj, br, bj):
     cr, cj = multiply(ar, aj, br, -bj)
     angle = np.arctan2(cj, cr)
     return (angle / np.pi * (1 << 14))
     # return (angle * 180.0 / np.pi)
 
-def fast_atan2(x, y):
+
+def fast_atan2(y, x):
     pi4 = (1 << 12)  # since pi = 1 << 14
-    pi34 = 3 * pi4
-    if(x==0 && y==0):
+    if(x == 0 and y == 0):
         return 0
     if(x >= 0):
-        angle = pi4  - pi4 * (x-abs(y)) / (x+abs(y))
+        angle = pi4*(1 - (x-abs(y)) / (x+abs(y)))
     else:
-        angle = pi34 - pi4 * (x+abs(y)) / (abs(y)-x)
+        angle = pi4*(3 - (x+abs(y)) / (abs(y)-x))
     angle *= abs(y)/y
     return angle
 
 def polar_disc_fast(ar, aj, br, bj):
     cr, cj = multiply(ar, aj, br, -bj)
-    return fast_atan2(cr, cj)
+    return fast_atan2(cj, cr)
+
+
+def atan_lut():
+    for i in range(0, atan_lut_size):
+        atan_lut = np.arctan(i/((1 << atan_lut_coeff)*np.pi)*(1 << 14))
+
+def polar_disc_lut(ar, aj, br, bj):
+    atan_lut()
+    cr, cj = multiply(ar, aj, br, -bj)
+    # Special cases
+    if cr == 0 and cj == 0:
+        return 0
+    elif cr == 0 and cj > 0:
+        return 1 << 13
+    elif cr == 0 and cj > 0:
+        return -(1 << 13)
+    elif cr > 0 and cj == 0:
+        return 0
+    elif cr < 0 and cj == 0:
+        return 1 << 14
+    # real range -32768 - 32768 use 64x range -> absolute maximum: 2097152
+    x = (cj << atan_lut_coeff)/cr
+    if abs(x) >= atan_lut_size:
+        # can use linear range, but not necessary
+        pdl = 1<<13 if cj > 0 else -1<<13
+    else:
+        if x > 0:
+            pdl = atan_lut[x] if cj > 0 else atan_lut[x] - (1<<14)
+        else:
+            pdl = (1<<14) - atan_lut[-x] if cj > 0 else -atan_lut[-x]
+
+    return pdl
+
 
 def low_pass(signal):
     # simple square window FIR
-
     lowpassed = np.zeros(len(signal) // downsample*2)
-
     # needs to be go outside this function
     now_r = 0
     now_j = 0
-
     i = 0
     i2 = 0
-
     prev_index = 0
-
     while (i < len(signal)):
         now_r += signal[i]
         now_j += signal[i + 1]
         i += 2
-
         prev_index += 2
-
         if (prev_index < downsample):
             continue
-
         lowpassed[i2] = now_r
         lowpassed[i2 + 1] = now_j
         prev_index = 0
@@ -237,6 +265,7 @@ if __name__ == '__main__':
     plt.plot(signal_final, label="final")
     plt.legend()
     plt.show()
+    plt.savefig('signal.svg')
     '''
 
     # 1200 baud AFSK demodulator
