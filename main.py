@@ -14,8 +14,9 @@ from scipy.io.wavfile import write as sc_write
 
 
 # Look up table size
-atan_lut_size = 131072 # =512 kB
+atan_lut_size = 131072  # =512 kB
 atan_lut_coeff = 8
+
 
 def loading_file(filename):
 
@@ -40,17 +41,22 @@ def fm_demod(signal):
     pcm = polar_discriminant(lp[0], lp[1], 0, 0)
     result[0] = int(pcm)
 
-    for i in range(2, lp_len-1, 2):
-        # being lazy, only case 0 for now...
-        # there are other cases in rtl_fm.exe
+    # change value below to use different case
+    custom_atan = 0
 
-        # case 0
-        pcm = polar_discriminant(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+    for i in range(2, lp_len-1, 2):
+
+        if custom_atan == 0:
+            pcm = polar_discriminant(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+        elif custom_atan == 1:
+            pcm = polar_disc_fast(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+        elif custom_atan == 2:
+            pcm = polar_disc_lut(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
 
         result[i // 2] = int(pcm)
 
-    pre_r = lp[lp_len - 2]
-    pre_j = lp[lp_len - 1]
+    # pre_r = lp[lp_len - 2]
+    # pre_j = lp[lp_len - 1]
     # result_len = lp_len // 2
     return result
 
@@ -79,39 +85,41 @@ def fast_atan2(y, x):
     angle *= abs(y)/y
     return angle
 
+
 def polar_disc_fast(ar, aj, br, bj):
     cr, cj = multiply(ar, aj, br, -bj)
     return fast_atan2(cj, cr)
 
 
-def atan_lut():
+def atan_lut_init():
+    atan_lut_final = np.zeros(atan_lut_size)
     for i in range(0, atan_lut_size):
-        atan_lut = np.arctan(i/((1 << atan_lut_coeff)*np.pi)*(1 << 14))
+        atan_lut_final[i] = np.arctan(i/((1 << atan_lut_coeff)*np.pi)*(1 << 14))
+    return atan_lut_final
+
 
 def polar_disc_lut(ar, aj, br, bj):
-    atan_lut()
+    atan_lut = atan_lut_init()
     cr, cj = multiply(ar, aj, br, -bj)
     # Special cases
-    if cr == 0 and cj == 0:
-        return 0
-    elif cr == 0 and cj > 0:
-        return 1 << 13
-    elif cr == 0 and cj > 0:
-        return -(1 << 13)
-    elif cr > 0 and cj == 0:
-        return 0
-    elif cr < 0 and cj == 0:
-        return 1 << 14
-    # real range -32768 - 32768 use 64x range -> absolute maximum: 2097152
-    x = (cj << atan_lut_coeff)/cr
-    if abs(x) >= atan_lut_size:
-        # can use linear range, but not necessary
-        pdl = 1<<13 if cj > 0 else -1<<13
+    if cr*cj == 0:
+        if cr == 0 and cj == 0:
+            pdl = 0
+        elif cr == 0:
+            pdl = 1 << 13 if cj > 0 else -(1 << 13)
+        elif cj == 0:
+            pdl = 0 if cr > 0 else 1 << 14
     else:
-        if x > 0:
-            pdl = atan_lut[x] if cj > 0 else atan_lut[x] - (1<<14)
+        # real range -32768 - 32768 use 64x range -> absolute maximum: 2097152
+        x = int((int(cj) << atan_lut_coeff)/cr)
+        if abs(x) >= atan_lut_size:
+            # can use linear range, but not necessary
+            pdl = 1 << 13 if cj > 0 else -(1 << 13)
         else:
-            pdl = (1<<14) - atan_lut[-x] if cj > 0 else -atan_lut[-x]
+            if x > 0:
+                pdl = atan_lut[x] if cj > 0 else atan_lut[x] - (1 << 14)
+            else:
+                pdl = (1 << 14) - atan_lut[-x] if cj > 0 else -atan_lut[-x]
 
     return pdl
 
@@ -255,21 +263,19 @@ if __name__ == '__main__':
     signal_final = low_pass_real(signal_deemphed)
     signal_final = np.array(signal_final, dtype=np.int16)
 
-    # for all of us interesting to hear it beep
+    # for those interested to hear it beep
     sc_write("signal.wav", rate_out2, signal_final)
 
     # visual check of the demodulated output
-    '''
+
     plt.plot(signal_demod, label="demod")
     plt.plot(signal_deemphed, label="deemphed")
     plt.plot(signal_final, label="final")
     plt.legend()
     plt.show()
     plt.savefig('signal.svg')
-    '''
 
     # 1200 baud AFSK demodulator
-
     # # inspired by
     # # https://github.com/EliasOenal/multimon-ng/blob/master/demod_afsk12.c
     # # https://sites.google.com/site/wayneholder/attiny-4-5-9-10-assembly-ide-and-programmer/bell-202-1200-baud-demodulator-in-an-attiny10
