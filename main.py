@@ -12,6 +12,12 @@ from scipy.io.wavfile import write as sc_write
 # https://github.com/osmocom/rtl-sdr/blob/master/src/rtl_fm.c
 # thank you!
 
+
+# Look up table size
+atan_lut_size = 131072  # =512 kB
+atan_lut_coeff = 8
+
+
 def loading_file(filename):
 
     if filename.find(".wav") > -1:
@@ -26,32 +32,31 @@ def loading_file(filename):
 
 
 def fm_demod(signal):
-    pre_r = 0
-    pre_j = 0
-
-    i = 0
-    pcm = 0
-
     # low-passing
     lp = low_pass(signal)
     lp_len = len(lp)  # must stay double the size of result, due to later for loop
 
     result = np.zeros(len(lp)//2)
 
-    pcm = polar_discriminant(lp[0], lp[1], pre_r, pre_j)
+    pcm = polar_discriminant(lp[0], lp[1], 0, 0)
     result[0] = int(pcm)
 
-    for i in range(2, lp_len-1, 2):
-        # being lazy, only case 0 for now...
-        # there are other cases in rtl_fm.exe
+    # change value below to use different case
+    custom_atan = 0
 
-        # case 0
-        pcm = polar_discriminant(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+    for i in range(2, lp_len-1, 2):
+
+        if custom_atan == 0:
+            pcm = polar_discriminant(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+        elif custom_atan == 1:
+            pcm = polar_disc_fast(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
+        elif custom_atan == 2:
+            pcm = polar_disc_lut(lp[i], lp[i + 1], lp[i - 2], lp[i - 1])
 
         result[i // 2] = int(pcm)
 
-    pre_r = lp[lp_len - 2]
-    pre_j = lp[lp_len - 1]
+    # pre_r = lp[lp_len - 2]
+    # pre_j = lp[lp_len - 1]
     # result_len = lp_len // 2
     return result
 
@@ -69,30 +74,72 @@ def polar_discriminant(ar, aj, br, bj):
     # return (angle * 180.0 / np.pi)
 
 
+def fast_atan2(y, x):
+    pi4 = (1 << 12)  # since pi = 1 << 14
+    if(x == 0 and y == 0):
+        return 0
+    if(x >= 0):
+        angle = pi4*(1 - (x-abs(y)) / (x+abs(y)))
+    else:
+        angle = pi4*(3 - (x+abs(y)) / (abs(y)-x))
+    angle *= abs(y)/y
+    return angle
+
+
+def polar_disc_fast(ar, aj, br, bj):
+    cr, cj = multiply(ar, aj, br, -bj)
+    return fast_atan2(cj, cr)
+
+
+def atan_lut_init():
+    atan_lut_final = np.zeros(atan_lut_size)
+    for i in range(0, atan_lut_size):
+        atan_lut_final[i] = np.arctan(i/((1 << atan_lut_coeff)*np.pi)*(1 << 14))
+    return atan_lut_final
+
+
+def polar_disc_lut(ar, aj, br, bj):
+    atan_lut = atan_lut_init()
+    cr, cj = multiply(ar, aj, br, -bj)
+    # Special cases
+    if cr*cj == 0:
+        if cr == 0 and cj == 0:
+            pdl = 0
+        elif cr == 0:
+            pdl = 1 << 13 if cj > 0 else -(1 << 13)
+        elif cj == 0:
+            pdl = 0 if cr > 0 else 1 << 14
+    else:
+        # real range -32768 - 32768 use 64x range -> absolute maximum: 2097152
+        x = int((int(cj) << atan_lut_coeff)/cr)
+        if abs(x) >= atan_lut_size:
+            # can use linear range, but not necessary
+            pdl = 1 << 13 if cj > 0 else -(1 << 13)
+        else:
+            if x > 0:
+                pdl = atan_lut[x] if cj > 0 else atan_lut[x] - (1 << 14)
+            else:
+                pdl = (1 << 14) - atan_lut[-x] if cj > 0 else -atan_lut[-x]
+
+    return pdl
+
+
 def low_pass(signal):
     # simple square window FIR
-
     lowpassed = np.zeros(len(signal) // downsample*2)
-
     # needs to be go outside this function
     now_r = 0
     now_j = 0
-
     i = 0
     i2 = 0
-
     prev_index = 0
-
     while (i < len(signal)):
         now_r += signal[i]
         now_j += signal[i + 1]
         i += 2
-
         prev_index += 2
-
         if (prev_index < downsample):
             continue
-
         lowpassed[i2] = now_r
         lowpassed[i2 + 1] = now_j
         prev_index = 0
@@ -216,20 +263,19 @@ if __name__ == '__main__':
     signal_final = low_pass_real(signal_deemphed)
     signal_final = np.array(signal_final, dtype=np.int16)
 
-    # for all of us interesting to hear it beep
+    # for those interested to hear it beep
     sc_write("signal.wav", rate_out2, signal_final)
 
     # visual check of the demodulated output
-    '''
+
     plt.plot(signal_demod, label="demod")
     plt.plot(signal_deemphed, label="deemphed")
     plt.plot(signal_final, label="final")
     plt.legend()
     plt.show()
-    '''
+    plt.savefig('signal.svg')
 
     # 1200 baud AFSK demodulator
-
     # # inspired by
     # # https://github.com/EliasOenal/multimon-ng/blob/master/demod_afsk12.c
     # # https://sites.google.com/site/wayneholder/attiny-4-5-9-10-assembly-ide-and-programmer/bell-202-1200-baud-demodulator-in-an-attiny10
