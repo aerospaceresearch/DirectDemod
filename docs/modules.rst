@@ -31,11 +31,17 @@ Sinks
 .. autoclass:: directdemod.sink.wavFile
    :members:
 
+   .. automethod:: __init__
+
 .. autoclass:: directdemod.sink.image
    :members:
+
+   .. automethod:: __init__
 
 Chunking helper
 ---------------
 
 .. autoclass:: directdemod.chunker.chunker
    :members:
+
+   .. automethod:: __init__
