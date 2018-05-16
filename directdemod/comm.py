@@ -28,7 +28,7 @@ class commSignal:
 			raise ValueError("The sampling rate must be greater than zero")
 
 		self.__sig = np.array(sig)
-		if not self.__sig.size <= self.__sig.shape[0]:
+		if not self.__sig.size == self.__sig.shape[0]:
 			raise TypeError("The signal array must be 1-D")
 
 	'''
@@ -57,22 +57,24 @@ class commSignal:
 
 	'''
 	# Description: offset signal frequency by multiplying a complex envelope
-	# Inputs: freqOffset (in Hz), Outputs: -
+	# Inputs: freqOffset (in Hz), Outputs: self
 	'''
 	def offsetFreq(self, freqOffset):
 		self.__sig *= np.exp(-1.0j*2.0*np.pi*freqOffset*np.arange(self.length)/self.sampRate)
+		return self
 
 	'''
 	# Description: apply a filter to the signal
-	# Inputs: filter object, Outputs: -
+	# Inputs: filter object, Outputs: self
 	'''
 	def filter(self, filt):
 		self.updateSignal(filt.applyOn(self.signal))
+		return self
 
 	'''
 	# Description: limit the bandwidth by downsampling
 	# Inputs: tsampRate (target sample rate), strictness (if true, the target sample rate will be matched exactly)
-	# Outputs: -
+	# Outputs: self
 	'''
 	def bwLim(self, tsampRate, strict = False):
 		if self.__sampRate < tsampRate:
@@ -83,34 +85,38 @@ class commSignal:
 			self.__sampRate = tsampRate
 			self.__len = len(self.signal)
 		else:
-			jumpIndex = int(self.sampRate / tsampRate)  
+			jumpIndex = int(self.sampRate / tsampRate)
 			self.__sig = self.signal[0::jumpIndex]
 			self.__sampRate = int(self.sampRate/jumpIndex)
 			self.__len = len(self.signal)
+		return self
 
 	'''
 	# Description: applys a function to the signal
-	# Inputs: function to be applied, Outputs: -
+	# Inputs: function to be applied, Outputs: self
 	'''
 	def funcApply(self, func):
 		self.updateSignal(func(self.signal))
+		return self
 
 	'''
 	# Description: Adds another signal to this one
-	# Inputs: commSignal object, Outputs: -
+	# Inputs: commSignal object, Outputs: self
 	'''
 	def extend(self, sig):
 		if not self.__sampRate == sig.sampRate:
 			raise TypeError("Signals must have same sampling rate to be extended")
 		
 		self.updateSignal(np.concatenate([self.signal, sig.signal]))
+		return self
 
 	'''
 	# Description: Updates the signal
-	# Inputs: sig array, Outputs: -
+	# Inputs: sig array, Outputs: self
 	'''
 	def updateSignal(self, sig):
 		self.__sig = np.array(sig)
 		if not self.__sig.size <= self.__sig.shape[0]:
 			raise TypeError("The signal array must be 1-D")
 		self.__len = len(self.signal)
+		return self
