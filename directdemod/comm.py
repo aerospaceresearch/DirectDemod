@@ -12,15 +12,21 @@ This is an object used to store a signal and its properties
 e.g. To use this to store a audio signal: audioSig = commSignal(ArrayWithSignalValues, SamplingRate)
 Refer: Experiment 1 for testing memory effeciency of the object
 '''
-
 class commSignal:
+	
 	'''
-	# Description: Initialize the object
-	# NecessaryInputs: sampRate (in Hz, will be forced to be an integer)
-	# OptionalInputs: sig (must be one dimentional, will be forced to be a numpy array)
-	# Outputs: -
+	This is an object used to store a signal and its properties
 	'''
+
 	def __init__(self, sampRate, sig = np.array([])):
+
+		'''Initialize the object
+
+	    Args:
+	        sampRate (:obj:`int`): sampling rate in Hz, will be forced to be an integer
+	        sig (:obj:`numpy array`, optional): must be one dimentional, will be forced to be a numpy array
+	    '''
+
 		self.__len = len(sig)
 
 		self.__sampRate = int(sampRate)
@@ -31,52 +37,67 @@ class commSignal:
 		if not self.__sig.size == self.__sig.shape[0]:
 			raise TypeError("The signal array must be 1-D")
 
-	'''
-	# Description: get length of signal
-	# Inputs: -, Outputs: length of signal
-	'''
 	@property
 	def length(self):
+
+		''':obj:`int`: get length of signal'''
+
 		return self.__len
 
-	'''
-	# Description: get sampling rate of signal
-	# Inputs: -, Outputs: sampling rate of signal
-	'''
 	@property
 	def sampRate(self):
+
+		''':obj:`int`: get sampling rate of signal'''
+
 		return self.__sampRate
 
-	'''
-	# Description: get signal
-	# Inputs: -, Outputs: current signal
-	'''
 	@property
 	def signal(self):
+
+		''':obj:`numpy array`: get signal'''
+
 		return self.__sig
 
-	'''
-	# Description: offset signal frequency by multiplying a complex envelope
-	# Inputs: freqOffset (in Hz), Outputs: self
-	'''
 	def offsetFreq(self, freqOffset):
+
+		'''Offset signal by a frequency by multiplying a complex envelope
+
+	    Args:
+	        freqOffset (:obj:`float`): offset frequency in Hz
+
+	    Returns:
+	        :obj:`commSignal`: Signal offset by given frequency (self)
+	    '''
+
 		self.__sig *= np.exp(-1.0j*2.0*np.pi*freqOffset*np.arange(self.length)/self.sampRate)
 		return self
 
-	'''
-	# Description: apply a filter to the signal
-	# Inputs: filter object, Outputs: self
-	'''
 	def filter(self, filt):
+
+		'''Apply a filter to the signal
+
+	    Args:
+	        filt (:obj:`filter`): filter object
+
+	    Returns:
+	        :obj:`commSignal`: Updated signal (self)
+	    '''
+
 		self.updateSignal(filt.applyOn(self.signal))
 		return self
 
-	'''
-	# Description: limit the bandwidth by downsampling
-	# Inputs: tsampRate (target sample rate), strictness (if true, the target sample rate will be matched exactly)
-	# Outputs: self
-	'''
 	def bwLim(self, tsampRate, strict = False):
+
+		'''Limit the bandwidth by downsampling
+
+	    Args:
+	        tsampRate (:obj:`int`): target sample rate
+	        strict (:obj:`bool`, optional): if true, the target sample rate will be matched exactly
+
+	    Returns:
+	        :obj:`commSignal`: Updated signal (self)
+	    '''
+
 		if self.__sampRate < tsampRate:
 			raise ValueError("The target sampling rate must be less than current sampling rate")
 
@@ -91,30 +112,48 @@ class commSignal:
 			self.__len = len(self.signal)
 		return self
 
-	'''
-	# Description: applys a function to the signal
-	# Inputs: function to be applied, Outputs: self
-	'''
 	def funcApply(self, func):
+
+		''' Applies a function to the signal
+
+	    Args:
+	        func (function): function to be applied
+
+	    Returns:
+	        :obj:`commSignal`: Updated signal (self)
+	    '''
+
 		self.updateSignal(func(self.signal))
 		return self
 
-	'''
-	# Description: Adds another signal to this one
-	# Inputs: commSignal object, Outputs: self
-	'''
 	def extend(self, sig):
+
+		''' Adds another signal to this one at the tail end
+
+	    Args:
+	        sig (:obj:`commSignal`): Signal to be added
+
+	    Returns:
+	        :obj:`commSignal`: Updated signal (self)
+	    '''
+
 		if not self.__sampRate == sig.sampRate:
 			raise TypeError("Signals must have same sampling rate to be extended")
 		
 		self.updateSignal(np.concatenate([self.signal, sig.signal]))
 		return self
 
-	'''
-	# Description: Updates the signal
-	# Inputs: sig array, Outputs: self
-	'''
 	def updateSignal(self, sig):
+
+		''' Updates the signal
+
+	    Args:
+	        sig (:obj:`numpy array`): New signal array
+
+	    Returns:
+	        :obj:`commSignal`: Updated signal (self)
+	    '''
+
 		self.__sig = np.array(sig)
 		if not self.__sig.size <= self.__sig.shape[0]:
 			raise TypeError("The signal array must be 1-D")

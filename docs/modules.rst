@@ -1,0 +1,41 @@
+.. DirectDemod documentation master file, created by
+   sphinx-quickstart on Thu May 17 00:16:36 2018.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+DirectDemod: Modules documentation
+===================================
+
+
+Signal object
+---------------
+
+.. autoclass:: directdemod.comm.commSignal
+   :members:
+
+   .. automethod:: __init__
+
+
+Sources
+----------
+
+.. autoclass:: directdemod.source.IQwav
+   :members:
+
+   .. automethod:: __init__
+
+
+Sinks
+----------
+
+.. autoclass:: directdemod.sink.wavFile
+   :members:
+
+.. autoclass:: directdemod.sink.image
+   :members:
+
+Chunking helper
+---------------
+
+.. autoclass:: directdemod.chunker.chunker
+   :members:

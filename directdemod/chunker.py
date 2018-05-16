@@ -10,11 +10,20 @@ It is responsible for creating chunks of the signal and store the info to be use
 It can be helpful for avoiding border issues in filters and demods
 '''
 class chunker:
+
 	'''
-	# Description: initialize the object
-	# Inputs: commSignal object to be chunked, chunkSize, Outputs: -
+	This object is just to help in chunking process
 	'''
+
 	def __init__(self, sigsrc, chunkSize = constants.PROC_CHUNKSIZE):
+
+		'''Initialize the object
+
+	    Args:
+	        sampRate (:obj:`commSignal`): commSignal object to be chunked
+	        chunkSize (:obj:`int`, optional): chunk size
+	    '''
+
 		self.__nChunks = math.ceil(sigsrc.length*1.0/chunkSize)
 		self.__chunks = []
 		i = 0
@@ -31,10 +40,9 @@ class chunker:
 			if not self.__chunks[-1][1] == sigsrc.length:
 				self.__chunks.append([self.__chunks[-1][1],sigsrc.length])
 
-	'''
-	# Description: get the created chunks
-	# Inputs: -, Outputs: chunks list
-	'''
 	@property
 	def getChunks(self):
+
+		''':obj:`list`: get the created chunks'''
+
 		return self.__chunks
