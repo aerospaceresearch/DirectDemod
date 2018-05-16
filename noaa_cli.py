@@ -11,10 +11,10 @@ if not (len(sys.argv) == 2):
 	exit()
 
 sigsrc = source.IQwav(sys.argv[1])
-audioOut = comm.commSignal(sampRate = constants.NOAA_AUDSAMPRATE)
+audioOut = comm.commSignal(constants.NOAA_AUDSAMPRATE)
 
 for i in chunker.chunker(sigsrc).getChunks()[:1]:
-	sig = comm.commSignal(sigsrc.read(*i))
+	sig = comm.commSignal(constants.IQ_SDRSAMPRATE, sigsrc.read(*i))
 	sig.offsetFreq(constants.IQ_FREQOFFSET)
 	sig.filter(filters.blackmanHarris())
 	sig.bwLim(constants.IQ_FMBW)
