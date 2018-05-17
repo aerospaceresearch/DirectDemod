@@ -15,6 +15,18 @@ Signal object
 
    .. automethod:: __init__
 
+Filters
+---------------
+
+.. autoclass:: directdemod.filters.filter
+   :members:
+
+   .. automethod:: __init__
+
+.. autoclass:: directdemod.filters.rollingAverage
+   :members:
+
+   .. automethod:: __init__
 
 Sources
 ----------

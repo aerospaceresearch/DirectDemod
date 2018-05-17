@@ -197,6 +197,80 @@
 </dd></dl>
 
 </div>
+<div class="section" id="filters">
+<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="directdemod.filters.filter">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">filter</code><span class="sig-paren">(</span><em>b</em>, <em>a</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a parent object of all filters, it implements all the necessary properties. Refer to experiment 3 for details.</p>
+<dl class="method">
+<dt id="directdemod.filters.filter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>b</em>, <em>a</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#filter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.filter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>b</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of ‘b’ constants of filter</li>
+<li><strong>a</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of ‘a’ constants of filter</li>
+<li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
+<li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
+<li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.filters.filter.applyOn">
+<code class="descname">applyOn</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#filter.applyOn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.filter.applyOn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the filter to a given array of signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The signal array on which the filter needs to be applied</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Filtered signal array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.filters.rollingAverage">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">rollingAverage</code><span class="sig-paren">(</span><em>n=3</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#rollingAverage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.rollingAverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple rolling average filter</p>
+<dl class="method">
+<dt id="directdemod.filters.rollingAverage.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>n=3</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#rollingAverage.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.rollingAverage.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the rolling window</li>
+<li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
+<li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
+<li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="sources">
 <h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -268,6 +342,24 @@
 <dt id="directdemod.sink.wavFile">
 <em class="property">class </em><code class="descclassname">directdemod.sink.</code><code class="descname">wavFile</code><span class="sig-paren">(</span><em>filename</em>, <em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/sink.html#wavFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.sink.wavFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object is used to write wav files</p>
+<dl class="method">
+<dt id="directdemod.sink.wavFile.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>filename</em>, <em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/sink.html#wavFile.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.sink.wavFile.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – filename of the wav file</li>
+<li><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – signal to be written</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="directdemod.sink.wavFile.write">
 <code class="descname">write</code><a class="headerlink" href="#directdemod.sink.wavFile.write" title="Permalink to this definition">¶</a></dt>
@@ -280,6 +372,24 @@
 <dt id="directdemod.sink.image">
 <em class="property">class </em><code class="descclassname">directdemod.sink.</code><code class="descname">image</code><span class="sig-paren">(</span><em>filename</em>, <em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/sink.html#image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.sink.image" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object is used to display and write images</p>
+<dl class="method">
+<dt id="directdemod.sink.image.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>filename</em>, <em>mat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/sink.html#image.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.sink.image.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – filename of the wav file</li>
+<li><strong>mat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – a matrix of pixel values</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="directdemod.sink.image.show">
 <code class="descname">show</code><a class="headerlink" href="#directdemod.sink.image.show" title="Permalink to this definition">¶</a></dt>
@@ -301,6 +411,24 @@
 <dt id="directdemod.chunker.chunker">
 <em class="property">class </em><code class="descclassname">directdemod.chunker.</code><code class="descname">chunker</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>chunkSize=20000000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/chunker.html#chunker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.chunker.chunker" title="Permalink to this definition">¶</a></dt>
 <dd><p>This object is just to help in chunking process</p>
+<dl class="method">
+<dt id="directdemod.chunker.chunker.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>chunkSize=20000000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/chunker.html#chunker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.chunker.chunker.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sampRate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – commSignal object to be chunked</li>
+<li><strong>chunkSize</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – chunk size</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="directdemod.chunker.chunker.getChunks">
 <code class="descname">getChunks</code><a class="headerlink" href="#directdemod.chunker.chunker.getChunks" title="Permalink to this definition">¶</a></dt>
@@ -322,6 +450,7 @@
   <ul>
 <li><a class="reference internal" href="#">DirectDemod: Modules documentation</a><ul>
 <li><a class="reference internal" href="#signal-object">Signal object</a></li>
+<li><a class="reference internal" href="#filters">Filters</a></li>
 <li><a class="reference internal" href="#sources">Sources</a></li>
 <li><a class="reference internal" href="#sinks">Sinks</a></li>
 <li><a class="reference internal" href="#chunking-helper">Chunking helper</a></li>
