@@ -2,6 +2,7 @@
 Object for filters
 '''
 
+import directdemod.constants as constants
 import scipy.signal as signal
 
 '''
@@ -223,6 +224,53 @@ class gaussian(filter):
 		self.__n = n
 		self.__sigma = sigma
 		super(gaussian, self).__init__(signal.gaussian(self.__n, self.__sigma), [1], storeState, zeroPhase, initOut)
+
+'''
+Butterworth filter
+'''
+
+class butter(filter):
+
+	'''
+	Butterworth filter
+	'''
+
+	def __init__(self, Fs, cutoffA, cutoffB = None, n = 6, typeFlt = constants.FLT_LP, storeState = True, zeroPhase = False, initOut = None):
+
+		'''Initialize the object
+
+		Args:
+			Fs (:obj:`int`): Sampling frequency of signal
+			cutoffA (:obj:`float`): desired cutoff A of filter in Hz
+			cutoffB (:obj:`float`, optional): desired cutoff B of filter in Hz
+			n (:obj:`int`, optional): Order of filter
+			type (:obj:`constant`, optional): constants.FLT_LP to constants.FLT_BS, see constants module
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
+
+		'''
+		self.__Fs = Fs
+		self.__cutoffA = cutoffA
+		self.__cutoffB = cutoffB
+		self.__n = n
+		self.__type = typeFlt
+
+		if (self.__type == constants.FLT_BP or self.__type == constants.FLT_BS) and self.__cutoffB is None:
+			raise ValueError("CutoffB must be given")
+
+		if self.__type == constants.FLT_LP:
+			self.__b, self.__a = signal.butter(self.__n, self.__cutoffA / (0.5 * self.__Fs), btype='lowpass6')
+		elif self.__type == constants.FLT_HP:
+			self.__b, self.__a = signal.butter(self.__n, self.__cutoffA / (0.5 * self.__Fs), btype='highpass')
+		elif self.__type == constants.FLT_BP:
+			self.__b, self.__a = signal.butter(self.__n, [self.__cutoffA / (0.5 * self.__Fs), self.__cutoffB / (0.5 * self.__Fs)] , btype='bandpass')
+		elif self.__type == constants.FLT_BS:
+			self.__b, self.__a = signal.butter(self.__n, [self.__cutoffA / (0.5 * self.__Fs), self.__cutoffB / (0.5 * self.__Fs)] , btype='bandstop')
+		else:
+			raise ValueError("Invalid filter type")
+
+		super(butter, self).__init__(self.__b, self.__a, storeState, zeroPhase, initOut)
 
 
 

@@ -43,6 +43,11 @@ Filters
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.filters.butter
+   :members:
+
+   .. automethod:: __init__
+
 .. autoclass:: directdemod.filters.blackmanHarrisConv
    :members:
 

@@ -347,8 +347,38 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the window</li>
-<li><strong>sigma</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, optional) – The standard deviation</li>
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – size of the window</li>
+<li><strong>sigma</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – The standard deviation</li>
+<li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
+<li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
+<li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.filters.butter">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">butter</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoffA</em>, <em>cutoffB=None</em>, <em>n=6</em>, <em>typeFlt=0</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#butter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.butter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Butterworth filter</p>
+<dl class="method">
+<dt id="directdemod.filters.butter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoffA</em>, <em>cutoffB=None</em>, <em>n=6</em>, <em>typeFlt=0</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#butter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.butter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Fs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – Sampling frequency of signal</li>
+<li><strong>cutoffA</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – desired cutoff A of filter in Hz</li>
+<li><strong>cutoffB</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>, optional) – desired cutoff B of filter in Hz</li>
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – Order of filter</li>
+<li><strong>type</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">constant</span></code>, optional) – constants.FLT_LP to constants.FLT_BS, see constants module</li>
 <li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
 <li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
 <li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>

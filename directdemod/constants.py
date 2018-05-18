@@ -15,3 +15,9 @@ NOAA_AUDSAMPRATE = 20800
 
 ## Source types
 SOURCE_IQWAV = 0
+
+## Filter types
+FLT_LP = 0
+FLT_HP = 1
+FLT_BP = 2
+FLT_BS = 3

@@ -38,6 +38,7 @@
 <span class="sd">Object for filters</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
+<span class="kn">import</span> <span class="nn">directdemod.constants</span> <span class="k">as</span> <span class="nn">constants</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
@@ -248,8 +249,8 @@
 		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
 <span class="sd">		Args:</span>
-<span class="sd">			n (:obj:`int`, optional): size of the window</span>
-<span class="sd">			sigma (:obj:`float`, optional): The standard deviation</span>
+<span class="sd">			n (:obj:`int`): size of the window</span>
+<span class="sd">			sigma (:obj:`float`): The standard deviation</span>
 <span class="sd">			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
 <span class="sd">			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
 <span class="sd">			initOut (:obj:`list`, optional): Initial condition of the filter</span>
@@ -259,6 +260,53 @@
 		<span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span> <span class="o">=</span> <span class="n">sigma</span>
 		<span class="nb">super</span><span class="p">(</span><span class="n">gaussian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Butterworth filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="butter"><a class="viewcode-back" href="../../modules.html#directdemod.filters.butter">[docs]</a><span class="k">class</span> <span class="nc">butter</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Butterworth filter</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="butter.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.butter.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fs</span><span class="p">,</span> <span class="n">cutoffA</span><span class="p">,</span> <span class="n">cutoffB</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">typeFlt</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_LP</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			Fs (:obj:`int`): Sampling frequency of signal</span>
+<span class="sd">			cutoffA (:obj:`float`): desired cutoff A of filter in Hz</span>
+<span class="sd">			cutoffB (:obj:`float`, optional): desired cutoff B of filter in Hz</span>
+<span class="sd">			n (:obj:`int`, optional): Order of filter</span>
+<span class="sd">			type (:obj:`constant`, optional): constants.FLT_LP to constants.FLT_BS, see constants module</span>
+<span class="sd">			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">			initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">		&#39;&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span> <span class="o">=</span> <span class="n">Fs</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">=</span> <span class="n">cutoffA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">=</span> <span class="n">cutoffB</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">=</span> <span class="n">typeFlt</span>
+
+		<span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BS</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CutoffB must be given&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_LP</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass6&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_HP</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;highpass&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">)]</span> <span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;bandpass&#39;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BS</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">)]</span> <span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;bandstop&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid filter type&quot;</span><span class="p">)</span>
+
+		<span class="nb">super</span><span class="p">(</span><span class="n">butter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
 
 
 
