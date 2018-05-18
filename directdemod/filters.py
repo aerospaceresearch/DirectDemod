@@ -127,7 +127,7 @@ class blackmanHarris(filter):
 		'''Initialize the object
 
 		Args:
-			n (:obj:`int`, optional): size of the window
+			n (:obj:`int`): size of the window
 			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
 			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
 			initOut (:obj:`list`, optional): Initial condition of the filter
@@ -187,7 +187,7 @@ class hamming(filter):
 		'''Initialize the object
 
 		Args:
-			n (:obj:`int`, optional): size of the window
+			n (:obj:`int`): size of the window
 			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
 			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
 			initOut (:obj:`list`, optional): Initial condition of the filter
@@ -196,6 +196,33 @@ class hamming(filter):
 
 		self.__n = n
 		super(hamming, self).__init__(signal.hamming(self.__n), [1], storeState, zeroPhase, initOut)
+
+'''
+Gaussian filter
+'''
+
+class gaussian(filter):
+
+	'''
+	Gaussian filter
+	'''
+
+	def __init__(self, n, sigma, storeState = True, zeroPhase = False, initOut = None):
+
+		'''Initialize the object
+
+		Args:
+			n (:obj:`int`): size of the window
+			sigma (:obj:`float`): The standard deviation
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
+
+		'''
+
+		self.__n = n
+		self.__sigma = sigma
+		super(gaussian, self).__init__(signal.gaussian(self.__n, self.__sigma), [1], storeState, zeroPhase, initOut)
 
 
 

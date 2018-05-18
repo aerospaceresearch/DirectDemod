@@ -38,6 +38,11 @@ Filters
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.filters.gaussian
+   :members:
+
+   .. automethod:: __init__
+
 .. autoclass:: directdemod.filters.blackmanHarrisConv
    :members:
 
