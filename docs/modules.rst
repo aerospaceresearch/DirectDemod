@@ -33,6 +33,11 @@ Filters
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.filters.hamming
+   :members:
+
+   .. automethod:: __init__
+
 .. autoclass:: directdemod.filters.blackmanHarrisConv
    :members:
 

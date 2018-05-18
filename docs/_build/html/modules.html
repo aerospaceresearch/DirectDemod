@@ -295,7 +295,33 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the rolling window</li>
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the window</li>
+<li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
+<li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
+<li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.filters.hamming">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">hamming</code><span class="sig-paren">(</span><em>n</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#hamming"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.hamming" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hamming filter</p>
+<dl class="method">
+<dt id="directdemod.filters.hamming.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>n</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#hamming.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.hamming.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the window</li>
 <li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
 <li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
 <li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
@@ -320,7 +346,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the rolling window</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the window</td>
 </tr>
 </tbody>
 </table>

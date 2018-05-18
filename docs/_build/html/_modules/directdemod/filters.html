@@ -163,7 +163,7 @@
 		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
 <span class="sd">		Args:</span>
-<span class="sd">			n (:obj:`int`, optional): size of the rolling window</span>
+<span class="sd">			n (:obj:`int`, optional): size of the window</span>
 <span class="sd">			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
 <span class="sd">			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
 <span class="sd">			initOut (:obj:`list`, optional): Initial condition of the filter</span>
@@ -188,7 +188,7 @@
 		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
 <span class="sd">		Args:</span>
-<span class="sd">			n (:obj:`int`, optional): size of the rolling window</span>
+<span class="sd">			n (:obj:`int`, optional): size of the window</span>
 
 <span class="sd">		&#39;&#39;&#39;</span>
 
@@ -207,6 +207,32 @@
 <span class="sd">		&#39;&#39;&#39;</span>
 
 		<span class="k">return</span> <span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Hamming filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../modules.html#directdemod.filters.hamming">[docs]</a><span class="k">class</span> <span class="nc">hamming</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Hamming filter</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="hamming.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.hamming.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			n (:obj:`int`, optional): size of the window</span>
+<span class="sd">			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">			initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+		<span class="nb">super</span><span class="p">(</span><span class="n">hamming</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
 
 
 <span class="sd">&#39;&#39;&#39;</span>
