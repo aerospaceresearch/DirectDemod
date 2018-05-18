@@ -19,7 +19,7 @@ sigsrc = source.IQwav(sys.argv[1])
 audioOut = comm.commSignal(constants.NOAA_AUDSAMPRATE)
 
 for i in chunker.chunker(sigsrc).getChunks[:]:
-	sig = comm.commSignal(constants.IQ_SDRSAMPRATE, sigsrc.read(*i)).offsetFreq(constants.IQ_FREQOFFSET).filter(filters.blackmanHarris()).bwLim(constants.IQ_FMBW).funcApply(fmDemod.fmDemod().demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
+	sig = comm.commSignal(constants.IQ_SDRSAMPRATE, sigsrc.read(*i)).offsetFreq(constants.IQ_FREQOFFSET).filter(filters.blackmanHarris(151)).bwLim(constants.IQ_FMBW).funcApply(fmDemod.fmDemod().demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
 	audioOut.extend(sig)
 
 sink.wavFile("out.wav", audioOut).write

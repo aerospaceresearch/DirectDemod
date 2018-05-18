@@ -21,14 +21,14 @@ class filter:
 
 		'''Initialize the object
 
-	    Args:
-	    	b (:obj:`list`): list of 'b' constants of filter
-	    	a (:obj:`list`): list of 'a' constants of filter
-	        storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
-	        zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
-	        initOut (:obj:`list`, optional): Initial condition of the filter
+		Args:
+			b (:obj:`list`): list of 'b' constants of filter
+			a (:obj:`list`): list of 'a' constants of filter
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
 
-	    '''
+		'''
 
 		self.__storeState = storeState
 		self.__zeroPhase = zeroPhase
@@ -53,25 +53,39 @@ class filter:
 
 		'''Apply the filter to a given array of signal
 
-	    Args:
-	        x (:obj:`numpy array`): The signal array on which the filter needs to be applied
+		Args:
+			x (:obj:`numpy array`): The signal array on which the filter needs to be applied
 
-	    Returns:
-	        :obj:`numpy array`: Filtered signal array
-	    '''
+		Returns:
+			:obj:`numpy array`: Filtered signal array
+		'''
 
 		if self.__storeState:
 
 			if self.__zi is None:
 				self.__zi = signal.lfiltic(self.__b, self.__a, x, self.__initOut)
 
-			retDat, self.__zi = signal.lfilter(self.__b, self.__a, x, zi=self.__zi)
+			retDat, self.__zi = signal.lfilter(self.__b, self.__a, x, zi = self.__zi)
 			return retDat
 		else:
 			if self.__zeroPhase:
 				return signal.filtfilt(self.__b, self.__a, x)
 			else:
 				return signal.lfilter(self.__b, self.__a, x)
+
+	@property
+	def getA(self):
+
+		''':obj:`list`: Get 'a' of the filter'''
+
+		return self.__a
+
+	@property
+	def getB(self):
+		
+		''':obj:`list`: Get 'a' of the filter'''
+
+		return self.__b
 
 '''
 A simple rolling average filter
@@ -87,33 +101,82 @@ class rollingAverage(filter):
 
 		'''Initialize the object
 
-	    Args:
-	    	n (:obj:`int`, optional): size of the rolling window
-	        storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
-	        zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
-	        initOut (:obj:`list`, optional): Initial condition of the filter
+		Args:
+			n (:obj:`int`, optional): size of the rolling window
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
 
-	    '''
+		'''
 
 		self.__n = n
 		super(rollingAverage, self).__init__([1.0/n]*n, [1], storeState, zeroPhase, initOut)
 
 '''
-To be implemented later
+Blackman Harris filter
 '''
 
 class blackmanHarris(filter):
-	def __init__(self, n = 151, storeState = True):
+
+	'''
+	Blackman Harris filter
+	'''
+
+	def __init__(self, n, storeState = True, zeroPhase = False, initOut = None):
+
+		'''Initialize the object
+
+		Args:
+			n (:obj:`int`, optional): size of the rolling window
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
+
+		'''
+
 		self.__n = n
-		super(blackmanHarris, self).__init__(signal.blackmanharris(self.__n), [1], storeState)
+		super(blackmanHarris, self).__init__(signal.blackmanharris(self.__n), [1], storeState, zeroPhase, initOut)
+
+'''
+Blackman Harris filter (by convolving)
+'''
 
 class blackmanHarrisConv:
+
+	'''
+	Blackman Harris filter (by convolving, Not recommended for large signals)
+	'''
+
 	def __init__(self, n = 151):
+
+		'''Initialize the object
+
+		Args:
+			n (:obj:`int`, optional): size of the rolling window
+
+		'''
+
 		self.__n = n
 		self.__window = signal.blackmanharris(self.__n)
 
 	def applyOn(self, sig):
+
+		'''Apply the filter to a given array of signal
+
+		Args:
+			x (:obj:`numpy array`): The signal array on which the filter needs to be applied
+
+		Returns:
+			:obj:`numpy array`: Filtered signal array
+		'''
+
 		return signal.convolve(sig, self.__window, mode='same')
+
+
+'''
+To be implemented later
+'''
+
 
 class medianFilter:
 	def __init__(self, n = 5):
