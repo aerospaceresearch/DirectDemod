@@ -28,6 +28,16 @@ Filters
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.filters.blackmanHarris
+   :members:
+
+   .. automethod:: __init__
+
+.. autoclass:: directdemod.filters.blackmanHarrisConv
+   :members:
+
+   .. automethod:: __init__
+
 Sources
 ----------
 

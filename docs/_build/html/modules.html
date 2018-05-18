@@ -242,6 +242,18 @@
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="directdemod.filters.filter.getA">
+<code class="descname">getA</code><a class="headerlink" href="#directdemod.filters.filter.getA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – Get ‘a’ of the filter</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.filters.filter.getB">
+<code class="descname">getB</code><a class="headerlink" href="#directdemod.filters.filter.getB" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – Get ‘a’ of the filter</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -263,6 +275,70 @@
 <li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
 </ul>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.filters.blackmanHarris">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">blackmanHarris</code><span class="sig-paren">(</span><em>n</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#blackmanHarris"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.blackmanHarris" title="Permalink to this definition">¶</a></dt>
+<dd><p>Blackman Harris filter</p>
+<dl class="method">
+<dt id="directdemod.filters.blackmanHarris.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>n</em>, <em>storeState=True</em>, <em>zeroPhase=False</em>, <em>initOut=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#blackmanHarris.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.blackmanHarris.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the rolling window</li>
+<li><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</li>
+<li><strong>zeroPhase</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable ‘storeState’ and ‘initOut’)</li>
+<li><strong>initOut</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>, optional) – Initial condition of the filter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.filters.blackmanHarrisConv">
+<em class="property">class </em><code class="descclassname">directdemod.filters.</code><code class="descname">blackmanHarrisConv</code><span class="sig-paren">(</span><em>n=151</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#blackmanHarrisConv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.blackmanHarrisConv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Blackman Harris filter (by convolving, Not recommended for large signals)</p>
+<dl class="method">
+<dt id="directdemod.filters.blackmanHarrisConv.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>n=151</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#blackmanHarrisConv.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.blackmanHarrisConv.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – size of the rolling window</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.filters.blackmanHarrisConv.applyOn">
+<code class="descname">applyOn</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/filters.html#blackmanHarrisConv.applyOn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.filters.blackmanHarrisConv.applyOn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply the filter to a given array of signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – The signal array on which the filter needs to be applied</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Filtered signal array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
 </tr>
 </tbody>
 </table>
