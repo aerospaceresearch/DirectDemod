@@ -48,6 +48,11 @@ Filters
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.filters.remez
+   :members:
+
+   .. automethod:: __init__
+
 .. autoclass:: directdemod.filters.blackmanHarrisConv
    :members:
 

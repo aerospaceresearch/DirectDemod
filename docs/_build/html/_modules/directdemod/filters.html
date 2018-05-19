@@ -120,7 +120,7 @@
 	<span class="nd">@property</span>
 	<span class="k">def</span> <span class="nf">getB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 		
-		<span class="sd">&#39;&#39;&#39;:obj:`list`: Get &#39;a&#39; of the filter&#39;&#39;&#39;</span>
+		<span class="sd">&#39;&#39;&#39;:obj:`list`: Get &#39;b&#39; of the filter&#39;&#39;&#39;</span>
 
 		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__b</span></div>
 
@@ -296,7 +296,7 @@
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CutoffB must be given&quot;</span><span class="p">)</span>
 
 		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_LP</span><span class="p">:</span>
-			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass6&#39;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass&#39;</span><span class="p">)</span>
 		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_HP</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;highpass&#39;</span><span class="p">)</span>
 		<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span><span class="p">:</span>
@@ -308,10 +308,52 @@
 
 		<span class="nb">super</span><span class="p">(</span><span class="n">butter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
 
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Remez band filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="remez"><a class="viewcode-back" href="../../modules.html#directdemod.filters.remez">[docs]</a><span class="k">class</span> <span class="nc">remez</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Remez band filter</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="remez.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.remez.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fs</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">gains</span><span class="p">,</span> <span class="n">ntaps</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">		Args:</span>
+<span class="sd">			Fs (:obj:`int`): sampling frequency in Hz</span>
+<span class="sd">			bands (:obj:`list`): non-overlapping list of bands (in Hz) in increasing order. e.g [[0, 100], [400, 500], [600, 700]]</span>
+<span class="sd">			gains (:obj:`float`): Corresponding gains of the bands e.g. [0, 1, 0.5]</span>
+<span class="sd">			ntaps (:obj:`int`, optional): Number of taps of filter (number of terms in filter)</span>
+<span class="sd">			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">			initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">		&#39;&#39;&#39;</span>
+
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atleast one band must be given&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">bands</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Last band must end before (Fs/2)Hz&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">__bands</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">__gains</span> <span class="o">=</span> <span class="n">gains</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bands/gains values&quot;</span><span class="p">)</span>
+
+		<span class="nb">super</span><span class="p">(</span><span class="n">remez</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">remez</span><span class="p">(</span><span class="n">ntaps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">,</span> <span class="n">Hz</span> <span class="o">=</span> <span class="n">Fs</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
 
 
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">To be implemented later</span>
+<span class="sd">To be implemented later if needed</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 

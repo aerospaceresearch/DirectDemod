@@ -84,7 +84,7 @@ class filter:
 	@property
 	def getB(self):
 		
-		''':obj:`list`: Get 'a' of the filter'''
+		''':obj:`list`: Get 'b' of the filter'''
 
 		return self.__b
 
@@ -260,7 +260,7 @@ class butter(filter):
 			raise ValueError("CutoffB must be given")
 
 		if self.__type == constants.FLT_LP:
-			self.__b, self.__a = signal.butter(self.__n, self.__cutoffA / (0.5 * self.__Fs), btype='lowpass6')
+			self.__b, self.__a = signal.butter(self.__n, self.__cutoffA / (0.5 * self.__Fs), btype='lowpass')
 		elif self.__type == constants.FLT_HP:
 			self.__b, self.__a = signal.butter(self.__n, self.__cutoffA / (0.5 * self.__Fs), btype='highpass')
 		elif self.__type == constants.FLT_BP:
@@ -272,10 +272,52 @@ class butter(filter):
 
 		super(butter, self).__init__(self.__b, self.__a, storeState, zeroPhase, initOut)
 
+'''
+Remez band filter
+'''
+
+class remez(filter):
+
+	'''
+	Remez band filter
+	'''
+
+	def __init__(self, Fs, bands, gains, ntaps = 128, storeState = True, zeroPhase = False, initOut = None):
+
+		'''Initialize the object
+
+		Args:
+			Fs (:obj:`int`): sampling frequency in Hz
+			bands (:obj:`list`): non-overlapping list of bands (in Hz) in increasing order. e.g [[0, 100], [400, 500], [600, 700]]
+			gains (:obj:`float`): Corresponding gains of the bands e.g. [0, 1, 0.5]
+			ntaps (:obj:`int`, optional): Number of taps of filter (number of terms in filter)
+			storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.
+			zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable 'storeState' and 'initOut')
+			initOut (:obj:`list`, optional): Initial condition of the filter
+
+		'''
+
+		if len(bands) == 0:
+			raise ValueError("Atleast one band must be given")
+
+		if bands[-1][1] >= (Fs/2):
+			raise ValueError("Last band must end before (Fs/2)Hz")
+
+		self.__bands = []
+		for i in bands:
+			self.__bands.extend(i)
+		self.__gains = gains
+
+		print(self.__bands, self.__gains)
+
+		if not len(self.__bands) == 2*len(self.__gains):
+			raise ValueError("Invalid bands/gains values")
+
+		super(remez, self).__init__(signal.remez(ntaps, self.__bands, self.__gains, Hz = Fs), [1], storeState, zeroPhase, initOut)
 
 
 '''
-To be implemented later
+To be implemented later if needed
 '''
 
 
