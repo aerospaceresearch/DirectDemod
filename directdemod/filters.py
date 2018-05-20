@@ -308,8 +308,6 @@ class remez(filter):
 			self.__bands.extend(i)
 		self.__gains = gains
 
-		print(self.__bands, self.__gains)
-
 		if not len(self.__bands) == 2*len(self.__gains):
 			raise ValueError("Invalid bands/gains values")
 

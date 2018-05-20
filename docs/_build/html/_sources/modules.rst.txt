@@ -58,6 +58,14 @@ Filters
 
    .. automethod:: __init__
 
+Demodulators
+-------------
+
+.. autoclass:: directdemod.fmDemod.fmDemod
+   :members:
+
+   .. automethod:: __init__
+
 Sources
 ----------
 

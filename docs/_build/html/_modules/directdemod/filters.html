@@ -344,8 +344,6 @@
 			<span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">__gains</span> <span class="o">=</span> <span class="n">gains</span>
 
-		<span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">)</span>
-
 		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">):</span>
 			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bands/gains values&quot;</span><span class="p">)</span>
 

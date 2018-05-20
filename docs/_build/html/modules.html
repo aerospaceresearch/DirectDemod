@@ -459,6 +459,47 @@
 </dd></dl>
 
 </div>
+<div class="section" id="demodulators">
+<h2>Demodulators<a class="headerlink" href="#demodulators" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="directdemod.fmDemod.fmDemod">
+<em class="property">class </em><code class="descclassname">directdemod.fmDemod.</code><code class="descname">fmDemod</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object for FM demodulation</p>
+<dl class="method">
+<dt id="directdemod.fmDemod.fmDemod.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Store state? Helps if signal is chunked</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.fmDemod.fmDemod.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod.demod" title="Permalink to this definition">¶</a></dt>
+<dd><p>FM demod a given complex IQ array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – numpy array with IQ in complex form</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">FM demodulated array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="sources">
 <h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -639,6 +680,7 @@
 <li><a class="reference internal" href="#">DirectDemod: Modules documentation</a><ul>
 <li><a class="reference internal" href="#signal-object">Signal object</a></li>
 <li><a class="reference internal" href="#filters">Filters</a></li>
+<li><a class="reference internal" href="#demodulators">Demodulators</a></li>
 <li><a class="reference internal" href="#sources">Sources</a></li>
 <li><a class="reference internal" href="#sinks">Sinks</a></li>
 <li><a class="reference internal" href="#chunking-helper">Chunking helper</a></li>
