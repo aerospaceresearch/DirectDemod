@@ -45,68 +45,68 @@
 <span class="sd">&#39;&#39;&#39;</span>
 <div class="viewcode-block" id="wavFile"><a class="viewcode-back" href="../../modules.html#directdemod.sink.wavFile">[docs]</a><span class="k">class</span> <span class="nc">wavFile</span><span class="p">:</span>
 
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	This object is used to write wav files</span>
-<span class="sd">	&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This object is used to write wav files</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="wavFile.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.sink.wavFile.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+<div class="viewcode-block" id="wavFile.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.sink.wavFile.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
-<span class="sd">	    Args:</span>
-<span class="sd">	        filename (:obj:`str`): filename of the wav file</span>
-<span class="sd">	        sig (:obj:`commSignal`): signal to be written</span>
-<span class="sd">	    &#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            filename (:obj:`str`): filename of the wav file</span>
+<span class="sd">            sig (:obj:`commSignal`): signal to be written</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">__fname</span> <span class="o">=</span> <span class="n">filename</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="n">sig</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fname</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="n">sig</span></div>
 
 
-	<span class="nd">@property</span>
-	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39; sig (:obj:`wavFile`): writes the signal to file&#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; sig (:obj:`wavFile`): writes the signal to file&#39;&#39;&#39;</span>
 
-		<span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span>
-		<span class="k">return</span> <span class="bp">self</span></div>
+        <span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">This object is used to display and write images</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <div class="viewcode-block" id="image"><a class="viewcode-back" href="../../modules.html#directdemod.sink.image">[docs]</a><span class="k">class</span> <span class="nc">image</span><span class="p">:</span>
 
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	This object is used to display and write images</span>
-<span class="sd">	&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This object is used to display and write images</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="image.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.sink.image.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
+<div class="viewcode-block" id="image.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.sink.image.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
-<span class="sd">	    Args:</span>
-<span class="sd">	        filename (:obj:`str`): filename of the wav file</span>
-<span class="sd">	        mat (:obj:`list`): a matrix of pixel values</span>
-<span class="sd">	    &#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            filename (:obj:`str`): filename of the wav file</span>
+<span class="sd">            mat (:obj:`list`): a matrix of pixel values</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">__fname</span> <span class="o">=</span> <span class="n">filename</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">__mat</span> <span class="o">=</span> <span class="n">mat</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mat</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fname</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mat</span> <span class="o">=</span> <span class="n">mat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">PIL</span><span class="o">.</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__mat</span><span class="p">)</span></div>
 
-	<span class="nd">@property</span>
-	<span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39; sig (:obj:`image`): writes the image to file&#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; sig (:obj:`image`): writes the image to file&#39;&#39;&#39;</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fname</span><span class="p">)</span>
-		<span class="k">return</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
 
-	<span class="nd">@property</span>
-	<span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39; sig (:obj:`image`): shows the image&#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39; sig (:obj:`image`): shows the image&#39;&#39;&#39;</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-		<span class="k">return</span> <span class="bp">self</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 </pre></div>
 
           </div>

@@ -42,11 +42,11 @@
 <h2>Signal object<a class="headerlink" href="#signal-object" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="directdemod.comm.commSignal">
-<em class="property">class </em><code class="descclassname">directdemod.comm.</code><code class="descname">commSignal</code><span class="sig-paren">(</span><em>sampRate</em>, <em>sig=array([]</em>, <em>dtype=float64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">directdemod.comm.</code><code class="descname">commSignal</code><span class="sig-paren">(</span><em>sampRate</em>, <em>sig=array([]</em>, <em>dtype=float64)</em>, <em>chunker=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an object used to store a signal and its properties</p>
 <dl class="method">
 <dt id="directdemod.comm.commSignal.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>sampRate</em>, <em>sig=array([]</em>, <em>dtype=float64)</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sampRate</em>, <em>sig=array([]</em>, <em>dtype=float64)</em>, <em>chunker=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -55,6 +55,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>sampRate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – sampling rate in Hz, will be forced to be an integer</li>
 <li><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>, optional) – must be one dimentional, will be forced to be a numpy array</li>
+<li><strong>chunker</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">chunker</span></code>, optional) – Chunking object, if this signal is going to be processed in chunks</li>
 </ul>
 </td>
 </tr>
@@ -64,7 +65,7 @@
 
 <dl class="method">
 <dt id="directdemod.comm.commSignal.bwLim">
-<code class="descname">bwLim</code><span class="sig-paren">(</span><em>tsampRate</em>, <em>strict=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal.bwLim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal.bwLim" title="Permalink to this definition">¶</a></dt>
+<code class="descname">bwLim</code><span class="sig-paren">(</span><em>tsampRate</em>, <em>strict=False</em>, <em>uniq='abcd'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/comm.html#commSignal.bwLim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.comm.commSignal.bwLim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Limit the bandwidth by downsampling</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -73,6 +74,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>tsampRate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – target sample rate</li>
 <li><strong>strict</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – if true, the target sample rate will be matched exactly</li>
+<li><strong>uniq</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>, optional) – in case chunked signal, uniq is to differentiate different bwLim funcs</li>
 </ul>
 </td>
 </tr>
@@ -499,6 +501,44 @@
 
 </dd></dl>
 
+<dl class="class">
+<dt id="directdemod.fmDemod.fmDemodAD">
+<em class="property">class </em><code class="descclassname">directdemod.fmDemod.</code><code class="descname">fmDemodAD</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object for FM demodulation (Alternative method using angle differentiation)</p>
+<dl class="method">
+<dt id="directdemod.fmDemod.fmDemodAD.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>storeState</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – Store state? Helps if signal is chunked</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.fmDemod.fmDemodAD.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD.demod" title="Permalink to this definition">¶</a></dt>
+<dd><p>FM demod a given complex IQ array</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – numpy array with IQ in complex form</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">FM demodulated array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="sources">
 <h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
@@ -658,10 +698,52 @@
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="directdemod.chunker.chunker.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>name</em>, <em>init=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/chunker.html#chunker.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.chunker.chunker.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get a variable value for to be used during chunking</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – name of the variable</li>
+<li><strong>init</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">anything</span></code>) – initialize variable to this, if undefined previously</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">value of variable</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aything</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="directdemod.chunker.chunker.getChunks">
 <code class="descname">getChunks</code><a class="headerlink" href="#directdemod.chunker.chunker.getChunks" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – get the created chunks</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.chunker.chunker.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/chunker.html#chunker.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.chunker.chunker.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>set a variable for to be used during chunking</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code>) – name of the variable</li>
+<li><strong>value</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">anything</span></code>, optional) – value of variable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

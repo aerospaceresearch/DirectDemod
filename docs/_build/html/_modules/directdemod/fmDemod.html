@@ -47,44 +47,89 @@
 
 <div class="viewcode-block" id="fmDemod"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemod">[docs]</a><span class="k">class</span> <span class="nc">fmDemod</span><span class="p">():</span>
 
-	<span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">	Object for FM demodulation</span>
-<span class="sd">	&#39;&#39;&#39;</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Object for FM demodulation</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="fmDemod.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemod.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="fmDemod.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemod.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39;Initialize the object</span>
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
-<span class="sd">		Args:</span>
-<span class="sd">			storeState (:obj:`bool`): Store state? Helps if signal is chunked</span>
-<span class="sd">		&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            storeState (:obj:`bool`): Store state? Helps if signal is chunked</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-		<span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span> <span class="o">=</span> <span class="n">storeState</span>
-		<span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span> <span class="o">=</span> <span class="n">storeState</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="fmDemod.demod"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemod.demod">[docs]</a>	<span class="k">def</span> <span class="nf">demod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+<div class="viewcode-block" id="fmDemod.demod"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemod.demod">[docs]</a>    <span class="k">def</span> <span class="nf">demod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
 
-		<span class="sd">&#39;&#39;&#39;FM demod a given complex IQ array</span>
+        <span class="sd">&#39;&#39;&#39;FM demod a given complex IQ array</span>
 
-<span class="sd">	    Args:</span>
-<span class="sd">	        sig (:obj:`numpy array`): numpy array with IQ in complex form</span>
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`numpy array`): numpy array with IQ in complex form</span>
 
-<span class="sd">	    Returns:</span>
-<span class="sd">	        :obj:`numpy array`: FM demodulated array</span>
-<span class="sd">	    &#39;&#39;&#39;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: FM demodulated array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-		<span class="n">sig_fmd</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">sig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">sig_fmd</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">sig</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 
-		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span><span class="p">:</span>
-			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-				<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">sig_fmd</span><span class="p">)</span>
-			<span class="k">else</span><span class="p">:</span>
-				<span class="n">addCorrection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sig</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__last</span><span class="p">)])</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-				<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">addCorrection</span><span class="p">,</span> <span class="n">sig_fmd</span><span class="p">]))</span>
-		<span class="k">else</span><span class="p">:</span>
-			<span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">sig_fmd</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">sig_fmd</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">addCorrection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sig</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__last</span><span class="p">)])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">sig</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">addCorrection</span><span class="p">,</span> <span class="n">sig_fmd</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">sig_fmd</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Object for FM demodulation using angle differentiation</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="fmDemodAD"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemodAD">[docs]</a><span class="k">class</span> <span class="nc">fmDemodAD</span><span class="p">():</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Object for FM demodulation (Alternative method using angle differentiation)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="fmDemodAD.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemodAD.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            storeState (:obj:`bool`): Store state? Helps if signal is chunked</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span> <span class="o">=</span> <span class="n">storeState</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="fmDemodAD.demod"><a class="viewcode-back" href="../../modules.html#directdemod.fmDemod.fmDemodAD.demod">[docs]</a>    <span class="k">def</span> <span class="nf">demod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;FM demod a given complex IQ array</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`numpy array`): numpy array with IQ in complex form</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: FM demodulated array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">anglesOfIQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">anglesOfIQ</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">anglesOfIQ</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">addCorrection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">__last</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__last</span> <span class="o">=</span> <span class="n">anglesOfIQ</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">addCorrection</span><span class="p">,</span> <span class="n">anglesOfIQ</span><span class="p">])))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">anglesOfIQ</span><span class="p">))</span></div></div>
 </pre></div>
 
           </div>

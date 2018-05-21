@@ -66,6 +66,11 @@ Demodulators
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.fmDemod.fmDemodAD
+   :members:
+
+   .. automethod:: __init__
+
 Sources
 ----------
 
