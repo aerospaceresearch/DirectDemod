@@ -21,3 +21,6 @@ FLT_LP = 0
 FLT_HP = 1
 FLT_BP = 2
 FLT_BS = 3
+
+## Chunker var names
+CHUNK_FREQOFFSET = "freqoffset"

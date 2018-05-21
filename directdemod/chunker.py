@@ -26,6 +26,7 @@ class chunker:
 
         self.__nChunks = math.ceil(sigsrc.length*1.0/chunkSize)
         self.__chunks = []
+        self.__vars = {}
         i = 0
 
         # create normal sized chunks
@@ -46,3 +47,35 @@ class chunker:
         ''':obj:`list`: get the created chunks'''
 
         return self.__chunks
+
+    def set(self, name, value):
+
+        '''set a variable for to be used during chunking
+
+        Args:
+            name (:obj:`str`): name of the variable
+            value (:obj:`anything`, optional): value of variable
+        '''
+
+        self.__vars[name] = value
+
+    def get(self, name, init = None):
+
+        '''get a variable value for to be used during chunking
+
+        Args:
+            name (:obj:`str`): name of the variable
+            init (:obj:`anything`): initialize variable to this, if undefined previously
+
+        Returns:
+            :obj:`aything`: value of variable
+        '''
+
+        if init is None:
+            return self.__vars[name]
+        else:
+            try:
+                return self.__vars[name]
+            except:
+                self.__vars[name] = init
+                return self.__vars[name]

@@ -18,14 +18,16 @@ class commSignal:
     This is an object used to store a signal and its properties
     '''
 
-    def __init__(self, sampRate, sig = np.array([])):
+    def __init__(self, sampRate, sig = np.array([]), chunker = None):
 
         '''Initialize the object
 
         Args:
             sampRate (:obj:`int`): sampling rate in Hz, will be forced to be an integer
             sig (:obj:`numpy array`, optional): must be one dimentional, will be forced to be a numpy array
+            chunker (:obj:`chunker`, optional): Chunking object, if this signal is going to be processed in chunks
         '''
+        self.__chunker = chunker
 
         self.__len = len(sig)
 
@@ -68,8 +70,11 @@ class commSignal:
         Returns:
             :obj:`commSignal`: Signal offset by given frequency (self)
         '''
-
-        self.__sig *= np.exp(-1.0j*2.0*np.pi*freqOffset*np.arange(self.length)/self.sampRate)
+        offset = 0
+        if not self.__chunker is None:
+            offset = self.__chunker.get(constants.CHUNK_FREQOFFSET, 0)
+            self.__chunker.set(constants.CHUNK_FREQOFFSET, offset + self.length)
+        self.__sig *= np.exp(-1.0j*2.0*np.pi*freqOffset*np.arange(offset, offset + self.length)/self.sampRate)
         return self
 
     def filter(self, filt):
