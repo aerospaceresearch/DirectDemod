@@ -23,7 +23,7 @@ bhFilter = filters.blackmanHarris(151)
 fmDemdulator = fmDemod.fmDemod()
 chunkerObj = chunker.chunker(sigsrc)
 for i in chunkerObj.getChunks[:]:
-    sig = comm.commSignal(constants.IQ_SDRSAMPRATE, sigsrc.read(*i), chunkerObj).offsetFreq(constants.IQ_FREQOFFSET).filter(bhFilter).bwLim(constants.IQ_FMBW).funcApply(fmDemdulator.demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
+    sig = comm.commSignal(constants.IQ_SDRSAMPRATE, sigsrc.read(*i), chunkerObj).offsetFreq(constants.IQ_FREQOFFSET).filter(bhFilter).bwLim(constants.IQ_FMBW, uniq = "First").funcApply(fmDemdulator.demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
     audioOut.extend(sig)
 
 sink.wavFile("out.wav", audioOut).write

@@ -24,3 +24,4 @@ FLT_BS = 3
 
 ## Chunker var names
 CHUNK_FREQOFFSET = "freqoffset"
+CHUNK_BWLIM = "bwlim"

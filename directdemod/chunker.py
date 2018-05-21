@@ -9,6 +9,9 @@ This object is just to help in chunking process
 It is responsible for creating chunks of the signal and store the info to be used later
 It can be helpful for avoiding border issues in filters and demods
 '''
+
+# POSSIBLE TODO: automatic distinction in get/set for every cycle. will avoid need of 'uniq'
+
 class chunker:
 
     '''

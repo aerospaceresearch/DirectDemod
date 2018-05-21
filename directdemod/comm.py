@@ -91,13 +91,14 @@ class commSignal:
         self.updateSignal(filt.applyOn(self.signal))
         return self
 
-    def bwLim(self, tsampRate, strict = False):
+    def bwLim(self, tsampRate, strict = False, uniq = "abcd"):
 
         '''Limit the bandwidth by downsampling
 
         Args:
             tsampRate (:obj:`int`): target sample rate
             strict (:obj:`bool`, optional): if true, the target sample rate will be matched exactly
+            uniq (:obj:`str`, optional): in case chunked signal, uniq is to differentiate different bwLim funcs
 
         Returns:
             :obj:`commSignal`: Updated signal (self)
@@ -107,12 +108,23 @@ class commSignal:
             raise ValueError("The target sampling rate must be less than current sampling rate")
 
         if strict:
+
+            # will be depreciated later on, try not to use
+
             self.__sig = signal.resample(self.signal, int(tsampRate * self.length/self.sampRate))
             self.__sampRate = tsampRate
             self.__len = len(self.signal)
+
         else:
             jumpIndex = int(self.sampRate / tsampRate)
-            self.__sig = self.signal[0::jumpIndex]
+
+            offset = 0
+            if not self.__chunker is None:
+                offset = self.__chunker.get(constants.CHUNK_BWLIM + uniq, 0)
+                nextOff = (jumpIndex - (self.length - offset)%jumpIndex)%jumpIndex
+                self.__chunker.set(constants.CHUNK_BWLIM + uniq, nextOff)
+
+            self.__sig = self.signal[offset::jumpIndex]
             self.__sampRate = int(self.sampRate/jumpIndex)
             self.__len = len(self.signal)
         return self
