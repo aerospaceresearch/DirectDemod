@@ -15,6 +15,14 @@ Signal object
 
    .. automethod:: __init__
 
+Specific applications
+-----------------------
+
+.. autoclass:: directdemod.noaa.noaa
+   :members:
+
+   .. automethod:: __init__
+
 Filters
 ---------------
 

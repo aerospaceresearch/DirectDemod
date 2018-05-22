@@ -199,6 +199,65 @@
 </dd></dl>
 
 </div>
+<div class="section" id="specific-applications">
+<h2>Specific applications<a class="headerlink" href="#specific-applications" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="directdemod.noaa.noaa">
+<em class="property">class </em><code class="descclassname">directdemod.noaa.</code><code class="descname">noaa</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to decode NOAA APT</p>
+<dl class="method">
+<dt id="directdemod.noaa.noaa.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sigsrc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – IQ data source</li>
+<li><strong>offset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Frequency offset of source in Hz</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.noaa.noaa.getAudio">
+<code class="descname">getAudio</code><a class="headerlink" href="#directdemod.noaa.noaa.getAudio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the audio from data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An audio signal</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.noaa.noaa.getImage">
+<code class="descname">getImage</code><a class="headerlink" href="#directdemod.noaa.noaa.getImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the image from data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A matrix of pixel values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="filters">
 <h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -567,6 +626,24 @@
 </dd></dl>
 
 <dl class="method">
+<dt id="directdemod.source.IQwav.limitData">
+<code class="descname">limitData</code><span class="sig-paren">(</span><em>initOffset=None</em>, <em>finalLimit=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/source.html#IQwav.limitData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.source.IQwav.limitData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limit source data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>initOffset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – starting index</li>
+<li><strong>finalLimit</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – ending index</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="directdemod.source.IQwav.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>fromIndex</em>, <em>toIndex=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/source.html#IQwav.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.source.IQwav.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read source data</p>
@@ -761,6 +838,7 @@
   <ul>
 <li><a class="reference internal" href="#">DirectDemod: Modules documentation</a><ul>
 <li><a class="reference internal" href="#signal-object">Signal object</a></li>
+<li><a class="reference internal" href="#specific-applications">Specific applications</a></li>
 <li><a class="reference internal" href="#filters">Filters</a></li>
 <li><a class="reference internal" href="#demodulators">Demodulators</a></li>
 <li><a class="reference internal" href="#sources">Sources</a></li>

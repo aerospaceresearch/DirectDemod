@@ -10,6 +10,7 @@ PROC_CHUNKSIZE = 20000000
 
 ## NOAA settings
 NOAA_AUDSAMPRATE = 20800
+NOAA_FREQ = 137620000
 
 ###### Do not change these
 
