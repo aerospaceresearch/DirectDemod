@@ -74,6 +74,9 @@ Demodulators
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.amDemod.amDemod
+   :members:
+
 .. autoclass:: directdemod.fmDemod.fmDemodAD
    :members:
 
