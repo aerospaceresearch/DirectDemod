@@ -39,12 +39,18 @@
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
+<span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">filters</span><span class="p">,</span> <span class="n">constants</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">AM demodulation by hilbert&#39;s transform</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="amDemod"><a class="viewcode-back" href="../../modules.html#directdemod.amDemod.amDemod">[docs]</a><span class="k">class</span> <span class="nc">amDemod</span><span class="p">():</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    AM demodulation by hilbert&#39;s transform</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
 <div class="viewcode-block" id="amDemod.demod"><a class="viewcode-back" href="../../modules.html#directdemod.amDemod.amDemod.demod">[docs]</a>    <span class="k">def</span> <span class="nf">demod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;AM demodulation by hilbert&#39;s transform</span>
@@ -57,6 +63,39 @@
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">hilbert</span><span class="p">(</span><span class="n">sig</span><span class="p">))</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">AM demodulation by low pass filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="amDemodFLT"><a class="viewcode-back" href="../../modules.html#directdemod.amDemod.amDemodFLT">[docs]</a><span class="k">class</span> <span class="nc">amDemodFLT</span><span class="p">():</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    AM demodulation by low pass filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="amDemodFLT.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.amDemod.amDemodFLT.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fs</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            cutoff (:obj:`int`): lowpass cutoff frequency in Hz</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__filter</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="n">Fs</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="amDemodFLT.demod"><a class="viewcode-back" href="../../modules.html#directdemod.amDemod.amDemodFLT.demod">[docs]</a>    <span class="k">def</span> <span class="nf">demod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;AM demodulation by low pass filter</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`numpy array`): Signal array to be demdodulated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: Demodulated signal</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__filter</span><span class="o">.</span><span class="n">applyOn</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

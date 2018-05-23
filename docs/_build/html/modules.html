@@ -563,7 +563,8 @@
 <dl class="class">
 <dt id="directdemod.amDemod.amDemod">
 <em class="property">class </em><code class="descclassname">directdemod.amDemod.</code><code class="descname">amDemod</code><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemod" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>AM demodulation by hilbert’s transform</p>
+<dl class="method">
 <dt id="directdemod.amDemod.amDemod.demod">
 <code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemod.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemod.demod" title="Permalink to this definition">¶</a></dt>
 <dd><p>AM demodulation by hilbert’s transform</p>
@@ -612,6 +613,44 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – numpy array with IQ in complex form</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">FM demodulated array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.amDemod.amDemodFLT">
+<em class="property">class </em><code class="descclassname">directdemod.amDemod.</code><code class="descname">amDemodFLT</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT" title="Permalink to this definition">¶</a></dt>
+<dd><p>AM demodulation by low pass filter</p>
+<dl class="method">
+<dt id="directdemod.amDemod.amDemodFLT.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cutoff</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>) – lowpass cutoff frequency in Hz</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.amDemod.amDemodFLT.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT.demod" title="Permalink to this definition">¶</a></dt>
+<dd><p>AM demodulation by low pass filter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Signal array to be demdodulated</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Demodulated signal</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
 </tr>

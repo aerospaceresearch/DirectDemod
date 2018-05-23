@@ -82,6 +82,11 @@ Demodulators
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.amDemod.amDemodFLT
+   :members:
+
+   .. automethod:: __init__
+
 Sources
 ----------
 
