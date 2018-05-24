@@ -3,6 +3,7 @@ noaa specific
 '''
 from directdemod import source, chunker, comm, constants, filters, fmDemod, sink, amDemod
 import numpy as np
+import logging
 
 '''
 Object to decode NOAA APT
@@ -38,16 +39,24 @@ class noaa:
         '''
 
         if self.__extractedAudio is None:
+
+            logging.info('Beginning FM demodulation to get audio in chunks')
+
             audioOut = comm.commSignal(constants.NOAA_AUDSAMPRATE)
             bhFilter = filters.blackmanHarris(151)
             fmDemdulator = fmDemod.fmDemod()
             chunkerObj = chunker.chunker(self.__sigsrc)
 
             for i in chunkerObj.getChunks:
-                sig = comm.commSignal(constants.IQ_SDRSAMPRATE, self.__sigsrc.read(*i), chunkerObj).offsetFreq(self.__offset).filter(bhFilter).bwLim(constants.IQ_FMBW, uniq = "First").funcApply(fmDemdulator.demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
+
+                logging.info('Processing chunk %d of %d chunks', chunkerObj.getChunks.index(i)+1, len(chunkerObj.getChunks))
+
+                sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i), chunkerObj).offsetFreq(self.__offset).filter(bhFilter).bwLim(constants.IQ_FMBW, uniq = "First").funcApply(fmDemdulator.demod).bwLim(constants.NOAA_AUDSAMPRATE, True)
                 audioOut.extend(sig)
 
             self.__extractedAudio = audioOut
+
+            logging.info('FM demodulation successfully complete')
 
         return self.__extractedAudio
 
@@ -64,6 +73,8 @@ class noaa:
             if self.__extractedAudio is None:
                 self.getAudio()
 
+            logging.info('Beginning AM demodulation to get image')
+
             self.__extractedAudio.updateSignal(self.__extractedAudio.signal[:constants.NOAA_AUDSAMPRATE*int(self.__extractedAudio.length // constants.NOAA_AUDSAMPRATE)]).funcApply(amDemod.amDemod().demod).filter(filters.medianFilter())
             reshaped = self.__extractedAudio.signal.reshape(self.__extractedAudio.length // 5, 5)
             (low, high) = np.percentile(reshaped[:, 2], (0.5, 99.5))
@@ -73,6 +84,8 @@ class noaa:
             data[data > 255] = 255
             digitized = data.astype(np.uint8)
             self.__image = digitized.reshape((int(len(digitized) / 2080), 2080))
+
+            logging.info('AM demodulation successfully complete')
 
         return self.__image
 

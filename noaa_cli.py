@@ -2,9 +2,12 @@
 noaa commandline interface
 '''
 
-from directdemod import source, chunker, comm, constants, filters, fmDemod, sink, amDemod, noaa
+from directdemod import source, chunker, comm, constants, filters, fmDemod, sink, amDemod, noaa, log
 import numpy as np
-import sys, getopt
+import sys, getopt, logging
+
+# enable logging to console
+log.log(console = True)
 
 # variables to store command line arguments
 optlist, args = [], []
@@ -76,6 +79,8 @@ sigsrc = source.IQwav(fileName)
 
 for fileIndex in range(len(freqs)):
 
+    logging.info('Beginning decoding of frequency %d of %d frequencies', fileIndex+1, len(freqs))
+
     # get the offset
     freqOffset = constants.IQ_FREQOFFSET
     if not freqs[fileIndex] is None: # if a -f is mentioned
@@ -91,6 +96,8 @@ for fileIndex in range(len(freqs)):
         # if invertion of IQ is chosen
         if '-q' in [i[0] for i in optlist]:
             freqOffset *= -1
+
+    logging.info('Offset for this frequency was determined to be %f Hz', freqOffset)
 
     # output file names
     audFileName = fileName.split(".")[0] + "_FM" + ".wav"

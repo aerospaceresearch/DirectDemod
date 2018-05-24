@@ -116,3 +116,11 @@ Chunking helper
    :members:
 
    .. automethod:: __init__
+
+Logging
+--------
+
+.. autoclass:: directdemod.log.log
+   :members:
+
+   .. automethod:: __init__
