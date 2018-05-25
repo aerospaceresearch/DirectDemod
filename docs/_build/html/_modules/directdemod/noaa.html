@@ -40,6 +40,7 @@
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">source</span><span class="p">,</span> <span class="n">chunker</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">constants</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">fmDemod</span><span class="p">,</span> <span class="n">sink</span><span class="p">,</span> <span class="n">amDemod</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Object to decode NOAA APT</span>
@@ -63,7 +64,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span> <span class="o">=</span> <span class="n">sigsrc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">getAudio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -75,24 +80,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning FM demodulation to get audio in chunks&#39;</span><span class="p">)</span>
-
-            <span class="n">audioOut</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_AUDSAMPRATE</span><span class="p">)</span>
-            <span class="n">bhFilter</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">)</span>
-            <span class="n">fmDemdulator</span> <span class="o">=</span> <span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span>
-            <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">:</span>
-
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing chunk </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> chunks&#39;</span><span class="p">,</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">))</span>
-
-                <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">),</span> <span class="n">chunkerObj</span><span class="p">)</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bhFilter</span><span class="p">)</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">IQ_FMBW</span><span class="p">,</span> <span class="n">uniq</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemdulator</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_AUDSAMPRATE</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                <span class="n">audioOut</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span> <span class="o">=</span> <span class="n">audioOut</span>
-
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;FM demodulation successfully complete&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__audio</span><span class="p">()</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span>
 
@@ -123,7 +111,214 @@
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AM demodulation successfully complete&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span>
+
+    <span class="k">def</span> <span class="nf">__audio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audioFreq</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_AUDSAMPRATE</span><span class="p">,</span> <span class="n">strictness</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Get the audio from data at this sampling rate</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            audioFreq (:obj:`int`, optional): Target frequency of sampling of audio</span>
+<span class="sd">            strictness (:obj:`bool`, optional): Strictness of sampling</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: An audio signal</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning FM demodulation to get audio in chunks&#39;</span><span class="p">)</span>
+
+        <span class="n">audioOut</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="n">audioFreq</span><span class="p">)</span>
+        <span class="n">bhFilter</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">)</span>
+        <span class="n">fmDemdulator</span> <span class="o">=</span> <span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span>
+        <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">[:</span><span class="mi">1</span><span class="p">]:</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing chunk </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> chunks&#39;</span><span class="p">,</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">))</span>
+
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">),</span> <span class="n">chunkerObj</span><span class="p">)</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bhFilter</span><span class="p">)</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">IQ_FMBW</span><span class="p">,</span> <span class="n">uniq</span> <span class="o">=</span> <span class="s2">&quot;First&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemdulator</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="n">audioFreq</span><span class="p">,</span> <span class="n">strictness</span><span class="p">)</span>
+            <span class="n">audioOut</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;FM demodulation successfully complete&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">audioOut</span>
+
+    <span class="k">def</span> <span class="nf">__getAM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Do AM demodulation in chunks of given signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`comm object`): Input signal</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: AM demodulated signal</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning AM demodulation in chunks&#39;</span><span class="p">)</span>
+
+        <span class="n">amDemdulator</span> <span class="o">=</span> <span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span>
+        <span class="n">amOut</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">)</span>
+
+        <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">chunkSize</span> <span class="o">=</span> <span class="mi">60000</span><span class="o">*</span><span class="mi">18</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">:</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing chunk </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> chunks&#39;</span><span class="p">,</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">))</span>
+            <span class="n">demodSig</span> <span class="o">=</span> <span class="n">amDemdulator</span><span class="o">.</span><span class="n">demod</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="n">amOut</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">,</span> <span class="n">demodSig</span><span class="p">))</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AM demodulation completed&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">amOut</span>
+
+
+    <span class="k">def</span> <span class="nf">__correlateAndFindPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">sync</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Correlates given signal and sync signal to find location of syncs</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`comm object`): Input signal</span>
+<span class="sd">            sync (:obj:`list`): Sync bits</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`list`: List of detected syncs</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># create the sync signals, at required sampling frequency</span>
+        <span class="n">sampRateCorrection</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_T</span><span class="p">)</span>
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="n">sampRateCorrection</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+
+        <span class="c1"># uncomment below if exact sampling frequency is desired</span>
+        <span class="c1">#sync = signal.resample(sync, int(sig.sampRate * len(sync)/(sampRateCorrection*1.0/constants.NOAA_T)))</span>
+
+        <span class="c1"># correlate signal with syncs</span>
+        <span class="n">cor</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+
+        <span class="c1"># now to find peaks</span>
+        <span class="c1"># in a second long signal we will expect two peaks, similarly here</span>
+        <span class="n">expectedPeaks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cor</span><span class="p">)</span> <span class="o">/</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">))</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="c1"># find indices top expectedPeak number of values</span>
+        <span class="n">maxk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">cor</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">expectedPeaks</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">expectedPeaks</span><span class="p">:]</span>
+
+        <span class="c1"># get average height of peaks</span>
+        <span class="n">avgpk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cor</span><span class="p">[</span><span class="n">maxk</span><span class="p">])</span> <span class="o">/</span> <span class="n">expectedPeaks</span> 
+
+        <span class="c1"># set minimum peak height, 25% less than average</span>
+        <span class="n">avgpk</span> <span class="o">-=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_PEAKHEIGHTWIGGLE</span><span class="o">*</span><span class="p">(</span><span class="n">avgpk</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cor</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argpartition</span><span class="p">(</span><span class="n">cor</span><span class="p">,</span> <span class="n">expectedPeaks</span><span class="p">)[:</span><span class="n">expectedPeaks</span><span class="p">]])</span> <span class="o">/</span> <span class="n">expectedPeaks</span><span class="p">))</span>
+
+        <span class="c1"># get all signal locations where it is above this</span>
+        <span class="n">possiblePeaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">cor</span> <span class="o">&gt;</span> <span class="n">avgpk</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+        <span class="c1"># minimum distance between peaks is about 0.45 seconds i.e. 50 ms wiggle room</span>
+        <span class="n">minPkDist</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_MINPEAKDIST</span> <span class="o">*</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span>
+
+        <span class="n">absolutePeaks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">currentMax</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">currentMaxIndex</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># go through the list of possible peaks abd pick the maximum one in each group</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">possiblePeaks</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">currentMaxIndex</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">currentMaxIndex</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">minPkDist</span><span class="p">:</span>
+                <span class="n">absolutePeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentMaxIndex</span><span class="p">)</span>
+                <span class="n">currentMax</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">currentMaxIndex</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">currentMax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">currentMax</span> <span class="o">&lt;</span> <span class="n">cor</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">currentMax</span> <span class="o">=</span> <span class="n">cor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">currentMaxIndex</span> <span class="o">=</span> <span class="n">i</span>
+
+        <span class="n">absolutePeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentMaxIndex</span><span class="p">)</span>
+
+        <span class="n">absolutePeaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">absolutePeaks</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">absolutePeaks</span>
+        
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getCrudeSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`list`: A list of locations of sync in sample number</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__audio</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_CRUDESYNCSAMPRATE</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> 
+
+            <span class="c1"># first get the AM demodulated signal at required sampling rate</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAM</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__syncCrudeSampRate</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning SyncA detection&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Done SyncA detection&#39;</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning SyncB detection&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCB</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Done SyncB detection&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getAccurateSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Get the sync locations: at highest sampling rate</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`list`: A list of locations of sync in sample number</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getCrudeSync</span>
+
+            <span class="c1"># calculate the width of search window in sample numbers</span>
+            <span class="n">syncTime</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_T</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">)</span>
+            <span class="n">searchTimeWidth</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">syncTime</span>
+            <span class="n">searchSampleWidth</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchTimeWidth</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">)</span>
+
+            <span class="c1"># convert sync from samples to time</span>
+            <span class="n">csyncA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncCrudeSampRate</span>
+            <span class="n">csyncB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncCrudeSampRate</span>
+
+            <span class="c1"># convert back to sample number</span>
+            <span class="n">csyncA</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span>
+            <span class="n">csyncB</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span>
+
+            <span class="c1">## Accurate syncA</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning Accurate SyncA detection&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csyncA</span><span class="p">:</span>
+                <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
+                <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">startI</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">endI</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">startI</span><span class="p">,</span> <span class="n">endI</span><span class="p">))</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accurate SyncA detection complete&#39;</span><span class="p">)</span>
+
+            <span class="c1">## Accurate syncB</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning Accurate SyncB detection&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csyncB</span><span class="p">:</span>
+                <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
+                <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">startI</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">endI</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">startI</span><span class="p">,</span> <span class="n">endI</span><span class="p">))</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCB</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accurate SyncB detection complete&#39;</span><span class="p">)</span>
+
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="p">]</span></div>
+
 
 </pre></div>
 

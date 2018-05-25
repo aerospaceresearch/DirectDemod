@@ -189,6 +189,9 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">==</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Signals must have same sampling rate to be extended&quot;</span><span class="p">)</span>

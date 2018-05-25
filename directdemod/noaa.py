@@ -96,7 +96,7 @@ class noaa:
         fmDemdulator = fmDemod.fmDemod()
         chunkerObj = chunker.chunker(self.__sigsrc)
 
-        for i in chunkerObj.getChunks[:1]:
+        for i in chunkerObj.getChunks:
 
             logging.info('Processing chunk %d of %d chunks', chunkerObj.getChunks.index(i)+1, len(chunkerObj.getChunks))
 
