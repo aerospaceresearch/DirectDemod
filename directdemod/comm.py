@@ -153,6 +153,9 @@ class commSignal:
         Returns:
             :obj:`commSignal`: Updated signal (self)
         '''
+        
+        if self.length == 0:
+            self.__sampRate = sig.sampRate
 
         if not self.__sampRate == sig.sampRate:
             raise TypeError("Signals must have same sampling rate to be extended")

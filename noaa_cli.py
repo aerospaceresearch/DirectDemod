@@ -7,7 +7,7 @@ import numpy as np
 import sys, getopt, logging
 
 # enable logging to console
-log.log(console = True)
+log.log('log.txt', console = True)
 
 # variables to store command line arguments
 optlist, args = [], []
@@ -112,6 +112,17 @@ for fileIndex in range(len(freqs)):
     # create noaa object
     noaaObj = noaa.noaa(sigsrc, freqOffset)
 
+    syncs = noaaObj.getAccurateSync
+
+    print("SYNC A")
+    for i in syncs[0]:
+        print(i)
+
+    print("SYNC B")
+    for i in syncs[1]:
+        print(i)
+
+    '''
     # get the audio
     audioOut = noaaObj.getAudio
     sink.wavFile(audFileName, audioOut).write
@@ -119,3 +130,4 @@ for fileIndex in range(len(freqs)):
     # get the image
     imageMatrix = noaaObj.getImage
     sink.image(imgFileName, imageMatrix).write.show
+    '''

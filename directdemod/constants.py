@@ -11,6 +11,12 @@ PROC_CHUNKSIZE = 20000000
 ## NOAA settings
 NOAA_AUDSAMPRATE = 20800
 NOAA_FREQ = 137620000
+NOAA_CRUDESYNCSAMPRATE = 40960
+NOAA_T = 1.0/4160 #Time of one bit
+NOAA_SYNCA = [0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+NOAA_SYNCB = [0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0]
+NOAA_PEAKHEIGHTWIGGLE = 0.25 # %allowable change in peak height
+NOAA_MINPEAKDIST = 0.45 # min distance between two sync in seconds
 
 ###### Do not change these
 

@@ -33,7 +33,7 @@ class log():
         logging.getLogger('').setLevel(logging.DEBUG)
 
         if not self.__file is None:
-            logging.basicConfig(filename=self.__file, level=logging.DEBUG, format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M')
+            logging.basicConfig(filename=self.__file, level=logging.DEBUG, format='%(asctime)-13s.%(msecs)-4d %(levelname)-8s %(message)s [%(filename)s:%(lineno)d]', datefmt='%d-%m-%Y %H:%M:%S')
 
         if self.__console:
             console = logging.StreamHandler()
