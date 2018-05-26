@@ -135,8 +135,33 @@ class noaa:
 
         return amOut
 
+    def __correlate(self, haystack, needle):
 
-    def __correlateAndFindPeaks(self, sig, sync):
+        '''Function to do normalised correlation
+        
+        Args:
+            haystack (:obj:`numpy array`): Input signal
+            needle (:obj:`numpy array`): Sync signal
+
+        Returns:
+            :obj:`numpy array`: correlation array
+        '''
+
+        needle2 = np.sum(needle * needle)
+
+        window = len(needle)
+
+        norm = []
+        for i in range(0, len(haystack)-len(needle)):
+            haystack_part = np.array(haystack[i:i+window])
+            normed_cross_correlation = np.sum(haystack_part * needle)
+            normed_cross_correlation = normed_cross_correlation / (np.sum(haystack_part * haystack_part) * needle2)**0.5
+            norm.append(normed_cross_correlation)
+
+        return norm
+
+
+    def __correlateAndFindPeaks(self, sig, sync, useNormCorrelate = False, useFilter = False, usePosNeedle = False, filterType = filters.hamming(492, zeroPhase = True)):
 
         '''Correlates given signal and sync signal to find location of syncs
 
@@ -150,13 +175,26 @@ class noaa:
 
         # create the sync signals, at required sampling frequency
         sampRateCorrection = round(sig.sampRate * constants.NOAA_T)
-        sync = np.repeat(sync, sampRateCorrection) - 0.5
+        if usePosNeedle:
+            sync = (np.repeat(sync, sampRateCorrection) * 233) + 11
+        else:
+            sync = np.repeat(sync, sampRateCorrection) - 0.5
 
         # uncomment below if exact sampling frequency is desired
         #sync = signal.resample(sync, int(sig.sampRate * len(sync)/(sampRateCorrection*1.0/constants.NOAA_T)))
 
         # correlate signal with syncs
-        cor = signal.correlate(sig.signal, sync, mode = 'same')
+        cor = None
+        if not useNormCorrelate:
+            if useFilter:
+                cor = signal.correlate(filterType.applyOn(sig.signal), sync, mode = 'same')
+            else:
+                cor = signal.correlate(sig.signal, sync, mode = 'same')
+        else:
+            if useFilter:
+                cor = np.array(self.__correlate(filterType.applyOn(sig.signal), sync))
+            else:
+                cor = np.array(self.__correlate(sig.signal, sync))
 
         # now to find peaks
         # in a second long signal we will expect two peaks, similarly here
@@ -257,12 +295,15 @@ class noaa:
             logging.info('Beginning Accurate SyncA detection')
 
             for i in csyncA:
+
+                logging.info('Detecting Sync %d of %d syncs', list(csyncA).index(i) + 1, len(csyncA))
+
                 startI = int(i) - int(searchSampleWidth)
                 endI = int(i) + int(searchSampleWidth)
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncA.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA)[0] + startI)
+                self.__asyncA.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA, useFilter = True)[0] + startI)
 
             logging.info('Accurate SyncA detection complete')
 
@@ -271,12 +312,15 @@ class noaa:
             logging.info('Beginning Accurate SyncB detection')
 
             for i in csyncB:
+
+                logging.info('Detecting Sync %d of %d syncs', list(csyncB).index(i) + 1, len(csyncB))
+
                 startI = int(i) - int(searchSampleWidth)
                 endI = int(i) + int(searchSampleWidth)
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncB.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB)[0] + startI)
+                self.__asyncB.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, useFilter = True)[0] + startI)
 
             logging.info('Accurate SyncB detection complete')
 
