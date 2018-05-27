@@ -33,6 +33,7 @@ class noaa:
         self.__syncB = None
         self.__asyncA = None
         self.__asyncB = None
+        self.__audOut = None
 
     @property
     def getAudio(self):
@@ -58,22 +59,41 @@ class noaa:
         '''
 
         if self.__image is None:
-            if self.__extractedAudio is None:
-                self.getAudio()
+            if self.__audOut is None or self.__syncA is None or self.__syncB is None:
+                self.getCrudeSync
 
-            logging.info('Beginning AM demodulation to get image')
+            logging.info('Beginning image extraction')
 
-            self.__extractedAudio.updateSignal(self.__extractedAudio.signal[:constants.NOAA_AUDSAMPRATE*int(self.__extractedAudio.length // constants.NOAA_AUDSAMPRATE)]).funcApply(amDemod.amDemod().demod).filter(filters.medianFilter())
-            reshaped = self.__extractedAudio.signal.reshape(self.__extractedAudio.length // 5, 5)
-            (low, high) = np.percentile(reshaped[:, 2], (0.5, 99.5))
-            delta = high - low
-            data = np.round(255 * (reshaped[:, 2] - low) / delta)
-            data[data < 0] = 0
-            data[data > 255] = 255
-            digitized = data.astype(np.uint8)
-            self.__image = digitized.reshape((int(len(digitized) / 2080), 2080))
+            amSig = self.__getAM(self.__audOut)
 
-            logging.info('AM demodulation successfully complete')
+            # convert sync from samples to time
+            csync = self.__syncA / self.__syncCrudeSampRate
+
+            # convert back to sample number
+            csync *= amSig.sampRate
+
+            self.__image = []
+            for i in csync:
+
+                logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
+
+                startI = int(i)
+                endI = int(i) + int(amSig.sampRate * 0.5)
+                imgLine = amSig.signal[startI:endI]
+                imgLine = signal.resample(imgLine, int(4160 * len(imgLine)/amSig.sampRate))
+                (low, high) = np.percentile(imgLine, (0.5, 99.5))
+                imgLine = np.round(255 * (imgLine - low) / (high - low))
+                imgLine[imgLine < 0] = 0
+                imgLine[imgLine > 255] = 255
+                imgLine = imgLine.astype(np.uint8)
+                self.__image.append(imgLine)
+
+            # get mean lengths of lines
+            lens = [len(i) for i in self.__image]
+            acceptedLen = max(set(lens), key=lens.count)
+            self.__image = np.array([i for i in self.__image if len(i) == acceptedLen])
+
+            logging.info('Image extraction complete')
 
         return self.__image
 
@@ -104,7 +124,8 @@ class noaa:
             audioOut.extend(sig)
 
         logging.info('FM demodulation successfully complete')
-
+        self.__audOut = audioOut
+        
         return audioOut
 
     def __getAM(self, sig):

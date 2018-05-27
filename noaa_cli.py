@@ -112,6 +112,12 @@ for fileIndex in range(len(freqs)):
     # create noaa object
     noaaObj = noaa.noaa(sigsrc, freqOffset)
 
+    # get the image
+    imageMatrix = noaaObj.getImage
+    sink.image(imgFileName, imageMatrix).show
+
+    '''
+    # print sync
     syncs = noaaObj.getAccurateSync
 
     print("SYNC A")
@@ -121,13 +127,4 @@ for fileIndex in range(len(freqs)):
     print("SYNC B")
     for i in syncs[1]:
         print(i)
-
-    '''
-    # get the audio
-    audioOut = noaaObj.getAudio
-    sink.wavFile(audFileName, audioOut).write
-
-    # get the image
-    imageMatrix = noaaObj.getImage
-    sink.image(imgFileName, imageMatrix).write.show
     '''
