@@ -125,7 +125,7 @@ class noaa:
 
         logging.info('FM demodulation successfully complete')
         self.__audOut = audioOut
-        
+
         return audioOut
 
     def __getAM(self, sig):
@@ -168,21 +168,13 @@ class noaa:
             :obj:`numpy array`: correlation array
         '''
 
-        needle2 = np.sum(needle * needle)
-
-        window = len(needle)
-
-        norm = []
-        for i in range(0, len(haystack)-len(needle)):
-            haystack_part = np.array(haystack[i:i+window])
-            normed_cross_correlation = np.sum(haystack_part * needle)
-            normed_cross_correlation = normed_cross_correlation / (np.sum(haystack_part * haystack_part) * needle2)**0.5
-            norm.append(normed_cross_correlation)
+        cor = signal.correlate(haystack, needle, mode = 'same')
+        sums = np.convolve(haystack * haystack, [1]*len(needle), mode = 'same')
+        norm = cor / (sums * np.sum(needle * needle))**0.5
 
         return norm
 
-
-    def __correlateAndFindPeaks(self, sig, sync, useNormCorrelate = False, useFilter = False, usePosNeedle = False, filterType = filters.hamming(492, zeroPhase = True)):
+    def __correlateAndFindPeaks(self, sig, sync, useNormCorrelate = True, useFilter = False, usePosNeedle = True, filterType = filters.hamming(492, zeroPhase = True)):
 
         '''Correlates given signal and sync signal to find location of syncs
 
@@ -197,7 +189,7 @@ class noaa:
         # create the sync signals, at required sampling frequency
         sampRateCorrection = round(sig.sampRate * constants.NOAA_T)
         if usePosNeedle:
-            sync = (np.repeat(sync, sampRateCorrection) * 233) + 11
+            sync = ((np.repeat(sync, sampRateCorrection) * 233) + 11)/255
         else:
             sync = np.repeat(sync, sampRateCorrection) - 0.5
 

@@ -113,10 +113,10 @@ for fileIndex in range(len(freqs)):
     noaaObj = noaa.noaa(sigsrc, freqOffset)
 
     # get the image
-    imageMatrix = noaaObj.getImage
-    sink.image(imgFileName, imageMatrix).show
+    '''imageMatrix = noaaObj.getImage
+    sink.image(imgFileName, imageMatrix).show'''
 
-    '''
+    
     # print sync
     syncs = noaaObj.getAccurateSync
 
@@ -127,4 +127,4 @@ for fileIndex in range(len(freqs)):
     print("SYNC B")
     for i in syncs[1]:
         print(i)
-    '''
+    
