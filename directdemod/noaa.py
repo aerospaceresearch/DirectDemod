@@ -34,6 +34,7 @@ class noaa:
         self.__asyncA = None
         self.__asyncB = None
         self.__audOut = None
+        self.__useNormCorrelate = None
 
     @property
     def getAudio(self):
@@ -60,7 +61,7 @@ class noaa:
 
         if self.__image is None:
             if self.__audOut is None or self.__syncA is None or self.__syncB is None:
-                self.getCrudeSync
+                self.getCrudeSync()
 
             logging.info('Beginning image extraction')
 
@@ -73,6 +74,7 @@ class noaa:
             csync *= amSig.sampRate
 
             self.__image = []
+            (low, high) = np.percentile(amSig.signal, (0.5, 99.5))
             for i in csync:
 
                 logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
@@ -81,7 +83,6 @@ class noaa:
                 endI = int(i) + int(amSig.sampRate * 0.5)
                 imgLine = amSig.signal[startI:endI]
                 imgLine = signal.resample(imgLine, int(4160 * len(imgLine)/amSig.sampRate))
-                (low, high) = np.percentile(imgLine, (0.5, 99.5))
                 imgLine = np.round(255 * (imgLine - low) / (high - low))
                 imgLine[imgLine < 0] = 0
                 imgLine[imgLine > 255] = 255
@@ -249,8 +250,6 @@ class noaa:
 
         return absolutePeaks
         
-
-    @property
     def getCrudeSync(self):
 
         '''Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate
@@ -277,18 +276,22 @@ class noaa:
 
         return [self.__syncA, self.__syncB]
 
-    @property
-    def getAccurateSync(self):
+    def getAccurateSync(self, useNormCorrelate = True):
 
         '''Get the sync locations: at highest sampling rate
+
+        Args:
+            useNormCorrelate (:obj:`bool`, optional): Whether to use normalized correlation or not
 
         Returns:
             :obj:`list`: A list of locations of sync in sample number
         '''
 
-        if self.__asyncA is None or self.__asyncB is None:
+        if self.__asyncA is None or self.__asyncB is None or not self.__useNormCorrelate == useNormCorrelate:
+            self.__useNormCorrelate = useNormCorrelate
+
             if self.__syncA is None or self.__syncB is None:
-                self.getCrudeSync
+                self.getCrudeSync()
 
             # calculate the width of search window in sample numbers
             syncTime = constants.NOAA_T * len(constants.NOAA_SYNCA)
@@ -316,7 +319,7 @@ class noaa:
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncA.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA, useFilter = True)[0] + startI)
+                self.__asyncA.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA,  useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)[0] + startI)
 
             logging.info('Accurate SyncA detection complete')
 
@@ -333,7 +336,7 @@ class noaa:
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncB.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, useFilter = True)[0] + startI)
+                self.__asyncB.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)[0] + startI)
 
             logging.info('Accurate SyncB detection complete')
 

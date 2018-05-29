@@ -118,7 +118,7 @@ for fileIndex in range(len(freqs)):
 
     
     # print sync
-    syncs = noaaObj.getAccurateSync
+    syncs = noaaObj.getAccurateSync(useNormCorrelate = False)
 
     print("SYNC A")
     for i in syncs[0]:
