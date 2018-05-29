@@ -68,7 +68,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="o">=</span> <span class="kc">None</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__useNormCorrelate</span> <span class="o">=</span> <span class="kc">None</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">getAudio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -94,22 +96,41 @@
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">getAudio</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getCrudeSync</span><span class="p">()</span>
 
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning AM demodulation to get image&#39;</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning image extraction&#39;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span><span class="o">.</span><span class="n">updateSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span><span class="o">.</span><span class="n">signal</span><span class="p">[:</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_AUDSAMPRATE</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_AUDSAMPRATE</span><span class="p">)])</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">medianFilter</span><span class="p">())</span>
-            <span class="n">reshaped</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__extractedAudio</span><span class="o">.</span><span class="n">length</span> <span class="o">//</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-            <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">reshaped</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">))</span>
-            <span class="n">delta</span> <span class="o">=</span> <span class="n">high</span> <span class="o">-</span> <span class="n">low</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="p">(</span><span class="n">reshaped</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="n">delta</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">data</span><span class="p">[</span><span class="n">data</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
-            <span class="n">digitized</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">digitized</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">digitized</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2080</span><span class="p">),</span> <span class="mi">2080</span><span class="p">))</span>
+            <span class="n">amSig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span><span class="p">)</span>
 
-            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;AM demodulation successfully complete&#39;</span><span class="p">)</span>
+            <span class="c1"># convert sync from samples to time</span>
+            <span class="n">csync</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncCrudeSampRate</span>
+
+            <span class="c1"># convert back to sample number</span>
+            <span class="n">csync</span> <span class="o">*=</span> <span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csync</span><span class="p">:</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Decoding line </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> lines&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">csync</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">csync</span><span class="p">))</span>
+
+                <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">[</span><span class="n">startI</span><span class="p">:</span><span class="n">endI</span><span class="p">]</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">4160</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span><span class="o">/</span><span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">))</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="p">(</span><span class="n">imgLine</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">))</span>
+                <span class="n">imgLine</span><span class="p">[</span><span class="n">imgLine</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">imgLine</span><span class="p">[</span><span class="n">imgLine</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">imgLine</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span>
+
+            <span class="c1"># get mean lengths of lines</span>
+            <span class="n">lens</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="p">]</span>
+            <span class="n">acceptedLen</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">lens</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">lens</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="n">acceptedLen</span><span class="p">])</span>
+
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Image extraction complete&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__image</span>
 
@@ -132,7 +153,7 @@
         <span class="n">fmDemdulator</span> <span class="o">=</span> <span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span>
         <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">[:</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">:</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing chunk </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> chunks&#39;</span><span class="p">,</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">))</span>
 
@@ -140,6 +161,7 @@
             <span class="n">audioOut</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;FM demodulation successfully complete&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span> <span class="o">=</span> <span class="n">audioOut</span>
 
         <span class="k">return</span> <span class="n">audioOut</span>
 
@@ -171,8 +193,25 @@
 
         <span class="k">return</span> <span class="n">amOut</span>
 
+    <span class="k">def</span> <span class="nf">__correlate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__correlateAndFindPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">sync</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function to do normalised correlation</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            haystack (:obj:`numpy array`): Input signal</span>
+<span class="sd">            needle (:obj:`numpy array`): Sync signal</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: correlation array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">cor</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">haystack</span><span class="p">,</span> <span class="n">needle</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="n">sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">haystack</span> <span class="o">*</span> <span class="n">haystack</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">needle</span><span class="p">),</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">cor</span> <span class="o">/</span> <span class="p">(</span><span class="n">sums</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">needle</span> <span class="o">*</span> <span class="n">needle</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span>
+
+        <span class="k">return</span> <span class="n">norm</span>
+
+    <span class="k">def</span> <span class="nf">__correlateAndFindPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span> <span class="n">useNormCorrelate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">useFilter</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">usePosNeedle</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">filterType</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="mi">492</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)):</span>
 
         <span class="sd">&#39;&#39;&#39;Correlates given signal and sync signal to find location of syncs</span>
 
@@ -186,13 +225,26 @@
 
         <span class="c1"># create the sync signals, at required sampling frequency</span>
         <span class="n">sampRateCorrection</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_T</span><span class="p">)</span>
-        <span class="n">sync</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="n">sampRateCorrection</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
+        <span class="k">if</span> <span class="n">usePosNeedle</span><span class="p">:</span>
+            <span class="n">sync</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="n">sampRateCorrection</span><span class="p">)</span> <span class="o">*</span> <span class="mi">233</span><span class="p">)</span> <span class="o">+</span> <span class="mi">11</span><span class="p">)</span><span class="o">/</span><span class="mi">255</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sync</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="n">sampRateCorrection</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span>
 
         <span class="c1"># uncomment below if exact sampling frequency is desired</span>
         <span class="c1">#sync = signal.resample(sync, int(sig.sampRate * len(sync)/(sampRateCorrection*1.0/constants.NOAA_T)))</span>
 
         <span class="c1"># correlate signal with syncs</span>
-        <span class="n">cor</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="n">cor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">useNormCorrelate</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">useFilter</span><span class="p">:</span>
+                <span class="n">cor</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">filterType</span><span class="o">.</span><span class="n">applyOn</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">),</span> <span class="n">sync</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cor</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="n">sync</span><span class="p">,</span> <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;same&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">useFilter</span><span class="p">:</span>
+                <span class="n">cor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlate</span><span class="p">(</span><span class="n">filterType</span><span class="o">.</span><span class="n">applyOn</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">),</span> <span class="n">sync</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlate</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="n">sync</span><span class="p">))</span>
 
         <span class="c1"># now to find peaks</span>
         <span class="c1"># in a second long signal we will expect two peaks, similarly here</span>
@@ -234,9 +286,7 @@
 
         <span class="k">return</span> <span class="n">absolutePeaks</span>
         
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">getCrudeSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="noaa.getCrudeSync"><a class="viewcode-back" href="../../modules.html#directdemod.noaa.noaa.getCrudeSync">[docs]</a>    <span class="k">def</span> <span class="nf">getCrudeSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</span>
 
@@ -260,20 +310,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCB</span><span class="p">)</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Done SyncB detection&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span><span class="p">]</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">getAccurateSync</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="noaa.getAccurateSync"><a class="viewcode-back" href="../../modules.html#directdemod.noaa.noaa.getAccurateSync">[docs]</a>    <span class="k">def</span> <span class="nf">getAccurateSync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useNormCorrelate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;Get the sync locations: at highest sampling rate</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            useNormCorrelate (:obj:`bool`, optional): Whether to use normalized correlation or not</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`list`: A list of locations of sync in sample number</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__useNormCorrelate</span> <span class="o">==</span> <span class="n">useNormCorrelate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__useNormCorrelate</span> <span class="o">=</span> <span class="n">useNormCorrelate</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">getCrudeSync</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getCrudeSync</span><span class="p">()</span>
 
             <span class="c1"># calculate the width of search window in sample numbers</span>
             <span class="n">syncTime</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_T</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">)</span>
@@ -293,12 +347,15 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning Accurate SyncA detection&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csyncA</span><span class="p">:</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Detecting Sync </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> syncs&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">csyncA</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">csyncA</span><span class="p">))</span>
+
                 <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
                 <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">startI</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">endI</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">startI</span><span class="p">,</span> <span class="n">endI</span><span class="p">))</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCA</span><span class="p">,</span>  <span class="n">useNormCorrelate</span> <span class="o">=</span> <span class="n">useNormCorrelate</span><span class="p">,</span> <span class="n">usePosNeedle</span> <span class="o">=</span> <span class="n">useNormCorrelate</span><span class="p">,</span> <span class="n">useFilter</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accurate SyncA detection complete&#39;</span><span class="p">)</span>
 
@@ -307,17 +364,20 @@
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning Accurate SyncB detection&#39;</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csyncB</span><span class="p">:</span>
+
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Detecting Sync </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> syncs&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">csyncB</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">csyncB</span><span class="p">))</span>
+
                 <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
                 <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">searchSampleWidth</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">startI</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">endI</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">startI</span><span class="p">,</span> <span class="n">endI</span><span class="p">))</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemod</span><span class="o">.</span><span class="n">fmDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">amDemod</span><span class="o">.</span><span class="n">amDemod</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCB</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__correlateAndFindPeaks</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">NOAA_SYNCB</span><span class="p">,</span> <span class="n">useNormCorrelate</span> <span class="o">=</span> <span class="n">useNormCorrelate</span><span class="p">,</span> <span class="n">usePosNeedle</span> <span class="o">=</span> <span class="n">useNormCorrelate</span><span class="p">,</span> <span class="n">useFilter</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">startI</span><span class="p">)</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Accurate SyncB detection complete&#39;</span><span class="p">)</span>
 
 
-        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span><span class="p">]</span></div></div>
 
 
 </pre></div>

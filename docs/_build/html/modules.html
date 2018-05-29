@@ -223,17 +223,19 @@
 </table>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="directdemod.noaa.noaa.getAccurateSync">
-<code class="descname">getAccurateSync</code><a class="headerlink" href="#directdemod.noaa.noaa.getAccurateSync" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Get the sync locations</em> – at highest sampling rate</p>
+<code class="descname">getAccurateSync</code><span class="sig-paren">(</span><em>useNormCorrelate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.getAccurateSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.getAccurateSync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the sync locations: at highest sampling rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of locations of sync in sample number</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>useNormCorrelate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – Whether to use normalized correlation or not</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of locations of sync in sample number</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -255,10 +257,10 @@
 </table>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="directdemod.noaa.noaa.getCrudeSync">
-<code class="descname">getCrudeSync</code><a class="headerlink" href="#directdemod.noaa.noaa.getCrudeSync" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>Get the sync locations</em> – at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</p>
+<code class="descname">getCrudeSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.getCrudeSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.getCrudeSync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

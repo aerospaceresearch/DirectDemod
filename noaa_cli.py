@@ -112,13 +112,15 @@ for fileIndex in range(len(freqs)):
     # create noaa object
     noaaObj = noaa.noaa(sigsrc, freqOffset)
 
+    '''
     # get the image
-    '''imageMatrix = noaaObj.getImage
-    sink.image(imgFileName, imageMatrix).show'''
+    imageMatrix = noaaObj.getImage
+    sink.image(imgFileName, imageMatrix).show
+    '''
 
     
     # print sync
-    syncs = noaaObj.getAccurateSync(useNormCorrelate = False)
+    syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
 
     print("SYNC A")
     for i in syncs[0]:
