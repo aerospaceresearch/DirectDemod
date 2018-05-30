@@ -131,4 +131,4 @@ for fileIndex in range(len(freqs)):
     # calculate sync is -sync flag is set
     if calculateSync:
         syncs = noaaObj.getAccurateSync(useNormCorrelate = False) # change to False to use scipy's correlate
-        sink.csv(csvFileName, syncs, titles = ["syncA", "syncB"]).write
+        sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB",]).write

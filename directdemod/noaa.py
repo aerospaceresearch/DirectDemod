@@ -34,6 +34,10 @@ class noaa:
         self.__asyncA = None
         self.__asyncB = None
         self.__audOut = None
+        self.__asyncApk = None
+        self.__asyncAtime = None
+        self.__asyncBpk = None
+        self.__asyncBtime = None
         self.__useNormCorrelate = None
 
     @property
@@ -230,7 +234,7 @@ class noaa:
 
         return norm
 
-    def __correlateAndFindPeaks(self, sig, sync, useNormCorrelate = True, useFilter = False, usePosNeedle = True, filterType = filters.hamming(492, zeroPhase = True)):
+    def __correlateAndFindPeaks(self, sig, sync, getExtraInfo = False, useNormCorrelate = True, useFilter = False, usePosNeedle = True, filterType = filters.hamming(492, zeroPhase = True)):
 
         '''Correlates given signal and sync signal to find location of syncs
 
@@ -306,6 +310,20 @@ class noaa:
 
         absolutePeaks = np.sort(np.array(absolutePeaks).ravel())
 
+        # get time sync values
+        timeSyncs = []
+        pkHeights = []
+        if getExtraInfo:
+            for i in absolutePeaks:
+                if i+2*int(len(sync)) < sig.length:
+                    timeSyncs.append(np.average(sig.signal[i+int(len(sync)):i+2*int(len(sync))]))
+                else:
+                    timeSyncs.append(None)
+                pkHeights.append(cor[i + int(len(sync)/2)])
+
+        if getExtraInfo:
+            return absolutePeaks, pkHeights, timeSyncs
+
         return absolutePeaks
         
     def getCrudeSync(self):
@@ -345,7 +363,7 @@ class noaa:
             :obj:`list`: A list of locations of sync in sample number (start of sync)
         '''
 
-        if self.__asyncA is None or self.__asyncB is None or not self.__useNormCorrelate == useNormCorrelate:
+        if self.__asyncA is None or self.__asyncB is None or self.__asyncBtime is None or self.__asyncAtime is None or self.__asyncBpk is None or self.__asyncApk is None or not self.__useNormCorrelate == useNormCorrelate:
             self.__useNormCorrelate = useNormCorrelate
 
             if self.__syncA is None or self.__syncB is None:
@@ -366,6 +384,8 @@ class noaa:
 
             ## Accurate syncA
             self.__asyncA = []
+            self.__asyncApk = []
+            self.__asyncAtime = []
             logging.info('Beginning Accurate SyncA detection')
 
             for i in csyncA:
@@ -377,12 +397,16 @@ class noaa:
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncA.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA,  useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)[0] + startI)
-
+                syncDet, PkHeights, TimeSync = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA, getExtraInfo = True, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)
+                self.__asyncA.append(syncDet[0] + startI)
+                self.__asyncApk.append(PkHeights[0])
+                self.__asyncAtime.append(TimeSync[0])
             logging.info('Accurate SyncA detection complete')
 
             ## Accurate syncB
             self.__asyncB = []
+            self.__asyncBpk = []
+            self.__asyncBtime = []
             logging.info('Beginning Accurate SyncB detection')
 
             for i in csyncB:
@@ -394,11 +418,12 @@ class noaa:
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
                 sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
-                self.__asyncB.append(self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)[0] + startI)
-
+                syncDet, PkHeights, TimeSync = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, getExtraInfo = True, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)
+                self.__asyncB.append(syncDet[0] + startI)
+                self.__asyncBpk.append(PkHeights[0])
+                self.__asyncBtime.append(TimeSync[0])
             logging.info('Accurate SyncB detection complete')
 
-
-        return [self.__asyncA, self.__asyncB]
+        return [self.__asyncA, np.diff(self.__asyncA), self.__asyncApk, self.__asyncAtime, self.__asyncB, np.diff(self.__asyncB), self.__asyncBpk, self.__asyncBtime]
 
 
