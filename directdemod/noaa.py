@@ -80,6 +80,41 @@ class noaa:
             # convert back to sample number
             csync *= amSig.sampRate
 
+            # correct any missing syncs
+
+            syncDIff = np.diff(csync)
+            modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
+            wiggleRoom = 100
+
+            validSyncs = []
+            for i in range(len(csync) - 1):
+                if abs(csync[i+1] - csync[i] - modeSyncDIff) < wiggleRoom:
+                    if csync[i] not in validSyncs:
+                        validSyncs.append(csync[i])
+                    if csync[i+1] not in validSyncs:
+                        validSyncs.append(csync[i+1])
+
+            correctedSyncs = validSyncs
+
+            # initial correction
+            c = validSyncs[0] - modeSyncDIff
+            while(c > wiggleRoom):
+                correctedSyncs.append(c)
+                c -= modeSyncDIff
+
+            # later corrections
+            anchor = 0
+            c = modeSyncDIff
+            while(validSyncs[anchor] + c < amSig.length):
+                if (anchor + 1) < len(validSyncs) and abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom:
+                    anchor += 1
+                    c = modeSyncDIff
+                else:
+                    correctedSyncs.append(validSyncs[anchor] + c)
+                    c += modeSyncDIff
+
+            csync = list(np.sort(correctedSyncs))
+
             self.__image = []
 
             numPixels = int(0.5/constants.NOAA_T)
