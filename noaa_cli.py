@@ -19,6 +19,7 @@ def usage(err = ""):
     print("Options:\t-c <Fc in Hz> : centre frequency of the recording")
     print("\t\t-ce : extract centre frequency from file name")
     print("\t\t-f <in Hz> : channel frequencies (in order)")
+    print("\t\t-sync : calculate sync values and store in .csv file")
     print("\t\t-o <str> : output file names (in order)")
     print("\t\t-s <in sample#> : starts of signals (in order)")
     print("\t\t-e <in sample#> : ends of signals (in order)")
@@ -49,11 +50,20 @@ if '-h' in [i[0] for i in optlist] or '--help' in [i[0] for i in optlist]:
 if not (len(args) == 1):
     usage("Invalid argument: filename")
 
+# check is -sync flag is set
+calculateSync = False
+if len([i for i in optlist if (i[0] == '-s' and i[1] == 'ync')]) > 0:
+    calculateSync = True
+
 # create the list of frequencies to be decoded
 freqs = [int(i[1]) for i in optlist if i[0] == '-f']
-starts = [int(i[1]) for i in optlist if i[0] == '-s']
+starts = [int(i[1]) for i in optlist if i[0] == '-s' and not i[1] == 'ync']
 ends = [int(i[1]) for i in optlist if i[0] == '-e']
 outs = [i[1] for i in optlist if i[0] == '-o']
+
+# if no frequencies given, use default
+if len(freqs) == 0:
+    freqs = [None]
 
 # check that starts and ends are less than frequencies
 if len(starts) > len(freqs) or len(ends) > len(freqs) or len(outs) > len(freqs):
@@ -63,13 +73,6 @@ if len(starts) > len(freqs) or len(ends) > len(freqs) or len(outs) > len(freqs):
 starts.extend([None]*(len(freqs) - len(starts)))
 ends.extend([None]*(len(freqs) - len(ends)))
 outs.extend([None]*(len(freqs) - len(outs)))
-
-# if no frequencies given, use default
-if len(freqs) == 0:
-    freqs = [None]
-    starts = [None]
-    ends = [None]
-    outs = [None]
 
 # input file name
 fileName = args[0]
@@ -102,9 +105,11 @@ for fileIndex in range(len(freqs)):
     # output file names
     audFileName = fileName.split(".")[0] + "_FM" + ".wav"
     imgFileName = fileName.split(".")[0] + ".png"
+    csvFileName = fileName.split(".")[0] + ".csv"
     if not outs[fileIndex] is None:
         audFileName = outs[fileIndex] + ".wav"
         imgFileName = outs[fileIndex] + ".png"
+        csvFileName = outs[fileIndex] + ".csv"
 
     # limit the source data if start/end is mentioned
     sigsrc.limitData(starts[fileIndex], ends[fileIndex])
@@ -120,13 +125,7 @@ for fileIndex in range(len(freqs)):
 
     
     # print sync
-    syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
-
-    print("SYNC A")
-    for i in syncs[0]:
-        print(i)
-
-    print("SYNC B")
-    for i in syncs[1]:
-        print(i)
-    
+    # calculate sync is -sync flag is set
+    if calculateSync:
+        syncs = noaaObj.getAccurateSync(useNormCorrelate = False) # change to False to use scipy's correlate
+        sink.csv(csvFileName, syncs, titles = ["syncA", "syncB"]).write

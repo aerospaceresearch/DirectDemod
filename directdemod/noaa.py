@@ -246,6 +246,9 @@ class noaa:
 
         absolutePeaks.append(currentMaxIndex)
 
+        # offset it to the beginning of the sync
+        absolutePeaks = [i - int(len(sync)/2) for i in absolutePeaks]
+
         absolutePeaks = np.sort(np.array(absolutePeaks).ravel())
 
         return absolutePeaks
@@ -255,7 +258,7 @@ class noaa:
         '''Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate
 
         Returns:
-            :obj:`list`: A list of locations of sync in sample number
+            :obj:`list`: A list of locations of sync in sample number (start of sync)
         '''
 
         if self.__syncA is None or self.__syncB is None:
@@ -284,7 +287,7 @@ class noaa:
             useNormCorrelate (:obj:`bool`, optional): Whether to use normalized correlation or not
 
         Returns:
-            :obj:`list`: A list of locations of sync in sample number
+            :obj:`list`: A list of locations of sync in sample number (start of sync)
         '''
 
         if self.__asyncA is None or self.__asyncB is None or not self.__useNormCorrelate == useNormCorrelate:

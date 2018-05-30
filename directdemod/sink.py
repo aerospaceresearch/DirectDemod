@@ -2,7 +2,7 @@
 Object for different outputs e.g. image, audio.wav etc.
 '''
 from scipy.io.wavfile import write
-import PIL
+import PIL, itertools
 
 '''
 This object is used to write wav files
@@ -48,7 +48,7 @@ class image:
         '''Initialize the object
 
         Args:
-            filename (:obj:`str`): filename of the wav file
+            filename (:obj:`str`): filename of the image file
             mat (:obj:`list`): a matrix of pixel values
         '''
 
@@ -70,4 +70,39 @@ class image:
         ''' sig (:obj:`image`): shows the image'''
 
         self.__image.show()
+        return self
+
+'''
+This object is used to write to .csv files
+'''
+class csv:
+
+    '''
+    This object is used to write to .csv files
+    '''
+
+    def __init__(self, filename, data, titles = None):
+
+        '''Initialize the object
+
+        Args:
+            filename (:obj:`str`): filename of the csv file
+            data (:obj:`list`): data to be written
+            titles (:obj:`list`): titles of columns
+        '''
+
+        self.__fname = filename
+        self.__data = data
+        self.__title = titles
+
+    @property
+    def write(self):
+
+        ''' sig (:obj:`csv`): writes the data to file'''
+
+        f = open(self.__fname, 'w')
+        if not self.__title is None:
+            print("".join([str(i)+"," for i in self.__title]), file=f)
+        for i in list(itertools.zip_longest(*self.__data, fillvalue='')):
+            print("".join([str(j)+"," for j in i]), file=f)
         return self
