@@ -64,8 +64,15 @@ class noaa:
                 self.getCrudeSync()
 
             logging.info('Beginning image extraction')
+            
+            # get audio
+            amSig = self.__audOut
 
-            amSig = self.__getAM(self.__audOut)
+            # apply a bandpass filter to remove any noise
+            amSig.filter(filters.butter(amSig.sampRate, 400, 4400, typeFlt = constants.FLT_BP, zeroPhase = True))
+
+            # am demodulate
+            amSig = self.__getAM(amSig)
 
             # convert sync from samples to time
             csync = self.__syncA / self.__syncCrudeSampRate
@@ -74,19 +81,32 @@ class noaa:
             csync *= amSig.sampRate
 
             self.__image = []
-            (low, high) = np.percentile(amSig.signal, (0.5, 99.5))
+
+            numPixels = int(0.5/constants.NOAA_T)
+            imgLine = amSig.signal[:int(len(amSig.signal)/numPixels) * numPixels]
+            imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
+            imgLine = np.median(imgLine, axis = -1)
+            (low, high) = np.percentile(imgLine, (0.5, 99.5))
+
             for i in csync:
 
                 logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
 
                 startI = int(i)
                 endI = int(i) + int(amSig.sampRate * 0.5)
+                if endI > amSig.length:
+                    continue
+
                 imgLine = amSig.signal[startI:endI]
-                imgLine = signal.resample(imgLine, int(4160 * len(imgLine)/amSig.sampRate))
+                imgLine = imgLine[:int(len(imgLine)/numPixels) * numPixels]
+                imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
+                imgLine = np.median(imgLine, axis = -1)
+
                 imgLine = np.round(255 * (imgLine - low) / (high - low))
                 imgLine[imgLine < 0] = 0
                 imgLine[imgLine > 255] = 255
                 imgLine = imgLine.astype(np.uint8)
+
                 self.__image.append(imgLine)
 
             # get mean lengths of lines

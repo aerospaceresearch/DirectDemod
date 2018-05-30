@@ -23,6 +23,7 @@ def usage(err = ""):
     print("\t\t-o <str> : output file names (in order)")
     print("\t\t-s <in sample#> : starts of signals (in order)")
     print("\t\t-e <in sample#> : ends of signals (in order)")
+    print("\t\t-noimage : doesn't show/store image")
     print("\t\t-q : switch I and Q channels")
     print("\t\t-h: print this")
     print()
@@ -38,7 +39,7 @@ def usage(err = ""):
 
 # try to get the arguments, if error occurs display usage
 try:
-    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:q', ['help'])
+    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:qn:', ['help'])
 except getopt.GetoptError as e:
     usage(e)
 
@@ -54,6 +55,11 @@ if not (len(args) == 1):
 calculateSync = False
 if len([i for i in optlist if (i[0] == '-s' and i[1] == 'ync')]) > 0:
     calculateSync = True
+
+# check is -noimage flag is set
+calculateImage = True
+if len([i for i in optlist if (i[0] == '-n' and i[1] == 'oimage')]) > 0:
+    calculateImage = False
 
 # create the list of frequencies to be decoded
 freqs = [int(i[1]) for i in optlist if i[0] == '-f']
@@ -117,14 +123,11 @@ for fileIndex in range(len(freqs)):
     # create noaa object
     noaaObj = noaa.noaa(sigsrc, freqOffset)
 
-    '''
-    # get the image
-    imageMatrix = noaaObj.getImage
-    sink.image(imgFileName, imageMatrix).show
-    '''
-
+    # get the image if -noimage is not present
+    if calculateImage:
+        imageMatrix = noaaObj.getImage
+        sink.image(imgFileName, imageMatrix).write.show
     
-    # print sync
     # calculate sync is -sync flag is set
     if calculateSync:
         syncs = noaaObj.getAccurateSync(useNormCorrelate = False) # change to False to use scipy's correlate

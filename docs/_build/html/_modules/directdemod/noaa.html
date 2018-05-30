@@ -100,8 +100,15 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">getCrudeSync</span><span class="p">()</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Beginning image extraction&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># get audio</span>
+            <span class="n">amSig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span>
 
-            <span class="n">amSig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__audOut</span><span class="p">)</span>
+            <span class="c1"># apply a bandpass filter to remove any noise</span>
+            <span class="n">amSig</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">4400</span><span class="p">,</span> <span class="n">typeFlt</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">True</span><span class="p">))</span>
+
+            <span class="c1"># am demodulate</span>
+            <span class="n">amSig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getAM</span><span class="p">(</span><span class="n">amSig</span><span class="p">)</span>
 
             <span class="c1"># convert sync from samples to time</span>
             <span class="n">csync</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncCrudeSampRate</span>
@@ -110,19 +117,32 @@
             <span class="n">csync</span> <span class="o">*=</span> <span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">__image</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">))</span>
+
+            <span class="n">numPixels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.5</span><span class="o">/</span><span class="n">constants</span><span class="o">.</span><span class="n">NOAA_T</span><span class="p">)</span>
+            <span class="n">imgLine</span> <span class="o">=</span> <span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span><span class="o">/</span><span class="n">numPixels</span><span class="p">)</span> <span class="o">*</span> <span class="n">numPixels</span><span class="p">]</span>
+            <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="p">(</span><span class="n">numPixels</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span><span class="o">/</span><span class="n">numPixels</span><span class="p">)))</span>
+            <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">)</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">99.5</span><span class="p">))</span>
+
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">csync</span><span class="p">:</span>
 
                 <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Decoding line </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> lines&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">csync</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">csync</span><span class="p">))</span>
 
                 <span class="n">startI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="n">endI</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">endI</span> <span class="o">&gt;</span> <span class="n">amSig</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
                 <span class="n">imgLine</span> <span class="o">=</span> <span class="n">amSig</span><span class="o">.</span><span class="n">signal</span><span class="p">[</span><span class="n">startI</span><span class="p">:</span><span class="n">endI</span><span class="p">]</span>
-                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">4160</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span><span class="o">/</span><span class="n">amSig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">))</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">imgLine</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span><span class="o">/</span><span class="n">numPixels</span><span class="p">)</span> <span class="o">*</span> <span class="n">numPixels</span><span class="p">]</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="p">(</span><span class="n">numPixels</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span><span class="o">/</span><span class="n">numPixels</span><span class="p">)))</span>
+                <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">imgLine</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
                 <span class="n">imgLine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">255</span> <span class="o">*</span> <span class="p">(</span><span class="n">imgLine</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">))</span>
                 <span class="n">imgLine</span><span class="p">[</span><span class="n">imgLine</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">imgLine</span><span class="p">[</span><span class="n">imgLine</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
                 <span class="n">imgLine</span> <span class="o">=</span> <span class="n">imgLine</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">__image</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imgLine</span><span class="p">)</span>
 
             <span class="c1"># get mean lengths of lines</span>
@@ -282,6 +302,9 @@
 
         <span class="n">absolutePeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentMaxIndex</span><span class="p">)</span>
 
+        <span class="c1"># offset it to the beginning of the sync</span>
+        <span class="n">absolutePeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sync</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">absolutePeaks</span><span class="p">]</span>
+
         <span class="n">absolutePeaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">absolutePeaks</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
 
         <span class="k">return</span> <span class="n">absolutePeaks</span>
@@ -291,7 +314,7 @@
         <span class="sd">&#39;&#39;&#39;Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`list`: A list of locations of sync in sample number</span>
+<span class="sd">            :obj:`list`: A list of locations of sync in sample number (start of sync)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__syncB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -320,7 +343,7 @@
 <span class="sd">            useNormCorrelate (:obj:`bool`, optional): Whether to use normalized correlation or not</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            :obj:`list`: A list of locations of sync in sample number</span>
+<span class="sd">            :obj:`list`: A list of locations of sync in sample number (start of sync)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncA</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__asyncB</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__useNormCorrelate</span> <span class="o">==</span> <span class="n">useNormCorrelate</span><span class="p">:</span>
