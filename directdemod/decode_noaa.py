@@ -84,6 +84,9 @@ class decode_noaa:
             # convert back to sample number
             csync *= amSig.sampRate
 
+            # store uncorrected csync
+            ucsync = csync[:]
+
             # correct any missing syncs
 
             syncDIff = np.diff(csync)
@@ -125,23 +128,42 @@ class decode_noaa:
             imgLine = amSig.signal[:int(len(amSig.signal)/numPixels) * numPixels]
             imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
             imgLine = np.median(imgLine, axis = -1)
-            (low, high) = np.percentile(imgLine, (0.5, 99.5))
+            (self.__low, self.__high) = np.percentile(imgLine, (0.5, 99.5))
+
+            lowFifo, highFifo = [], []
 
             for i in csync:
 
                 logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
 
                 startI = int(i)
-                endI = int(i) + int(amSig.sampRate * 0.5)
+                endI = int(i) + int(0.5 * amSig.sampRate)
+
                 if endI > amSig.length:
                     continue
 
                 imgLine = amSig.signal[startI:endI]
-                imgLine = imgLine[:int(len(imgLine)/numPixels) * numPixels]
+                imgLine = signal.resample(imgLine, int(len(imgLine)/numPixels) * numPixels)
                 imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
+
+                # image color correction based on sync
+                if i in ucsync:
+                    for j in range(len(constants.NOAA_SYNCA)):
+                        if constants.NOAA_SYNCA[j] == 0:
+                            lowFifo.extend(imgLine[j])
+                        else:
+                            highFifo.extend(imgLine[j])
+                        lowFifo = lowFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
+                        highFifo = highFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
+                    val11, val244 = np.median(lowFifo), np.median(highFifo)
+                    val0 = val11 - (val244 - val11)*(11 - 0)/(244 - 11)
+                    val255 = val11 - (val244 - val11)*(11 - 255)/(244 - 11)
+                    self.__low = val0
+                    self.__high = val255
+
                 imgLine = np.median(imgLine, axis = -1)
 
-                imgLine = np.round(255 * (imgLine - low) / (high - low))
+                imgLine = np.round(255 * (imgLine - self.__low) / (self.__high - self.__low))
                 imgLine[imgLine < 0] = 0
                 imgLine[imgLine > 255] = 255
                 imgLine = imgLine.astype(np.uint8)
