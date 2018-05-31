@@ -18,7 +18,7 @@ Signal object
 Specific applications
 -----------------------
 
-.. autoclass:: directdemod.noaa.noaa
+.. autoclass:: directdemod.decode_noaa.decode_noaa
    :members:
 
    .. automethod:: __init__
@@ -69,20 +69,20 @@ Filters
 Demodulators
 -------------
 
-.. autoclass:: directdemod.fmDemod.fmDemod
+.. autoclass:: directdemod.demod_fm.demod_fm
    :members:
 
    .. automethod:: __init__
 
-.. autoclass:: directdemod.amDemod.amDemod
+.. autoclass:: directdemod.demod_am.demod_am
    :members:
 
-.. autoclass:: directdemod.fmDemod.fmDemodAD
+.. autoclass:: directdemod.demod_fm.demod_fmAD
    :members:
 
    .. automethod:: __init__
 
-.. autoclass:: directdemod.amDemod.amDemodFLT
+.. autoclass:: directdemod.demod_am.demod_amFLT
    :members:
 
    .. automethod:: __init__

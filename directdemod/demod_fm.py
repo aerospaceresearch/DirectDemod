@@ -9,7 +9,7 @@ import scipy.signal as signal
 Object for FM demodulation
 '''
 
-class fmDemod():
+class demod_fm():
 
     '''
     Object for FM demodulation
@@ -54,7 +54,7 @@ class fmDemod():
 Object for FM demodulation using angle differentiation
 '''
 
-class fmDemodAD():
+class demod_fmAD():
 
     '''
     Object for FM demodulation (Alternative method using angle differentiation)

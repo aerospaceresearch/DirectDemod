@@ -9,7 +9,7 @@ from directdemod import filters, constants
 AM demodulation by hilbert's transform
 '''
 
-class amDemod():
+class demod_am():
 
     '''
     AM demodulation by hilbert's transform
@@ -32,7 +32,7 @@ class amDemod():
 AM demodulation by low pass filter
 '''
 
-class amDemodFLT():
+class demod_amFLT():
 
     '''
     AM demodulation by low pass filter

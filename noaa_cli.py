@@ -2,7 +2,7 @@
 noaa commandline interface
 '''
 
-from directdemod import source, chunker, comm, constants, filters, fmDemod, sink, amDemod, noaa, log
+from directdemod import source, chunker, comm, constants, filters, demod_fm, sink, demod_am, decode_noaa, log
 import numpy as np
 import sys, getopt, logging
 
@@ -121,7 +121,7 @@ for fileIndex in range(len(freqs)):
     sigsrc.limitData(starts[fileIndex], ends[fileIndex])
 
     # create noaa object
-    noaaObj = noaa.noaa(sigsrc, freqOffset)
+    noaaObj = decode_noaa.decode_noaa(sigsrc, freqOffset)
 
     # get the image if -noimage is not present
     if calculateImage:
@@ -130,5 +130,5 @@ for fileIndex in range(len(freqs)):
     
     # calculate sync is -sync flag is set
     if calculateSync:
-        syncs = noaaObj.getAccurateSync(useNormCorrelate = False) # change to False to use scipy's correlate
+        syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
         sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB",]).write

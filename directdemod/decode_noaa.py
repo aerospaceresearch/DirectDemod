@@ -1,7 +1,7 @@
 '''
 noaa specific
 '''
-from directdemod import source, chunker, comm, constants, filters, fmDemod, sink, amDemod
+from directdemod import source, sink, chunker, comm, constants, filters, demod_am, demod_fm
 import numpy as np
 import logging
 import scipy.signal as signal
@@ -10,7 +10,7 @@ import scipy.signal as signal
 Object to decode NOAA APT
 '''
 
-class noaa:
+class decode_noaa:
 
     '''
     Object to decode NOAA APT
@@ -173,7 +173,7 @@ class noaa:
 
         audioOut = comm.commSignal(audioFreq)
         bhFilter = filters.blackmanHarris(151)
-        fmDemdulator = fmDemod.fmDemod()
+        fmDemdulator = demod_fm.demod_fm()
         chunkerObj = chunker.chunker(self.__sigsrc)
 
         for i in chunkerObj.getChunks:
@@ -201,7 +201,7 @@ class noaa:
 
         logging.info('Beginning AM demodulation in chunks')
 
-        amDemdulator = amDemod.amDemod()
+        amDemdulator = demod_am.demod_am()
         amOut = comm.commSignal(sig.sampRate)
 
         chunkerObj = chunker.chunker(sig, chunkSize = 60000*18)
@@ -396,7 +396,7 @@ class noaa:
                 endI = int(i) + int(searchSampleWidth)
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
-                sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
+                sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(demod_fm.demod_fm().demod).funcApply(demod_am.demod_am().demod)
                 syncDet, PkHeights, TimeSync = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCA, getExtraInfo = True, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)
                 self.__asyncA.append(syncDet[0] + startI)
                 self.__asyncApk.append(PkHeights[0])
@@ -417,7 +417,7 @@ class noaa:
                 endI = int(i) + int(searchSampleWidth)
                 if startI < 0 or endI > self.__sigsrc.length:
                     continue
-                sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(fmDemod.fmDemod().demod).funcApply(amDemod.amDemod().demod)
+                sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(startI, endI)).offsetFreq(self.__offset).filter(filters.blackmanHarris(151, zeroPhase = True)).funcApply(demod_fm.demod_fm().demod).funcApply(demod_am.demod_am().demod)
                 syncDet, PkHeights, TimeSync = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB, getExtraInfo = True, useNormCorrelate = useNormCorrelate, usePosNeedle = useNormCorrelate, useFilter = True)
                 self.__asyncB.append(syncDet[0] + startI)
                 self.__asyncBpk.append(PkHeights[0])

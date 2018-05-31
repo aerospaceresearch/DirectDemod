@@ -202,12 +202,12 @@
 <div class="section" id="specific-applications">
 <h2>Specific applications<a class="headerlink" href="#specific-applications" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="directdemod.noaa.noaa">
-<em class="property">class </em><code class="descclassname">directdemod.noaa.</code><code class="descname">noaa</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa">
+<em class="property">class </em><code class="descclassname">directdemod.decode_noaa.</code><code class="descname">decode_noaa</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object to decode NOAA APT</p>
 <dl class="method">
-<dt id="directdemod.noaa.noaa.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -224,8 +224,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.noaa.noaa.getAccurateSync">
-<code class="descname">getAccurateSync</code><span class="sig-paren">(</span><em>useNormCorrelate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.getAccurateSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.getAccurateSync" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa.getAccurateSync">
+<code class="descname">getAccurateSync</code><span class="sig-paren">(</span><em>useNormCorrelate=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.getAccurateSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getAccurateSync" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the sync locations: at highest sampling rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -242,8 +242,8 @@
 </dd></dl>
 
 <dl class="attribute">
-<dt id="directdemod.noaa.noaa.getAudio">
-<code class="descname">getAudio</code><a class="headerlink" href="#directdemod.noaa.noaa.getAudio" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa.getAudio">
+<code class="descname">getAudio</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getAudio" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the audio from data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -258,8 +258,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.noaa.noaa.getCrudeSync">
-<code class="descname">getCrudeSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/noaa.html#noaa.getCrudeSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.noaa.noaa.getCrudeSync" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa.getCrudeSync">
+<code class="descname">getCrudeSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.getCrudeSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getCrudeSync" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the sync locations: at constants.NOAA_CRUDESYNCSAMPRATE sampling rate</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -274,8 +274,8 @@
 </dd></dl>
 
 <dl class="attribute">
-<dt id="directdemod.noaa.noaa.getImage">
-<code class="descname">getImage</code><a class="headerlink" href="#directdemod.noaa.noaa.getImage" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.decode_noaa.decode_noaa.getImage">
+<code class="descname">getImage</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getImage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the image from data</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -557,12 +557,12 @@
 <div class="section" id="demodulators">
 <h2>Demodulators<a class="headerlink" href="#demodulators" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="directdemod.fmDemod.fmDemod">
-<em class="property">class </em><code class="descclassname">directdemod.fmDemod.</code><code class="descname">fmDemod</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fm">
+<em class="property">class </em><code class="descclassname">directdemod.demod_fm.</code><code class="descname">demod_fm</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object for FM demodulation</p>
 <dl class="method">
-<dt id="directdemod.fmDemod.fmDemod.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fm.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fm.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fm.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -575,8 +575,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.fmDemod.fmDemod.demod">
-<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemod.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemod.demod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fm.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fm.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fm.demod" title="Permalink to this definition">¶</a></dt>
 <dd><p>FM demod a given complex IQ array</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -595,12 +595,12 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="directdemod.amDemod.amDemod">
-<em class="property">class </em><code class="descclassname">directdemod.amDemod.</code><code class="descname">amDemod</code><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_am.demod_am">
+<em class="property">class </em><code class="descclassname">directdemod.demod_am.</code><code class="descname">demod_am</code><a class="reference internal" href="_modules/directdemod/demod_am.html#demod_am"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_am.demod_am" title="Permalink to this definition">¶</a></dt>
 <dd><p>AM demodulation by hilbert’s transform</p>
 <dl class="method">
-<dt id="directdemod.amDemod.amDemod.demod">
-<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemod.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemod.demod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_am.demod_am.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_am.html#demod_am.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_am.demod_am.demod" title="Permalink to this definition">¶</a></dt>
 <dd><p>AM demodulation by hilbert’s transform</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -619,12 +619,12 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="directdemod.fmDemod.fmDemodAD">
-<em class="property">class </em><code class="descclassname">directdemod.fmDemod.</code><code class="descname">fmDemodAD</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fmAD">
+<em class="property">class </em><code class="descclassname">directdemod.demod_fm.</code><code class="descname">demod_fmAD</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fmAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fmAD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object for FM demodulation (Alternative method using angle differentiation)</p>
 <dl class="method">
-<dt id="directdemod.fmDemod.fmDemodAD.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fmAD.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>storeState=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fmAD.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fmAD.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -637,8 +637,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.fmDemod.fmDemodAD.demod">
-<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/fmDemod.html#fmDemodAD.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.fmDemod.fmDemodAD.demod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_fm.demod_fmAD.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_fm.html#demod_fmAD.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_fm.demod_fmAD.demod" title="Permalink to this definition">¶</a></dt>
 <dd><p>FM demod a given complex IQ array</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -657,12 +657,12 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="directdemod.amDemod.amDemodFLT">
-<em class="property">class </em><code class="descclassname">directdemod.amDemod.</code><code class="descname">amDemodFLT</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_am.demod_amFLT">
+<em class="property">class </em><code class="descclassname">directdemod.demod_am.</code><code class="descname">demod_amFLT</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_am.html#demod_amFLT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_am.demod_amFLT" title="Permalink to this definition">¶</a></dt>
 <dd><p>AM demodulation by low pass filter</p>
 <dl class="method">
-<dt id="directdemod.amDemod.amDemodFLT.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_am.demod_amFLT.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>Fs</em>, <em>cutoff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_am.html#demod_amFLT.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_am.demod_amFLT.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -675,8 +675,8 @@
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.amDemod.amDemodFLT.demod">
-<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/amDemod.html#amDemodFLT.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.amDemod.amDemodFLT.demod" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.demod_am.demod_amFLT.demod">
+<code class="descname">demod</code><span class="sig-paren">(</span><em>sig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/demod_am.html#demod_amFLT.demod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.demod_am.demod_amFLT.demod" title="Permalink to this definition">¶</a></dt>
 <dd><p>AM demodulation by low pass filter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
