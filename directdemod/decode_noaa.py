@@ -5,6 +5,7 @@ from directdemod import source, sink, chunker, comm, constants, filters, demod_a
 import numpy as np
 import logging
 import scipy.signal as signal
+from scipy import stats
 
 '''
 Object to decode NOAA APT
@@ -123,6 +124,8 @@ class decode_noaa:
             csync = list(np.sort(correctedSyncs))
 
             self.__image = []
+            imageBuffer = []
+            backupImage = []
 
             numPixels = int(0.5/constants.NOAA_T)
             imgLine = amSig.signal[:int(len(amSig.signal)/numPixels) * numPixels]
@@ -130,7 +133,18 @@ class decode_noaa:
             imgLine = np.median(imgLine, axis = -1)
             (self.__low, self.__high) = np.percentile(imgLine, (0.5, 99.5))
 
+            # vars for image correction
             lowFifo, highFifo = [], []
+            corrfifo = []
+            corrfifosig = []
+            ncorrfifo = 3
+            lcorr = None
+            lcorrsig = None
+            statecorr = 0
+            valuesPixCorr = []
+            valuesSigCorr = []
+            self.__slope = None
+            self.__intercept = None
 
             for i in csync:
 
@@ -161,14 +175,71 @@ class decode_noaa:
                     self.__low = val0
                     self.__high = val255
 
+                # image color correction based on calibration strip
+                lengthOfStrip = int((len(constants.NOAA_SYNCA) * constants.NOAA_T) * amSig.sampRate)
+                stripVal = np.median(amSig.signal[startI - lengthOfStrip:startI])
+
+                corrfifo.append(255 * (stripVal - self.__low) / (self.__high - self.__low))
+                corrfifo = corrfifo[-1*ncorrfifo:]
+                outcorr = np.median(corrfifo)
+                
+                corrfifosig.append(stripVal)
+                corrfifosig = corrfifosig[-1*ncorrfifo:]
+                outcorrsig = np.median(corrfifosig)
+
+                if lcorr is None or abs(outcorr - lcorr) > 255.0/16:
+                    logging.info('Color correction state: %d', statecorr)
+                    if statecorr == 0:
+                        valuesPixCorr = [lcorr, outcorr]
+                        valuesSigCorr = [lcorrsig, outcorrsig]
+                        statecorr = 1
+                    elif 1 <= statecorr <= 6:
+                        if outcorr - valuesPixCorr[-1] > 2*255.0/(8*3):
+                            valuesPixCorr.append(outcorr)
+                            valuesSigCorr.append(outcorrsig)
+                            statecorr += 1
+                        else:
+                            statecorr = 0
+                    elif statecorr == 7:
+                        if valuesPixCorr[-1] - outcorr > 2*255.0/3:
+                            valuesPixCorr = [outcorr] + valuesPixCorr
+                            valuesSigCorr = [outcorrsig] + valuesSigCorr
+                            self.__slope, self.__intercept, r_value, p_value, std_err = stats.linregress(valuesSigCorr,np.array([i for i in range(9)]) * 255.0/8)
+                            logging.info('Color correction bingo slope: %f intercept: %f', self.__slope, self.__intercept)
+                            statecorr = 0
+                        else:
+                            statecorr = 0
+                lcorr = outcorr
+                lcorrsig = outcorrsig
+
+
                 imgLine = np.median(imgLine, axis = -1)
 
-                imgLine = np.round(255 * (imgLine - self.__low) / (self.__high - self.__low))
-                imgLine[imgLine < 0] = 0
-                imgLine[imgLine > 255] = 255
-                imgLine = imgLine.astype(np.uint8)
+                if self.__slope is None or self.__intercept is None:
+                    imageBuffer.append(imgLine[:])
+                    imgLine = np.round(255 * (imgLine - self.__low) / (self.__high - self.__low))
+                    imgLine[imgLine < 0] = 0
+                    imgLine[imgLine > 255] = 255
+                    imgLine = imgLine.astype(np.uint8)
+                    backupImage.append(imgLine)
+                else:
+                    if len(imageBuffer) > 0:
+                        for i in imageBuffer:
+                            imgLineb = np.round(i*self.__slope + self.__intercept)
+                            imgLineb[imgLineb < 0] = 0
+                            imgLineb[imgLineb > 255] = 255
+                            imgLineb = imgLineb.astype(np.uint8)
+                            self.__image.append(imgLineb)
+                        imageBuffer = []
+                    imgLine = np.round(imgLine*self.__slope + self.__intercept)
+                    imgLine[imgLine < 0] = 0
+                    imgLine[imgLine > 255] = 255
+                    imgLine = imgLine.astype(np.uint8)
+                    self.__image.append(imgLine)
 
-                self.__image.append(imgLine)
+            # use backup if color correction didnot work
+            if len(self.__image) == 0:
+                self.__image = backupImage
 
             # get mean lengths of lines
             lens = [len(i) for i in self.__image]
