@@ -17,15 +17,18 @@ class decode_noaa:
     Object to decode NOAA APT
     '''
 
-    def __init__(self, sigsrc, offset):
+    def __init__(self, sigsrc, offset, bw = None):
 
         '''Initialize the object
 
         Args:
             sigsrc (:obj:`commSignal`): IQ data source
             offset (:obj:`float`): Frequency offset of source in Hz
+            bw (:obj:`int`, optional): Bandwidth
         '''
-
+        self.__bw = bw
+        if self.__bw is None:
+            self.__bw = constants.NOAA_FMBW
         self.__sigsrc = sigsrc
         self.__offset = offset
         self.__extractedAudio = None
@@ -273,7 +276,7 @@ class decode_noaa:
 
             logging.info('Processing chunk %d of %d chunks', chunkerObj.getChunks.index(i)+1, len(chunkerObj.getChunks))
 
-            sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i), chunkerObj).offsetFreq(self.__offset).filter(bhFilter).bwLim(constants.IQ_FMBW, uniq = "First").funcApply(fmDemdulator.demod).bwLim(audioFreq, strictness)
+            sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i), chunkerObj).offsetFreq(self.__offset).filter(bhFilter).bwLim(self.__bw, uniq = "First").funcApply(fmDemdulator.demod).bwLim(audioFreq, strictness)
             audioOut.extend(sig)
 
         logging.info('FM demodulation successfully complete')
