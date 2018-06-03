@@ -3,7 +3,7 @@ Direct Demodulation of Radio-signals
 
 ## NOAA image decoder
 Under progress
-To run: run 'python noaa_cli.py IQ.wav'
+To run: run 'python main.py IQ.wav'
 
 ## Documentation
 Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io)
