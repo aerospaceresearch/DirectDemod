@@ -1,2 +1,4 @@
-signal.wav
-*.svg
+*.pyc
+*.png
+log.txt
+*.csv
