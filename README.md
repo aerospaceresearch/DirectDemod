@@ -1,9 +1,21 @@
 # DirectDemod
 Direct Demodulation of Radio-signals
 
-## NOAA image decoder
-Under progress
+## Decoders
+* NOAA images (Under progress)
+* AFSK1200 (Under progress)
+
+## Run example
 To run: run 'python main.py IQ.wav'
+
+(using Docker)
+```
+sudo docker build --tag direct_demod .
+sudo docker run --rm -it \
+   --volume="$PWD":/opt/code \
+   direct_demod python main.py samples/SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav
+```
+
 
 ## Documentation
 Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io)
