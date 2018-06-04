@@ -23,6 +23,11 @@ Specific applications
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.decode_afsk1200.decode_afsk1200
+   :members:
+
+   .. automethod:: __init__
+
 Filters
 ---------------
 
