@@ -132,6 +132,7 @@ for fileIndex in range(len(freqs)):
         # output file names
         audFileName = fileName.split(".")[0] + "_FM" + ".wav"
         imgFileName = fileName.split(".")[0] + ".png"
+        colorimgFileName = fileName.split(".")[0] + "_color.png"
         csvFileName = fileName.split(".")[0] + ".csv"
         if not outs[fileIndex] is None:
             audFileName = outs[fileIndex] + ".wav"
@@ -145,7 +146,10 @@ for fileIndex in range(len(freqs)):
         if calculateImage:
             imageMatrix = noaaObj.getImage
             sink.image(imgFileName, imageMatrix).write.show
-        
+
+            # Experimental
+            #sink.image(colorimgFileName, noaaObj.getColor).write.show
+
         # calculate sync is -sync flag is set
         if calculateSync:
             syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate

@@ -3,7 +3,7 @@ noaa specific
 '''
 from directdemod import source, sink, chunker, comm, constants, filters, demod_am, demod_fm
 import numpy as np
-import logging
+import logging, colorsys
 import scipy.signal as signal
 from scipy import stats
 
@@ -43,6 +43,7 @@ class decode_noaa:
         self.__asyncBpk = None
         self.__asyncBtime = None
         self.__useNormCorrelate = None
+        self.__color = None
 
     @property
     def getAudio(self):
@@ -252,6 +253,88 @@ class decode_noaa:
             logging.info('Image extraction complete')
 
         return self.__image
+
+    @property
+    def getImageA(self):
+        '''Get Image A from the extracted image
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return self.__image[:,:1040]
+
+    @property
+    def getImageB(self):
+        '''Get Image B from the extracted image
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return self.__image[:,1040:]
+
+    @property
+    def getColor(self):
+        '''Get false color image (EXPERIMENTAL)
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__color is None:
+            if self.__image is None:
+                self.getImage
+
+            imageA = self.getImageA
+            imageB = self.getImageB
+
+            # constants
+            tempLimit = 155.0
+            seaLimit = 30.0
+            landLimit = 90.0
+
+            colorImg = []
+            for r in range(len(imageA)):
+                colorRow = []
+                for c in range(1040):
+                    v, t = imageA[r,c], imageB[r,c]
+                    maxColor, minColor = None, None
+                    scaleVisible, scaleTemp = None, None
+
+                    if t < tempLimit:
+                        # clouds
+                        maxColor, minColor = [230, 0.2, 0.3], [230, 0.0, 1.0]
+                        scaleVisible = v / 256.0
+                        scaleTemp = (256.0 - t) / 256.0
+                    else:
+                        if v < seaLimit:
+                            # sea
+                            maxColor, minColor = [200.0, 0.7, 0.6], [240.0, 0.6, 0.4]
+                            scaleVisible = v / seaLimit
+                            scaleTemp = (256.0-t) / (256.0 - tempLimit)
+                        else:
+                            # ground
+                            maxColor, minColor = [60.0, 0.6, 0.2], [100.0, 0.0, 0.5]
+                            scaleVisible = (v - seaLimit) / (landLimit - seaLimit)
+                            scaleTemp = (256.0 - t) / (256.0 - tempLimit);
+
+                    finalS = maxColor[1] + scaleTemp * (minColor[1] - maxColor[1]);
+                    finalV = maxColor[2] + scaleVisible * (minColor[2] - maxColor[2]);
+                    finalH = maxColor[0] + scaleVisible * scaleTemp * (minColor[0] - maxColor[0]);
+                    pix = tuple([int(k * 255.0) for k in colorsys.hsv_to_rgb(finalH, finalS, finalV)])
+                    colorRow.append(pix)
+
+                colorImg.append(colorRow)
+                self.__color = np.uint8(np.array(colorImg))
+
+        return self.__color
 
     def __audio(self, audioFreq = constants.NOAA_AUDSAMPRATE, strictness = True):
 
