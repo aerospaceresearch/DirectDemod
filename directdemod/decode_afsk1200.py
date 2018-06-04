@@ -99,12 +99,12 @@ class decode_afsk1200:
         if self.__msg is None:
             ## Next create a signal object, reading data from the source
             # Read all values from the source into an array
-            sigArray = sigsrc.read(0, sigsrc.length)
+            sigArray = self.__sigsrc.read(0, self.__sigsrc.length)
 
             # a commSignal object basically stores the signal array and its samplingrate
             # if you want the array do sig.signal
             # if you want the samping rate do sig.sampRate
-            sig = comm.commSignal(sigsrc.sampFreq, sigArray)
+            sig = comm.commSignal(self.__sigsrc.sampFreq, sigArray)
 
             ## Offset the frequency if required, not needed here
             # sig.offsetFreq(0)

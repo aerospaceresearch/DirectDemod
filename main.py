@@ -156,7 +156,7 @@ for fileIndex in range(len(freqs)):
         logging.info('Decoding AFSK1200 data')
 
         # create AFSK1200 object
-        noaaObj = decode_afsk1200.decode_afsk1200(sigsrc, freqOffset, bandwidths[fileIndex])
+        afskObj = decode_afsk1200.decode_afsk1200(sigsrc, freqOffset, bandwidths[fileIndex])
 
         ### ADD AFSK DECODING STUFF HERE
 
@@ -164,6 +164,8 @@ for fileIndex in range(len(freqs)):
         sigsrc #is the source object use this for data
         bandwidths[fileIndex] # is the bandwidth
         freqOffset # is the frequency offset
+
+        print(afskObj.getMsg)
 
     else:
         usage("Invalid decoder selected")
