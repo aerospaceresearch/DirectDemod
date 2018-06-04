@@ -161,14 +161,6 @@ for fileIndex in range(len(freqs)):
 
         # create AFSK1200 object
         afskObj = decode_afsk1200.decode_afsk1200(sigsrc, freqOffset, bandwidths[fileIndex])
-
-        ### ADD AFSK DECODING STUFF HERE
-
-        ####params
-        sigsrc #is the source object use this for data
-        bandwidths[fileIndex] # is the bandwidth
-        freqOffset # is the frequency offset
-
         print(afskObj.getMsg)
 
     else:
