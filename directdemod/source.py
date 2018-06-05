@@ -155,7 +155,7 @@ class IQdat(source):
         self.__data = np.memmap(filename)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
-        self.__actualLength = self.__data.shape[0]
+        self.__actualLength = int(len(self.__data)/2)
 
     @property
     def sampFreq(self):
@@ -246,7 +246,7 @@ class IQwavAlt(source):
         self.__data = np.memmap(filename, offset=44)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
-        self.__actualLength = self.__data.shape[0]
+        self.__actualLength = int(len(self.__data)/2)
 
     @property
     def sampFreq(self):
