@@ -98,7 +98,13 @@ bandwidths.extend([None]*(len(freqs) - len(bandwidths)))
 fileName = args[0]
 
 # create this as a signal source
-sigsrc = source.IQwav(fileName)
+sigsrc = None
+if fileName[-3:] == "wav":
+    sigsrc = source.IQwav(fileName)
+elif fileName[-3:] == "dat":
+    sigsrc = source.IQdat(fileName)
+else:
+    usage("Only .wav and .dat files are supported")
 
 for fileIndex in range(len(freqs)):
 

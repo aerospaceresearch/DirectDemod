@@ -23,6 +23,7 @@ NOAA_COLORCORRECT_FIFOLEN = 10000
 
 ## Source types
 SOURCE_IQWAV = 0
+SOURCE_IQDAT = 1
 
 ## Filter types
 FLT_LP = 0
