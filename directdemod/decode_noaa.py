@@ -6,6 +6,7 @@ import numpy as np
 import logging, colorsys
 import scipy.signal as signal
 from scipy import stats
+import scipy.ndimage
 
 '''
 Object to decode NOAA APT
@@ -118,7 +119,7 @@ class decode_noaa:
             anchor = 0
             c = modeSyncDIff
             while(validSyncs[anchor] + c < amSig.length):
-                if (anchor + 1) < len(validSyncs) and abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom:
+                if (anchor + 1) < len(validSyncs) and (abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom or c + validSyncs[anchor] > validSyncs[anchor + 1]):
                     anchor += 1
                     c = modeSyncDIff
                 else:
@@ -294,10 +295,12 @@ class decode_noaa:
 
             imageA = self.getImageA
             imageB = self.getImageB
+            imageAb = scipy.ndimage.uniform_filter(self.getImageA, size=(3, 3))
+            imageBb = scipy.ndimage.uniform_filter(self.getImageB, size=(3, 3))
 
             # constants
-            tempLimit = 155.0
-            seaLimit = 30.0
+            tempLimit = 147.0
+            seaLimit = 25.0
             landLimit = 90.0
 
             colorImg = []
@@ -305,23 +308,24 @@ class decode_noaa:
                 colorRow = []
                 for c in range(1040):
                     v, t = imageA[r,c], imageB[r,c]
+                    vb, tb = imageAb[r,c], imageBb[r,c]
                     maxColor, minColor = None, None
                     scaleVisible, scaleTemp = None, None
 
-                    if t < tempLimit:
+                    if tb > tempLimit:
                         # clouds
-                        maxColor, minColor = [230, 0.2, 0.3], [230, 0.0, 1.0]
+                        minColor, maxColor = [230/360.0, 0.2, 0.3], [230/360.0, 0.0, 1.0]
                         scaleVisible = v / 256.0
                         scaleTemp = (256.0 - t) / 256.0
                     else:
-                        if v < seaLimit:
+                        if vb < seaLimit:
                             # sea
-                            maxColor, minColor = [200.0, 0.7, 0.6], [240.0, 0.6, 0.4]
+                            minColor, maxColor = [200.0/360.0, 0.7, 0.6], [240.0/360.0, 0.6, 0.4]
                             scaleVisible = v / seaLimit
                             scaleTemp = (256.0-t) / (256.0 - tempLimit)
                         else:
                             # ground
-                            maxColor, minColor = [60.0, 0.6, 0.2], [100.0, 0.0, 0.5]
+                            minColor, maxColor = [60.0/360.0, 0.6, 0.2], [100.0/360.0, 0.0, 0.5]
                             scaleVisible = (v - seaLimit) / (landLimit - seaLimit)
                             scaleTemp = (256.0 - t) / (256.0 - tempLimit);
 
@@ -332,7 +336,7 @@ class decode_noaa:
                     colorRow.append(pix)
 
                 colorImg.append(colorRow)
-                self.__color = np.uint8(np.array(colorImg))
+            self.__color = np.uint8(np.array(colorImg))
 
         return self.__color
 

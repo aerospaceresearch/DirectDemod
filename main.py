@@ -150,11 +150,15 @@ for fileIndex in range(len(freqs)):
 
         # get the image if -noimage is not present
         if calculateImage:
+            # get the audio
+            #audioOut = noaaObj.getAudio
+            #sink.wavFile(audFileName, audioOut).write
+
             imageMatrix = noaaObj.getImage
             sink.image(imgFileName, imageMatrix).write.show
 
             # Experimental
-            #sink.image(colorimgFileName, noaaObj.getColor).write.show
+            sink.image(colorimgFileName, noaaObj.getColor).write.show
 
         # calculate sync is -sync flag is set
         if calculateSync:
