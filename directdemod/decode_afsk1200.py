@@ -49,23 +49,39 @@ class decode_afsk1200:
 
         if self.__msg is None:
 
-            # get the signal
-            sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(0, self.__sigsrc.length))
+            sig = comm.commSignal(self.__sigsrc.sampFreq)
 
-            ## Offset the frequency if required, not needed here
-            sig.offsetFreq(self.__offset)
+            chunkerObj = chunker.chunker(self.__sigsrc)
+            bhFilter = filters.blackmanHarris(151)
+            fmDemodObj = demod_fm.demod_fm()
+            
 
-            ## Apply a blackman harris filter to get rid of noise
-            sig.filter(filters.blackmanHarris(151))
+            for i in chunkerObj.getChunks:
 
-            ## Limit bandwidth
-            sig.bwLim(self.__bw)
+                logging.info('Processing chunk %d of %d chunks', chunkerObj.getChunks.index(i)+1, len(chunkerObj.getChunks))
+
+                # get the signal
+                chunkSig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i), chunkerObj)
+
+                ## Offset the frequency if required, not needed here
+                chunkSig.offsetFreq(self.__offset)
+
+                ## Apply a blackman harris filter to get rid of noise
+                chunkSig.filter(bhFilter)
+
+                ## Limit bandwidth
+                chunkSig.bwLim(self.__bw)
+
+                # store signal
+                sig.extend(chunkSig)
 
             ## FM demodulate
-            sig.funcApply(demod_fm.demod_fm().demod)
+            sig.funcApply(fmDemodObj.demod)
+            logging.info('FM demod complete')
 
             ## APRS has two freqs 1200 and 2200, hence create a butter band pass filter from 1200-500 to 2200+500
             sig.filter(filters.butter(sig.sampRate, 1200 - 500, 2200 + 500, typeFlt=constants.FLT_BP))
+            logging.info('Filtering complete')
 
             ## plot the signal
             if self.__graphs == 1:
@@ -94,6 +110,7 @@ class decode_afsk1200:
             # now we check the full signal for the binary states, whether it is closer to 1200 hz or closer to 2200 Hz
             binary_filter = np.zeros(len(sig.signal))
 
+
             for sample in range(len(sig.signal) - buffer_size):
                 corr_mi = 0
                 corr_mq = 0
@@ -108,7 +125,7 @@ class decode_afsk1200:
                     corr_sq = corr_sq + sig.signal[sample + sub] * corr_space_q[sub]
 
                 binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
-
+            logging.info('Binary filter complete')
             if self.__graphs == 1:
                 plt.plot(sig.signal / np.max(sig.signal))
                 plt.plot(np.sign(binary_filter))
@@ -153,7 +170,7 @@ class decode_afsk1200:
                 plt.show()
 
             bit_repeated = np.round(np.diff(peaks1_x) / (self.__bw / self.__BAUDRATE))
-
+            logging.info('Bit repeat complete')
             if self.__graphs == 1:
                 plt.plot(np.sign(binary_filter))
                 plt.plot(peaks1_x[:-1], bit_repeated, "*")
@@ -176,6 +193,7 @@ class decode_afsk1200:
 
             # here we convert the nrzi bits to normal bits
             bitstream = decode_afsk1200.decode_nrzi(np.sign(bitstream_nrzi))
+            logging.info('Decoding NRZI complete')
 
             if self.__graphs == 1:
                 plt.plot(np.sign(bitstream_nrzi))
@@ -209,7 +227,7 @@ class decode_afsk1200:
                 plt.plot(bitstream_stuffed, "*")
                 plt.title("test1")
                 plt.show()
-
+            logging.info('Stuffed bit removal complete')
             # checking at each possible start flag, if the bit stream was received correctly.
             # this is done by checking the crc16 at the end of the msg with the msg body.
             for flag in range(len(bit_startflag) - 1):
