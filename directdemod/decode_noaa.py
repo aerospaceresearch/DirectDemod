@@ -45,6 +45,21 @@ class decode_noaa:
         self.__asyncBtime = None
         self.__useNormCorrelate = None
         self.__color = None
+        self.__useful = 0
+
+    @property
+    def useful(self):
+
+        '''See if some data was found or not: 10 consecutive syncs apart by 0.5s+-error
+
+        Returns:
+            :obj:`int`: 0 if not found, 1 if found
+        '''
+
+        if self.__syncA is None or self.__syncB is None:
+            self.getCrudeSync()
+
+        return self.__useful
 
     @property
     def getAudio(self):
@@ -537,6 +552,19 @@ class decode_noaa:
             logging.info('Beginning SyncB detection')
             self.__syncB = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB)
             logging.info('Done SyncB detection')
+
+            # determine if some data was found or not
+            syncAdiff = np.abs(np.diff(self.__syncA) - (self.__syncCrudeSampRate*0.5))
+            minSyncAdiff = np.min([np.max(syncAdiff[i:i+constants.NOAA_DETECTCONSSYNCSNUM]) for i in range(len(syncAdiff)-constants.NOAA_DETECTCONSSYNCSNUM+1)])
+
+            syncBdiff = np.abs(np.diff(self.__syncB) - (self.__syncCrudeSampRate*0.5))
+            minSyncBdiff = np.min([np.max(syncBdiff[i:i+constants.NOAA_DETECTCONSSYNCSNUM]) for i in range(len(syncBdiff)-constants.NOAA_DETECTCONSSYNCSNUM+1)])
+
+            if minSyncAdiff < constants.NOAA_DETECTMAXCHANGE or minSyncBdiff < constants.NOAA_DETECTMAXCHANGE:
+                logging.info('NOAA Signal was found')
+                self.__useful = 1
+            else:
+                logging.info('NOAA Signal was not found')
 
         return [self.__syncA, self.__syncB]
 

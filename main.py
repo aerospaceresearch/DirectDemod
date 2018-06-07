@@ -122,9 +122,9 @@ for fileIndex in range(len(freqs)):
             else:
                 freqOffset = freqs[fileIndex] - int(frqFromFileName)
 
-        # if invertion of IQ is chosen
-        if '-q' in [i[0] for i in optlist]:
-            freqOffset *= -1
+    # if invertion of IQ is chosen
+    if '-q' in [i[0] for i in optlist]:
+        freqOffset *= -1
 
     logging.info('Offset for this frequency was determined to be %f Hz', freqOffset)
 
@@ -158,7 +158,7 @@ for fileIndex in range(len(freqs)):
             sink.image(imgFileName, imageMatrix).write.show
 
             # Experimental
-            sink.image(colorimgFileName, noaaObj.getColor).write.show
+            #sink.image(colorimgFileName, noaaObj.getColor).write.show
 
         # calculate sync is -sync flag is set
         if calculateSync:
