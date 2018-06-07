@@ -266,7 +266,12 @@ class decode_afsk1200:
                         crc_received += str(msg_rest[i])
 
                     if crc_received == crc:
-                        print("one aprs msg with correct crc is found. #", flag, "starts at", bit_startflag[flag], "length is", len(bits) / 8)
+                        msg_text = decode_afsk1200.bits_to_msg(msg)
+
+                        print("one aprs msg with correct crc is found. #", flag, "starts at", bit_startflag[flag],
+                              "length is", len(bits) / 8)
+                        msg_text
+
 
                         if self.__graphs == 1:
                             plt.plot(bitstream[bit_startflag[flag] + 8: bit_startflag[flag + 1] + 8], "o-")
@@ -281,6 +286,47 @@ class decode_afsk1200:
             logging.info('Message extraction complete')
 
         return self.__msg
+
+
+    def bits_to_msg(bits):
+
+        msg_text = ""
+        header_text = ""
+
+        aprs_header = 1
+
+        for byte in range(0, len(bits), 8):
+
+            tmp = bits[byte: byte + 8]
+            character = ""
+            for bit in range(len(tmp)):
+                character += str(tmp[7 - bit])
+
+            if aprs_header == 1:
+                header_text += chr(int("0" + character[:7], 2))
+
+            else:
+                msg_text += chr(int(character, 2))
+
+            if character[-1] == "1" and aprs_header == 1:
+                # header is ending here!
+                aprs_header = 0
+
+        DESTINATION_ADDRESS = header_text[:7]
+        SOURCE_ADDRESS = header_text[7:14]
+        PATH = header_text[14:]
+        print("destination:\t", DESTINATION_ADDRESS)
+        print("source:\t\t", SOURCE_ADDRESS)
+        print("path:\t\t", PATH)
+
+        CONTROL_FIELD = hex(ord(msg_text[0]))
+        PROTOCOL_ID = hex(ord(msg_text[1]))
+        INFORMATION_FIELD = msg_text[2:]
+        print("control fields:\t", CONTROL_FIELD, PROTOCOL_ID)
+        print("information:\t", INFORMATION_FIELD)
+
+        return INFORMATION_FIELD
+
 
     def decode_nrzi(nrzi):
 
