@@ -97,7 +97,7 @@ class decode_noaa:
 
             syncDIff = np.diff(csync)
             modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
-            wiggleRoom = 100
+            wiggleRoom = 200
 
             validSyncs = []
             for i in range(len(csync) - 1):
@@ -107,7 +107,7 @@ class decode_noaa:
                     if csync[i+1] not in validSyncs:
                         validSyncs.append(csync[i+1])
 
-            correctedSyncs = validSyncs
+            correctedSyncs = validSyncs[:]
 
             # initial correction
             c = validSyncs[0] - modeSyncDIff
@@ -295,12 +295,17 @@ class decode_noaa:
 
             imageA = self.getImageA
             imageB = self.getImageB
-            imageAb = scipy.ndimage.uniform_filter(self.getImageA, size=(3, 3))
-            imageBb = scipy.ndimage.uniform_filter(self.getImageB, size=(3, 3))
+            #imageAb = scipy.ndimage.uniform_filter(self.getImageA, size=(3, 3))
+            #imageBb = scipy.ndimage.uniform_filter(self.getImageB, size=(3, 3))
 
             # constants
-            tempLimit = 147.0
-            seaLimit = 25.0
+            #tempLimit = 147.0
+            #seaLimit = 25.0
+            #landLimit = 90.0
+
+            #orig
+            tempLimit = 155.0
+            seaLimit = 30.0
             landLimit = 90.0
 
             colorImg = []
@@ -308,17 +313,17 @@ class decode_noaa:
                 colorRow = []
                 for c in range(1040):
                     v, t = imageA[r,c], imageB[r,c]
-                    vb, tb = imageAb[r,c], imageBb[r,c]
+                    #vb, tb = imageAb[r,c], imageBb[r,c]
                     maxColor, minColor = None, None
                     scaleVisible, scaleTemp = None, None
-
-                    if tb > tempLimit:
+                    # change to >
+                    if t < tempLimit:
                         # clouds
                         minColor, maxColor = [230/360.0, 0.2, 0.3], [230/360.0, 0.0, 1.0]
                         scaleVisible = v / 256.0
                         scaleTemp = (256.0 - t) / 256.0
                     else:
-                        if vb < seaLimit:
+                        if v < seaLimit:
                             # sea
                             minColor, maxColor = [200.0/360.0, 0.7, 0.6], [240.0/360.0, 0.6, 0.4]
                             scaleVisible = v / seaLimit
