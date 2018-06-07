@@ -38,6 +38,21 @@ class decode_afsk1200:
         self.__offset = offset
         self.__msg = None
         self.__graphs = 0
+        self.__useful = 0
+
+    @property
+    def useful(self):
+
+        '''See if atleast one message was found or not
+
+        Returns:
+            :obj:`int`: 0 if not found, 1 if found
+        '''
+
+        #if self.__msg is None:
+        #    self.getMsg
+
+        return self.__useful
 
     @property
     def getMsg(self):
@@ -261,6 +276,7 @@ class decode_afsk1200:
                         # there can be several messages per stream, so for now only the last is stored.
                         # to-do
                         self.__msg = "template: space rocks!"
+                        self.__useful = 1
 
             logging.info('Message extraction complete')
 
