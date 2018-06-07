@@ -166,10 +166,10 @@ for fileIndex in range(len(freqs)):
         entryDict['filesCreated'] = []
 
         # output file names
-        audFileName = fileName.split(".")[0] + "_FM" + ".wav"
-        imgFileName = fileName.split(".")[0] + ".png"
-        colorimgFileName = fileName.split(".")[0] + "_color.png"
-        csvFileName = fileName.split(".")[0] + ".csv"
+        audFileName = fileName.split(".")[0] + "_FM" + "_f" + str(fileIndex+1) + ".wav"
+        imgFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".png"
+        colorimgFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_color.png"
+        csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
         if not outs[fileIndex] is None:
             audFileName = outs[fileIndex] + ".wav"
             imgFileName = outs[fileIndex] + ".png"
