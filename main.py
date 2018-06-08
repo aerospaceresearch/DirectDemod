@@ -187,11 +187,11 @@ for fileIndex in range(len(freqs)):
             #entryDict['filesCreated'].append(audFileName)
 
             imageMatrix = noaaObj.getImage
-            sink.image(imgFileName, imageMatrix).write.show
+            sink.image(imgFileName, imageMatrix).write
             entryDict['filesCreated'].append(imgFileName)
 
             # Experimental
-            #sink.image(colorimgFileName, noaaObj.getColor).write.show
+            #sink.image(colorimgFileName, noaaObj.getColor).write
             #entryDict['filesCreated'].append(colorimgFileName)
 
         # calculate sync is -sync flag is set
