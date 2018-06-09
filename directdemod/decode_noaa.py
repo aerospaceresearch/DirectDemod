@@ -156,13 +156,17 @@ class decode_noaa:
 
                 startIA = int(csyncA[syncIndex])
                 startIB = int(csyncB[syncIndex])
-                deltaI = int(0.25 * amSig.sampRate)
 
-                if startIB + deltaI > amSig.length or startIA + deltaI > amSig.length:
+                endIA = startIB
+                endIB = startIB + int(0.25 * amSig.sampRate)
+                if 1+syncIndex < len(csyncA):
+                    endIB = int(csyncA[syncIndex + 1])
+
+                if endIB > amSig.length or endIA > amSig.length:
                     continue
 
-                imgLineA = amSig.signal[startIA:startIA + deltaI]
-                imgLineB = amSig.signal[startIB:startIB + deltaI]
+                imgLineA = amSig.signal[startIA:endIA]
+                imgLineB = amSig.signal[startIB:endIB]
 
                 imgLineA = signal.resample(imgLineA, int(int(len(imgLineA)/(numPixels*0.5)) * (numPixels*0.5)))
                 imgLineB = signal.resample(imgLineB, int(int(len(imgLineB)/(numPixels*0.5)) * (numPixels*0.5)))
