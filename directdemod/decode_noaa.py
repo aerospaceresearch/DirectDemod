@@ -46,6 +46,7 @@ class decode_noaa:
         self.__useNormCorrelate = None
         self.__color = None
         self.__useful = 0
+        self.__chID = None
 
     @property
     def useful(self):
@@ -165,6 +166,7 @@ class decode_noaa:
             valuesSigCorr = []
             self.__slope = None
             self.__intercept = None
+            chidFifo = []
 
             for i in csync:
 
@@ -207,6 +209,9 @@ class decode_noaa:
                 corrfifosig = corrfifosig[-1*ncorrfifo:]
                 outcorrsig = np.median(corrfifosig)
 
+                chidFifo.append(outcorrsig)
+                chidFifo = chidFifo[-100:]
+
                 if lcorr is None or abs(outcorr - lcorr) > 255.0/16:
                     logging.info('Color correction state: %d', statecorr)
                     if statecorr == 0:
@@ -226,6 +231,10 @@ class decode_noaa:
                             valuesSigCorr = [outcorrsig] + valuesSigCorr
                             self.__slope, self.__intercept, r_value, p_value, std_err = stats.linregress(valuesSigCorr,np.array([i for i in range(9)]) * 255.0/8)
                             logging.info('Color correction bingo slope: %f intercept: %f', self.__slope, self.__intercept)
+                            if len(chidFifo) > 1+64+8:
+                                    self.__chID = np.round((self.__slope*np.median(chidFifo[-1-64-8:-1-64]) + self.__intercept) / (255.0/8))
+
+                            chidFifo = []
                             statecorr = 0
                         else:
                             statecorr = 0
