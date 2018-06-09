@@ -101,48 +101,30 @@ class decode_noaa:
             amSig = self.__getAM(amSig)
 
             # convert sync from samples to time
-            csync = self.__syncA / self.__syncCrudeSampRate
+            csyncA = self.__syncA / self.__syncCrudeSampRate
+            csyncB = self.__syncB / self.__syncCrudeSampRate
 
             # convert back to sample number
-            csync *= amSig.sampRate
+            csyncA *= amSig.sampRate
+            csyncB *= amSig.sampRate
 
             # store uncorrected csync
-            ucsync = csync[:]
+            ucsync = csyncA[:]
 
             # correct any missing syncs
+            csyncA = self.__fillSync(csyncA, amSig.length)
+            csyncB = self.__fillSync(csyncB, amSig.length)
 
-            syncDIff = np.diff(csync)
-            modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
-            wiggleRoom = 200
+            # we want channel A first always
+            if csyncB[0] < csyncA[0]:
+                csyncB.pop(0)
 
-            validSyncs = []
-            for i in range(len(csync) - 1):
-                if abs(csync[i+1] - csync[i] - modeSyncDIff) < wiggleRoom:
-                    if csync[i] not in validSyncs:
-                        validSyncs.append(csync[i])
-                    if csync[i+1] not in validSyncs:
-                        validSyncs.append(csync[i+1])
+            if csyncB[-1] < csyncA[-1]:
+                csyncA.pop(-1)
 
-            correctedSyncs = validSyncs[:]
-
-            # initial correction
-            c = validSyncs[0] - modeSyncDIff
-            while(c > wiggleRoom):
-                correctedSyncs.append(c)
-                c -= modeSyncDIff
-
-            # later corrections
-            anchor = 0
-            c = modeSyncDIff
-            while(validSyncs[anchor] + c < amSig.length):
-                if (anchor + 1) < len(validSyncs) and (abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom or c + validSyncs[anchor] > validSyncs[anchor + 1]):
-                    anchor += 1
-                    c = modeSyncDIff
-                else:
-                    correctedSyncs.append(validSyncs[anchor] + c)
-                    c += modeSyncDIff
-
-            csync = list(np.sort(correctedSyncs))
+            if not len(csyncA) == len(csyncB):
+                logging.error("Number of syncA and syncB unequal")
+                csyncB = np.array(csyncA) +  int(0.25 * amSig.sampRate)
 
             self.__image = []
             imageBuffer = []
@@ -168,27 +150,33 @@ class decode_noaa:
             self.__intercept = None
             chidFifo = []
 
-            for i in csync:
+            for syncIndex in range(len(csyncA)):
 
-                logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
+                logging.info('Decoding line %d of %d lines', syncIndex + 1, len(csyncA))
 
-                startI = int(i)
-                endI = int(i) + int(0.5 * amSig.sampRate)
+                startIA = int(csyncA[syncIndex])
+                startIB = int(csyncB[syncIndex])
+                deltaI = int(0.25 * amSig.sampRate)
 
-                if endI > amSig.length:
+                if startIB + deltaI > amSig.length or startIA + deltaI > amSig.length:
                     continue
 
-                imgLine = amSig.signal[startI:endI]
-                imgLine = signal.resample(imgLine, int(len(imgLine)/numPixels) * numPixels)
-                imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
+                imgLineA = amSig.signal[startIA:startIA + deltaI]
+                imgLineB = amSig.signal[startIB:startIB + deltaI]
+
+                imgLineA = signal.resample(imgLineA, int(int(len(imgLineA)/(numPixels*0.5)) * (numPixels*0.5)))
+                imgLineB = signal.resample(imgLineB, int(int(len(imgLineB)/(numPixels*0.5)) * (numPixels*0.5)))
+
+                imgLineA = np.reshape(imgLineA, (int(numPixels*0.5), int(len(imgLineA)/(numPixels*0.5))))
+                imgLineB = np.reshape(imgLineB, (int(numPixels*0.5), int(len(imgLineB)/(numPixels*0.5))))
 
                 # image color correction based on sync
-                if i in ucsync:
+                if csyncA[syncIndex] in ucsync:
                     for j in range(len(constants.NOAA_SYNCA)):
                         if constants.NOAA_SYNCA[j] == 0:
-                            lowFifo.extend(imgLine[j])
+                            lowFifo.extend(imgLineA[j])
                         else:
-                            highFifo.extend(imgLine[j])
+                            highFifo.extend(imgLineA[j])
                         lowFifo = lowFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
                         highFifo = highFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
                     val11, val244 = np.median(lowFifo), np.median(highFifo)
@@ -199,7 +187,7 @@ class decode_noaa:
 
                 # image color correction based on calibration strip
                 lengthOfStrip = int((len(constants.NOAA_SYNCA) * constants.NOAA_T) * amSig.sampRate)
-                stripVal = np.median(amSig.signal[startI - lengthOfStrip:startI])
+                stripVal = np.median(amSig.signal[startIA - lengthOfStrip:startIA])
 
                 corrfifo.append(255 * (stripVal - self.__low) / (self.__high - self.__low))
                 corrfifo = corrfifo[-1*ncorrfifo:]
@@ -242,7 +230,9 @@ class decode_noaa:
                 lcorrsig = outcorrsig
 
 
-                imgLine = np.median(imgLine, axis = -1)
+                imgLineA = np.median(imgLineA, axis = -1)
+                imgLineB = np.median(imgLineB, axis = -1)
+                imgLine = np.concatenate([imgLineA, imgLineB])
 
                 if self.__slope is None or self.__intercept is None:
                     imageBuffer.append(imgLine[:])
@@ -278,6 +268,49 @@ class decode_noaa:
             logging.info('Image extraction complete')
 
         return self.__image
+
+    def __fillSync(self, csync, maxLen):
+        '''Filters and fills missed syncs to help generate image
+        
+        Args:
+            csync (:obj:`list`): List of detected syncs
+            maxLen (:obj:`int`): Frequency offset of source in Hz
+        
+        Returns:
+            :obj:`list`: corrected syncs
+        '''
+        syncDIff = np.diff(csync)
+        modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
+        wiggleRoom = 200
+
+        validSyncs = []
+        for i in range(len(csync) - 1):
+            if abs(csync[i+1] - csync[i] - modeSyncDIff) < wiggleRoom:
+                if csync[i] not in validSyncs:
+                    validSyncs.append(csync[i])
+                if csync[i+1] not in validSyncs:
+                    validSyncs.append(csync[i+1])
+
+        correctedSyncs = validSyncs[:]
+
+        # initial correction
+        c = validSyncs[0] - modeSyncDIff
+        while(c > wiggleRoom):
+            correctedSyncs.append(c)
+            c -= modeSyncDIff
+
+        # later corrections
+        anchor = 0
+        c = modeSyncDIff
+        while(validSyncs[anchor] + c < maxLen):
+            if (anchor + 1) < len(validSyncs) and (abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom or c + validSyncs[anchor] > validSyncs[anchor + 1]):
+                anchor += 1
+                c = modeSyncDIff
+            else:
+                correctedSyncs.append(validSyncs[anchor] + c)
+                c += modeSyncDIff
+
+        return list(np.sort(correctedSyncs))
 
     @property
     def getImageA(self):
