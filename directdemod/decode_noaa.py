@@ -46,7 +46,21 @@ class decode_noaa:
         self.__useNormCorrelate = None
         self.__color = None
         self.__useful = 0
-        self.__chID = None
+        self.__chIDA = None
+        self.__chIDB = None
+
+    @property
+    def channelID(self):
+        '''get channel ID's
+
+        Returns:
+            :obj:`list`: [channelIDA, channelIDB]
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return [self.__chIDA, self.__chIDB]
 
     @property
     def useful(self):
@@ -140,6 +154,7 @@ class decode_noaa:
             lowFifo, highFifo = [], []
             corrfifo = []
             corrfifosig = []
+            corrfifosig2 = []
             ncorrfifo = 3
             lcorr = None
             lcorrsig = None
@@ -148,7 +163,8 @@ class decode_noaa:
             valuesSigCorr = []
             self.__slope = None
             self.__intercept = None
-            chidFifo = []
+            chidFifo1 = []
+            chidFifo2 = []
 
             for syncIndex in range(len(csyncA)):
 
@@ -201,8 +217,18 @@ class decode_noaa:
                 corrfifosig = corrfifosig[-1*ncorrfifo:]
                 outcorrsig = np.median(corrfifosig)
 
-                chidFifo.append(outcorrsig)
-                chidFifo = chidFifo[-100:]
+                lengthOfStrip2 = int((len(constants.NOAA_SYNCB) * constants.NOAA_T) * amSig.sampRate)
+                stripVal2 = np.median(amSig.signal[startIB - lengthOfStrip2:startIB])
+
+                corrfifosig2.append(stripVal2)
+                corrfifosig2 = corrfifosig2[-1*ncorrfifo:]
+                outcorrsig2 = np.median(corrfifosig2)
+
+                chidFifo1.append(outcorrsig2)
+                chidFifo1 = chidFifo1[-100:]
+
+                chidFifo2.append(outcorrsig)
+                chidFifo2 = chidFifo2[-100:]
 
                 if lcorr is None or abs(outcorr - lcorr) > 255.0/16:
                     logging.info('Color correction state: %d', statecorr)
@@ -223,10 +249,12 @@ class decode_noaa:
                             valuesSigCorr = [outcorrsig] + valuesSigCorr
                             self.__slope, self.__intercept, r_value, p_value, std_err = stats.linregress(valuesSigCorr,np.array([i for i in range(9)]) * 255.0/8)
                             logging.info('Color correction bingo slope: %f intercept: %f', self.__slope, self.__intercept)
-                            if len(chidFifo) > 1+64+8:
-                                    self.__chID = np.round((self.__slope*np.median(chidFifo[-1-64-8:-1-64]) + self.__intercept) / (255.0/8))
+                            if len(chidFifo1) > 1+64+8:
+                                    self.__chIDA = int(np.round((self.__slope*np.median(chidFifo1[-1-64-8:-1-64]) + self.__intercept) / (255.0/8)))
+                                    self.__chIDB = int(np.round((self.__slope*np.median(chidFifo2[-1-64-8:-1-64]) + self.__intercept) / (255.0/8)))
 
-                            chidFifo = []
+                            chidFifo1 = []
+                            chidFifo2 = []
                             statecorr = 0
                         else:
                             statecorr = 0

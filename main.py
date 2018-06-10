@@ -180,7 +180,7 @@ for fileIndex in range(len(freqs)):
         noaaObj = decode_noaa.decode_noaa(sigsrc, freqOffset, bandwidths[fileIndex])
 
         # get the image if -noimage is not present
-        if calculateImage:
+        if calculateImage and noaaObj.useful == 1:
             # get the audio
             #audioOut = noaaObj.getAudio
             #sink.wavFile(audFileName, audioOut).write
@@ -190,15 +190,25 @@ for fileIndex in range(len(freqs)):
             sink.image(imgFileName, imageMatrix).write
             entryDict['filesCreated'].append(imgFileName)
 
+            if not noaaObj.channelID[0] is None and not noaaObj.channelID[1] is None:
+                logging.info('NOAA image has channel A id: %d and channel B id: %d', noaaObj.channelID[0], noaaObj.channelID[1])
+
             # Experimental
-            #sink.image(colorimgFileName, noaaObj.getColor).write
-            #entryDict['filesCreated'].append(colorimgFileName)
+            if noaaObj.channelID[0] == 2 and noaaObj.channelID[1] == 4:
+                logging.info('Writing false color image')
+                sink.image(colorimgFileName, noaaObj.getColor).write
+                entryDict['filesCreated'].append(colorimgFileName)
+            else:
+                logging.info('This image is ineligible to be converted to false color')
 
         # calculate sync is -sync flag is set
-        if calculateSync:
+        if calculateSync and noaaObj.useful == 1:
             syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
             sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB",]).write
             entryDict['filesCreated'].append(csvFileName)
+
+        if noaaObj.useful == 0:
+            logging.info('No NOAA data was found at this frequency')
 
         entryDict['usefulness'] = noaaObj.useful
         entryDict['syncDetect'] = calculateSync
