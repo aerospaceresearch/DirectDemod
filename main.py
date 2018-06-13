@@ -24,6 +24,7 @@ def usage(err = ""):
     print("Common options:")
     print("\t-c <Fc in Hz> : centre frequency of the recording")
     print("\t-ce : extract centre frequency from file name")
+    print("\t-a <F in Hz> : sampling frequency of the recording")
     print("\t-q : switch I and Q channels")
     print("\t-r <filename> : generate report in JSON")
     print("\t-h : print this")
@@ -49,7 +50,7 @@ def usage(err = ""):
 
 # try to get the arguments, if error occurs display usage
 try:
-    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:qn:b:d:r:', ['help'])
+    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:qn:b:d:r:a:', ['help'])
 except getopt.GetoptError as e:
     usage(e)
 
@@ -75,6 +76,11 @@ if len([i for i in optlist if (i[0] == '-n' and i[1] == 'oimage')]) > 0:
 reportFile = None
 if len([i for i in optlist if i[0] == '-r']) > 0:
     reportFile = [i[1] for i in optlist if i[0] == '-r'][0]
+
+# check if -a is set to get sampling rate
+givenSampRate = None
+if len([i for i in optlist if i[0] == '-a']) > 0:
+    givenSampRate = int([i[1] for i in optlist if i[0] == '-a'][0])
 
 # create the list of frequencies to be decoded
 freqs = [int(i[1]) for i in optlist if i[0] == '-f']
@@ -108,9 +114,9 @@ fileName = args[0]
 # create this as a signal source
 sigsrc = None
 if fileName[-3:] == "wav":
-    sigsrc = source.IQwav(fileName)
+    sigsrc = source.IQwav(fileName, givenSampRate)
 elif fileName[-3:] == "dat":
-    sigsrc = source.IQdat(fileName)
+    sigsrc = source.IQdat(fileName, givenSampRate)
 else:
     usage("Only .wav and .dat files are supported")
 

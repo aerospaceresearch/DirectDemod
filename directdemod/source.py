@@ -54,7 +54,7 @@ class IQwav(source):
     '''
     An IQ.wav file source, typically an output recorded from SDRSHARP or other similar software
     '''
-    def __init__(self, filename):
+    def __init__(self, filename, givenSampFreq = None):
 
         '''Initialize the object
 
@@ -65,6 +65,8 @@ class IQwav(source):
         self.__offset = 0
         self.__sourceType = constants.SOURCE_IQWAV
         self.__sampFreq, self.__data = scipy.io.wavfile.read(filename, True)
+        if not givenSampFreq is None:
+            self.__sampFreq = givenSampFreq
         self.__actualLength = self.__data.shape[0]
         self.__length = self.__data.shape[0]
 
@@ -142,7 +144,7 @@ class IQdat(source):
     '''
     An IQ.dat file source
     '''
-    def __init__(self, filename):
+    def __init__(self, filename, givenSampFreq = None):
 
         '''Initialize the object
 
@@ -155,6 +157,8 @@ class IQdat(source):
         self.__data = np.memmap(filename)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
+        if not givenSampFreq is None:
+            self.__sampFreq = givenSampFreq
         self.__actualLength = int(len(self.__data)/2)
 
     @property
@@ -233,7 +237,7 @@ class IQwavAlt(source):
     Note: This is an alternative implementation, directly using np.memmap
     An IQ.wav file source, typically an output recorded from SDRSHARP
     '''
-    def __init__(self, filename):
+    def __init__(self, filename, givenSampFreq = None):
 
         '''Initialize the object
 
@@ -246,6 +250,8 @@ class IQwavAlt(source):
         self.__data = np.memmap(filename, offset=44)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
+        if not givenSampFreq is None:
+            self.__sampFreq = givenSampFreq
         self.__actualLength = int(len(self.__data)/2)
 
     @property
