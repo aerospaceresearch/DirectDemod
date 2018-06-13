@@ -15,7 +15,8 @@ optlist, args = [], []
 
 # function to display usage statement and exit
 def usage(err = ""):
-    print("ERROR :",err)
+    if len(err) > 0:
+        print("ERROR :",err)
 
     # common to all decoders
     print("Usage:", sys.argv[0], "[options] <IQ.wav>")
