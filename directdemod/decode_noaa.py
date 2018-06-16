@@ -7,6 +7,11 @@ import logging, colorsys
 import scipy.signal as signal
 from scipy import stats
 import scipy.ndimage
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+from scipy import ndimage
+from scipy import misc
+from PIL import Image
 
 '''
 Object to decode NOAA APT
@@ -89,6 +94,157 @@ class decode_noaa:
             self.__extractedAudio = self.__audio()
 
         return self.__extractedAudio
+
+    def getMapImage(self, cTime, destFileRot, destFileNoRot, satellite, tleFile = None):
+
+        '''Get the map overlay of the image
+
+        Args:
+            cTime (:obj:`datetime`): Time of start of capture in UTC
+            tleFile (:obj:`str`, optional): TLE file location, pulls latest from internet if not given
+            destFile (:obj:`str`): location where to store the image
+            satellite (:obj:`str`): Satellite name, ex: NOAA 19 etc.
+
+        '''
+
+        try:
+            from pyorbital.orbital import Orbital
+            from pyorbital import tlefile
+        except ImportError:
+            logging.error('pyorbital not installed')
+            return
+            
+        basemapPresent = False
+        cartopyPresent = False
+
+        try:
+            from mpl_toolkits.basemap import Basemap
+            basemapPresent = True
+        except ImportError:
+            logging.warning('basemap not installed')
+
+        if not basemapPresent:
+            try:
+                import cartopy.crs as ccrs
+                import cartopy.feature
+                cartopyPresent = True
+            except ImportError:
+                logging.error('Both basemap and cartopy not installed. Please install either.')
+                return
+
+        def angleFromCoordinate(lat1, long1, lat2, long2):
+            # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+            lat1 = np.radians(lat1)
+            long1 = np.radians(long1)
+            lat2 = np.radians(lat2)
+            long2 = np.radians(long2)
+
+            dLon = (long2 - long1)
+
+            y = np.sin(dLon) * np.cos(lat2)
+            x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(dLon)
+            brng = np.arctan2(y, x)
+            brng = np.degrees(brng)
+            brng = (brng + 360) % 360
+            brng = 360 - brng
+            return brng
+
+        if tleFile is None:
+            orb = Orbital(satellite)
+        else:
+            orb = Orbital(satellite, tle_file=tleFile)
+
+        im = self.getImageA
+        im = im[:,85:995]
+        oim = im[:]
+
+        tdelta = int(im.shape[0]/16)
+        if tdelta < 10:
+            tdelta = 10
+
+        top = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4) - tdelta))[:2][::-1]
+        bot = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4) + tdelta))[:2][::-1]
+        center = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4)))[:2][::-1]
+
+        rot = angleFromCoordinate(*bot, *top)
+
+        if basemapPresent:
+            rotated_img = ndimage.rotate(im, rot)
+            rimg = rotated_img[:]
+            w = rotated_img.shape[1]
+            h = rotated_img.shape[0]
+
+            m = Basemap(projection='cass',lon_0 = center[1],lat_0 = center[0],width = w*4000*0.81,height = h*4000*0.81, resolution = "i")
+            m.drawcoastlines(color='yellow')
+            m.drawcountries(color='yellow')
+
+            im = plt.imshow(rotated_img, cmap='gray', extent=(*plt.xlim(), *plt.ylim()))
+            
+            plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
+
+            img = misc.imread(destFileRot)
+            img = img[100:-100,100:-100,:]
+            img = ndimage.rotate(img, -1 * (rot%180))
+
+            img = misc.imresize(img, rimg.shape)
+            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            img = img[rf:re,cf:ce]
+
+            img = Image.fromarray(img[97:-97,97:-97])
+            
+            try:
+                img.save(destFileNoRot)
+            except:
+                logging.error('Image reverse rotation failed')
+
+        elif cartopyPresent:
+
+            def add_m(center, dx, dy):
+                # source: https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters
+                new_latitude  = center[0] + (dy / 6371000.0) * (180 / np.pi)
+                new_longitude = center[1] + (dx / 6371000.0) * (180 / np.pi) / np.cos(center[0] * np.pi/180)
+                return [new_latitude, new_longitude]
+
+            fig = plt.figure()
+
+            img = ndimage.rotate(im, rot)
+            rimg = img[:]
+
+            dx = img.shape[0]*4000/2*0.81 # in meters
+            dy = img.shape[1]*4000/2*0.81 # in meters
+
+            leftbot = add_m(center, -1*dx, -1*dy)
+            righttop = add_m(center, dx, dy)
+
+            img_extent = (leftbot[1], righttop[1], leftbot[0], righttop[0])
+
+            ax = plt.axes(projection=ccrs.PlateCarree())
+            ax.imshow(img, origin='upper', cmap='gray', extent=img_extent, transform=ccrs.PlateCarree())
+            ax.coastlines(resolution='50m', color='yellow', linewidth=1)
+            ax.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor='yellow')
+
+            plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
+
+            img = misc.imread(destFileRot)
+            img = img[100:-100,100:-100,:]
+            img = ndimage.rotate(img, -1 * (rot%180))
+
+            img = misc.imresize(img, rimg.shape)
+            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            img = img[rf:re,cf:ce]
+
+            img = Image.fromarray(img[97:-97,97:-97])
+            try:
+                img.save(destFileNoRot)
+            except:
+                logging.error('Image reverse rotation failed')
+
 
     @property
     def getImage(self):
@@ -232,7 +388,7 @@ class decode_noaa:
 
                 if lcorr is None or abs(outcorr - lcorr) > 255.0/16:
                     logging.info('Color correction state: %d', statecorr)
-                    if statecorr == 0:
+                    if statecorr == 0 and not lcorrsig is None:
                         valuesPixCorr = [lcorr, outcorr]
                         valuesSigCorr = [lcorrsig, outcorrsig]
                         statecorr = 1

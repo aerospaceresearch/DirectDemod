@@ -3,11 +3,15 @@ from mpl_toolkits.basemap import Basemap
 import numpy as np
 from scipy import ndimage
 
-center = [50.521436, 7.145530]
+center = [39.802613264377825, -14.536830769290223]
+center = [53.5480150544989, -20.38914395572289]
+center = [ 51.86099209979376,15.925813399768762]
+center = [6.859298612741445, 64.77839469486523][::-1]
+rot = +17+180
 
-rot = -17
-
-im = plt.imread('a.png')
+im = plt.imread('d.png')
+#im = im[:,1040:]
+print(im.shape)
 rotated_img = ndimage.rotate(im, rot)
 w = rotated_img.shape[1]
 h = rotated_img.shape[0]
