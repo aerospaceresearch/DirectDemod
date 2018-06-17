@@ -203,11 +203,11 @@
 <h2>Specific applications<a class="headerlink" href="#specific-applications" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="directdemod.decode_noaa.decode_noaa">
-<em class="property">class </em><code class="descclassname">directdemod.decode_noaa.</code><code class="descname">decode_noaa</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">directdemod.decode_noaa.</code><code class="descname">decode_noaa</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa" title="Permalink to this definition">¶</a></dt>
 <dd><p>Object to decode NOAA APT</p>
 <dl class="method">
 <dt id="directdemod.decode_noaa.decode_noaa.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -216,6 +216,7 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>sigsrc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – IQ data source</li>
 <li><strong>offset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Frequency offset of source in Hz</li>
+<li><strong>bw</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – Bandwidth</li>
 </ul>
 </td>
 </tr>
@@ -257,6 +258,22 @@
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="directdemod.decode_noaa.decode_noaa.getColor">
+<code class="descname">getColor</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get false color image (EXPERIMENTAL)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A matrix list of pixel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="directdemod.decode_noaa.decode_noaa.getCrudeSync">
 <code class="descname">getCrudeSync</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_noaa.html#decode_noaa.getCrudeSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getCrudeSync" title="Permalink to this definition">¶</a></dt>
@@ -284,6 +301,137 @@
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A matrix of pixel values</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.decode_noaa.decode_noaa.getImageA">
+<code class="descname">getImageA</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getImageA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Image A from the extracted image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A matrix list of pixel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.decode_noaa.decode_noaa.getImageB">
+<code class="descname">getImageB</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.getImageB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Image B from the extracted image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A matrix list of pixel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200">
+<em class="property">class </em><code class="descclassname">directdemod.decode_afsk1200.</code><code class="descname">decode_afsk1200</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_afsk1200.html#decode_afsk1200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to decode AFSK1200</p>
+<dl class="method">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_afsk1200.html#decode_afsk1200.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sigsrc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – IQ data source</li>
+<li><strong>offset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Frequency offset of source in Hz</li>
+<li><strong>bw</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – Bandwidth</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200.decode_nrzi">
+<code class="descname">decode_nrzi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_afsk1200.html#decode_afsk1200.decode_nrzi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200.decode_nrzi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode NRZI</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nrzi</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – the NRZI bits</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">decoded NRZI bits</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200.find_bit_stuffing">
+<code class="descname">find_bit_stuffing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_afsk1200.html#decode_afsk1200.find_bit_stuffing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200.find_bit_stuffing" title="Permalink to this definition">¶</a></dt>
+<dd><p>To find bit stuffing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>code_bit</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – the bits</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">bit stuffing status</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200.getMsg">
+<code class="descname">getMsg</code><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200.getMsg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the message from data</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string: A string of message data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.decode_afsk1200.decode_afsk1200.reduce_stuffed_bit">
+<code class="descname">reduce_stuffed_bit</code><span class="sig-paren">(</span><em>stuffed_bit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_afsk1200.html#decode_afsk1200.reduce_stuffed_bit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_afsk1200.decode_afsk1200.reduce_stuffed_bit" title="Permalink to this definition">¶</a></dt>
+<dd><p>To remove stuffed bits</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>code_bit</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – the bits</li>
+<li><strong>stuffed_bit</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – the result from find_bit_stuffing()</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">bits free from stuffing</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></p>
+</td>
 </tr>
 </tbody>
 </table>

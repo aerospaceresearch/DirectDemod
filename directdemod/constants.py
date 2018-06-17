@@ -18,11 +18,16 @@ NOAA_SYNCB = [0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 
 NOAA_PEAKHEIGHTWIGGLE = 0.25 # %allowable change in peak height
 NOAA_MINPEAKDIST = 0.45 # min distance between two sync in seconds
 NOAA_COLORCORRECT_FIFOLEN = 10000
+NOAA_DETECTMAXCHANGE = 5
+NOAA_DETECTCONSSYNCSNUM = 10
+NOAA_SATS = {137620000:"NOAA 15", 137100000:"NOAA 19", 137912500:"NOAA 18"}
+
 
 ###### Do not change these
 
 ## Source types
 SOURCE_IQWAV = 0
+SOURCE_IQDAT = 1
 
 ## Filter types
 FLT_LP = 0

@@ -3,9 +3,15 @@ noaa specific
 '''
 from directdemod import source, sink, chunker, comm, constants, filters, demod_am, demod_fm
 import numpy as np
-import logging
+import logging, colorsys
 import scipy.signal as signal
 from scipy import stats
+import scipy.ndimage
+from datetime import datetime, timedelta
+import matplotlib.pyplot as plt
+from scipy import ndimage
+from scipy import misc
+from PIL import Image
 
 '''
 Object to decode NOAA APT
@@ -43,6 +49,37 @@ class decode_noaa:
         self.__asyncBpk = None
         self.__asyncBtime = None
         self.__useNormCorrelate = None
+        self.__color = None
+        self.__useful = 0
+        self.__chIDA = None
+        self.__chIDB = None
+
+    @property
+    def channelID(self):
+        '''get channel ID's
+
+        Returns:
+            :obj:`list`: [channelIDA, channelIDB]
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return [self.__chIDA, self.__chIDB]
+
+    @property
+    def useful(self):
+
+        '''See if some data was found or not: 10 consecutive syncs apart by 0.5s+-error
+
+        Returns:
+            :obj:`int`: 0 if not found, 1 if found
+        '''
+
+        if self.__syncA is None or self.__syncB is None:
+            self.getCrudeSync()
+
+        return self.__useful
 
     @property
     def getAudio(self):
@@ -57,6 +94,157 @@ class decode_noaa:
             self.__extractedAudio = self.__audio()
 
         return self.__extractedAudio
+
+    def getMapImage(self, cTime, destFileRot, destFileNoRot, satellite, tleFile = None):
+
+        '''Get the map overlay of the image
+
+        Args:
+            cTime (:obj:`datetime`): Time of start of capture in UTC
+            tleFile (:obj:`str`, optional): TLE file location, pulls latest from internet if not given
+            destFile (:obj:`str`): location where to store the image
+            satellite (:obj:`str`): Satellite name, ex: NOAA 19 etc.
+
+        '''
+
+        try:
+            from pyorbital.orbital import Orbital
+            from pyorbital import tlefile
+        except ImportError:
+            logging.error('pyorbital not installed')
+            return
+            
+        basemapPresent = False
+        cartopyPresent = False
+
+        try:
+            from mpl_toolkits.basemap import Basemap
+            basemapPresent = True
+        except ImportError:
+            logging.warning('basemap not installed')
+
+        if not basemapPresent:
+            try:
+                import cartopy.crs as ccrs
+                import cartopy.feature
+                cartopyPresent = True
+            except ImportError:
+                logging.error('Both basemap and cartopy not installed. Please install either.')
+                return
+
+        def angleFromCoordinate(lat1, long1, lat2, long2):
+            # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+            lat1 = np.radians(lat1)
+            long1 = np.radians(long1)
+            lat2 = np.radians(lat2)
+            long2 = np.radians(long2)
+
+            dLon = (long2 - long1)
+
+            y = np.sin(dLon) * np.cos(lat2)
+            x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(dLon)
+            brng = np.arctan2(y, x)
+            brng = np.degrees(brng)
+            brng = (brng + 360) % 360
+            brng = 360 - brng
+            return brng
+
+        if tleFile is None:
+            orb = Orbital(satellite)
+        else:
+            orb = Orbital(satellite, tle_file=tleFile)
+
+        im = self.getImageA
+        im = im[:,85:995]
+        oim = im[:]
+
+        tdelta = int(im.shape[0]/16)
+        if tdelta < 10:
+            tdelta = 10
+
+        top = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4) - tdelta))[:2][::-1]
+        bot = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4) + tdelta))[:2][::-1]
+        center = orb.get_lonlatalt(cTime + timedelta(seconds=int(im.shape[0]/4)))[:2][::-1]
+
+        rot = angleFromCoordinate(*bot, *top)
+
+        if basemapPresent:
+            rotated_img = ndimage.rotate(im, rot)
+            rimg = rotated_img[:]
+            w = rotated_img.shape[1]
+            h = rotated_img.shape[0]
+
+            m = Basemap(projection='cass',lon_0 = center[1],lat_0 = center[0],width = w*4000*0.81,height = h*4000*0.81, resolution = "i")
+            m.drawcoastlines(color='yellow')
+            m.drawcountries(color='yellow')
+
+            im = plt.imshow(rotated_img, cmap='gray', extent=(*plt.xlim(), *plt.ylim()))
+            
+            plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
+
+            img = misc.imread(destFileRot)
+            img = img[100:-100,100:-100,:]
+            img = ndimage.rotate(img, -1 * (rot%180))
+
+            img = misc.imresize(img, rimg.shape)
+            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            img = img[rf:re,cf:ce]
+
+            img = Image.fromarray(img[97:-97,97:-97])
+
+            try:
+                img.save(destFileNoRot)
+            except:
+                logging.error('Image reverse rotation failed')
+
+        elif cartopyPresent:
+
+            def add_m(center, dx, dy):
+                # source: https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters
+                new_latitude  = center[0] + (dy / 6371000.0) * (180 / np.pi)
+                new_longitude = center[1] + (dx / 6371000.0) * (180 / np.pi) / np.cos(center[0] * np.pi/180)
+                return [new_latitude, new_longitude]
+
+            fig = plt.figure()
+
+            img = ndimage.rotate(im, rot)
+            rimg = img[:]
+
+            dx = img.shape[0]*4000/2*0.81 # in meters
+            dy = img.shape[1]*4000/2*0.81 # in meters
+
+            leftbot = add_m(center, -1*dx, -1*dy)
+            righttop = add_m(center, dx, dy)
+
+            img_extent = (leftbot[1], righttop[1], leftbot[0], righttop[0])
+
+            ax = plt.axes(projection=ccrs.PlateCarree())
+            ax.imshow(img, origin='upper', cmap='gray', extent=img_extent, transform=ccrs.PlateCarree())
+            ax.coastlines(resolution='50m', color='yellow', linewidth=1)
+            ax.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor='yellow')
+
+            plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
+
+            img = misc.imread(destFileRot)
+            img = img[100:-100,100:-100,:]
+            img = ndimage.rotate(img, -1 * (rot%180))
+
+            img = misc.imresize(img, rimg.shape)
+            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
+            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            img = img[rf:re,cf:ce]
+
+            img = Image.fromarray(img[97:-97,97:-97])
+            try:
+                img.save(destFileNoRot)
+            except:
+                logging.error('Image reverse rotation failed')
+
 
     @property
     def getImage(self):
@@ -83,48 +271,30 @@ class decode_noaa:
             amSig = self.__getAM(amSig)
 
             # convert sync from samples to time
-            csync = self.__syncA / self.__syncCrudeSampRate
+            csyncA = self.__syncA / self.__syncCrudeSampRate
+            csyncB = self.__syncB / self.__syncCrudeSampRate
 
             # convert back to sample number
-            csync *= amSig.sampRate
+            csyncA *= amSig.sampRate
+            csyncB *= amSig.sampRate
 
             # store uncorrected csync
-            ucsync = csync[:]
+            ucsync = csyncA[:]
 
             # correct any missing syncs
+            csyncA = self.__fillSync(csyncA, amSig.length)
+            csyncB = self.__fillSync(csyncB, amSig.length)
 
-            syncDIff = np.diff(csync)
-            modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
-            wiggleRoom = 100
+            # we want channel A first always
+            if csyncB[0] < csyncA[0]:
+                csyncB.pop(0)
 
-            validSyncs = []
-            for i in range(len(csync) - 1):
-                if abs(csync[i+1] - csync[i] - modeSyncDIff) < wiggleRoom:
-                    if csync[i] not in validSyncs:
-                        validSyncs.append(csync[i])
-                    if csync[i+1] not in validSyncs:
-                        validSyncs.append(csync[i+1])
+            if csyncB[-1] < csyncA[-1]:
+                csyncA.pop(-1)
 
-            correctedSyncs = validSyncs
-
-            # initial correction
-            c = validSyncs[0] - modeSyncDIff
-            while(c > wiggleRoom):
-                correctedSyncs.append(c)
-                c -= modeSyncDIff
-
-            # later corrections
-            anchor = 0
-            c = modeSyncDIff
-            while(validSyncs[anchor] + c < amSig.length):
-                if (anchor + 1) < len(validSyncs) and abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom:
-                    anchor += 1
-                    c = modeSyncDIff
-                else:
-                    correctedSyncs.append(validSyncs[anchor] + c)
-                    c += modeSyncDIff
-
-            csync = list(np.sort(correctedSyncs))
+            if not len(csyncA) == len(csyncB):
+                logging.error("Number of syncA and syncB unequal")
+                csyncB = np.array(csyncA) +  int(0.25 * amSig.sampRate)
 
             self.__image = []
             imageBuffer = []
@@ -140,6 +310,7 @@ class decode_noaa:
             lowFifo, highFifo = [], []
             corrfifo = []
             corrfifosig = []
+            corrfifosig2 = []
             ncorrfifo = 3
             lcorr = None
             lcorrsig = None
@@ -148,28 +319,41 @@ class decode_noaa:
             valuesSigCorr = []
             self.__slope = None
             self.__intercept = None
+            chidFifo1 = []
+            chidFifo2 = []
 
-            for i in csync:
+            for syncIndex in range(len(csyncA)):
 
-                logging.info('Decoding line %d of %d lines', list(csync).index(i) + 1, len(csync))
+                logging.info('Decoding line %d of %d lines', syncIndex + 1, len(csyncA))
 
-                startI = int(i)
-                endI = int(i) + int(0.5 * amSig.sampRate)
+                startIA = int(csyncA[syncIndex])
+                startIB = int(csyncB[syncIndex])
 
-                if endI > amSig.length:
+                endIA = startIB
+                endIB = startIB + int(0.25 * amSig.sampRate)
+                if 1+syncIndex < len(csyncA):
+                    endIB = int(csyncA[syncIndex + 1])
+                    
+                if endIB > amSig.length or endIA > amSig.length or startIA < 0 or startIB < 0:
                     continue
 
-                imgLine = amSig.signal[startI:endI]
-                imgLine = signal.resample(imgLine, int(len(imgLine)/numPixels) * numPixels)
-                imgLine = np.reshape(imgLine, (numPixels, int(len(imgLine)/numPixels)))
+                imgLineA = amSig.signal[startIA:endIA]
+                imgLineB = amSig.signal[startIB:endIB]
+
+
+                imgLineA = signal.resample(imgLineA, int(int(len(imgLineA)/(numPixels*0.5)) * (numPixels*0.5)))
+                imgLineB = signal.resample(imgLineB, int(int(len(imgLineB)/(numPixels*0.5)) * (numPixels*0.5)))
+
+                imgLineA = np.reshape(imgLineA, (int(numPixels*0.5), int(len(imgLineA)/(numPixels*0.5))))
+                imgLineB = np.reshape(imgLineB, (int(numPixels*0.5), int(len(imgLineB)/(numPixels*0.5))))
 
                 # image color correction based on sync
-                if i in ucsync:
+                if csyncA[syncIndex] in ucsync:
                     for j in range(len(constants.NOAA_SYNCA)):
                         if constants.NOAA_SYNCA[j] == 0:
-                            lowFifo.extend(imgLine[j])
+                            lowFifo.extend(imgLineA[j])
                         else:
-                            highFifo.extend(imgLine[j])
+                            highFifo.extend(imgLineA[j])
                         lowFifo = lowFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
                         highFifo = highFifo[-1*constants.NOAA_COLORCORRECT_FIFOLEN:]
                     val11, val244 = np.median(lowFifo), np.median(highFifo)
@@ -180,7 +364,7 @@ class decode_noaa:
 
                 # image color correction based on calibration strip
                 lengthOfStrip = int((len(constants.NOAA_SYNCA) * constants.NOAA_T) * amSig.sampRate)
-                stripVal = np.median(amSig.signal[startI - lengthOfStrip:startI])
+                stripVal = np.median(amSig.signal[startIA - lengthOfStrip:startIA])
 
                 corrfifo.append(255 * (stripVal - self.__low) / (self.__high - self.__low))
                 corrfifo = corrfifo[-1*ncorrfifo:]
@@ -190,9 +374,22 @@ class decode_noaa:
                 corrfifosig = corrfifosig[-1*ncorrfifo:]
                 outcorrsig = np.median(corrfifosig)
 
+                lengthOfStrip2 = int((len(constants.NOAA_SYNCB) * constants.NOAA_T) * amSig.sampRate)
+                stripVal2 = np.median(amSig.signal[startIB - lengthOfStrip2:startIB])
+
+                corrfifosig2.append(stripVal2)
+                corrfifosig2 = corrfifosig2[-1*ncorrfifo:]
+                outcorrsig2 = np.median(corrfifosig2)
+
+                chidFifo1.append(outcorrsig2)
+                chidFifo1 = chidFifo1[-100:]
+
+                chidFifo2.append(outcorrsig)
+                chidFifo2 = chidFifo2[-100:]
+
                 if lcorr is None or abs(outcorr - lcorr) > 255.0/16:
                     logging.info('Color correction state: %d', statecorr)
-                    if statecorr == 0:
+                    if statecorr == 0 and not lcorrsig is None:
                         valuesPixCorr = [lcorr, outcorr]
                         valuesSigCorr = [lcorrsig, outcorrsig]
                         statecorr = 1
@@ -209,6 +406,12 @@ class decode_noaa:
                             valuesSigCorr = [outcorrsig] + valuesSigCorr
                             self.__slope, self.__intercept, r_value, p_value, std_err = stats.linregress(valuesSigCorr,np.array([i for i in range(9)]) * 255.0/8)
                             logging.info('Color correction bingo slope: %f intercept: %f', self.__slope, self.__intercept)
+                            if len(chidFifo1) > 1+64+8:
+                                    self.__chIDA = int(np.round((self.__slope*np.median(chidFifo1[-1-64-8:-1-64]) + self.__intercept) / (255.0/8)))
+                                    self.__chIDB = int(np.round((self.__slope*np.median(chidFifo2[-1-64-8:-1-64]) + self.__intercept) / (255.0/8)))
+
+                            chidFifo1 = []
+                            chidFifo2 = []
                             statecorr = 0
                         else:
                             statecorr = 0
@@ -216,7 +419,9 @@ class decode_noaa:
                 lcorrsig = outcorrsig
 
 
-                imgLine = np.median(imgLine, axis = -1)
+                imgLineA = np.median(imgLineA, axis = -1)
+                imgLineB = np.median(imgLineB, axis = -1)
+                imgLine = np.concatenate([imgLineA, imgLineB])
 
                 if self.__slope is None or self.__intercept is None:
                     imageBuffer.append(imgLine[:])
@@ -252,6 +457,139 @@ class decode_noaa:
             logging.info('Image extraction complete')
 
         return self.__image
+
+    def __fillSync(self, csync, maxLen):
+        '''Filters and fills missed syncs to help generate image
+        
+        Args:
+            csync (:obj:`list`): List of detected syncs
+            maxLen (:obj:`int`): Frequency offset of source in Hz
+        
+        Returns:
+            :obj:`list`: corrected syncs
+        '''
+        syncDIff = np.diff(csync)
+        modeSyncDIff = max(set(syncDIff), key=list(syncDIff).count)
+        wiggleRoom = 200
+
+        validSyncs = []
+        for i in range(len(csync) - 1):
+            if abs(csync[i+1] - csync[i] - modeSyncDIff) < wiggleRoom:
+                if csync[i] not in validSyncs:
+                    validSyncs.append(csync[i])
+                if csync[i+1] not in validSyncs:
+                    validSyncs.append(csync[i+1])
+
+        correctedSyncs = validSyncs[:]
+
+        # initial correction
+        c = validSyncs[0] - modeSyncDIff
+        while(c > wiggleRoom):
+            correctedSyncs.append(c)
+            c -= modeSyncDIff
+
+        # later corrections
+        anchor = 0
+        c = modeSyncDIff
+        while(validSyncs[anchor] + c < maxLen):
+            if (anchor + 1) < len(validSyncs) and (abs(validSyncs[anchor + 1] - c - validSyncs[anchor]) < wiggleRoom or c + validSyncs[anchor] > validSyncs[anchor + 1]):
+                anchor += 1
+                c = modeSyncDIff
+            else:
+                correctedSyncs.append(validSyncs[anchor] + c)
+                c += modeSyncDIff
+
+        return list(np.sort(correctedSyncs))
+
+    @property
+    def getImageA(self):
+        '''Get Image A from the extracted image
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return self.__image[:,:1040]
+
+    @property
+    def getImageB(self):
+        '''Get Image B from the extracted image
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__image is None:
+            self.getImage
+
+        return self.__image[:,1040:]
+
+    @property
+    def getColor(self):
+        '''Get false color image (EXPERIMENTAL)
+
+        Returns:
+            :obj:`numpy array`: A matrix list of pixel
+        '''
+
+        if self.__color is None:
+            if self.__image is None:
+                self.getImage
+
+            imageA = self.getImageA
+            imageB = self.getImageB
+            #imageAb = scipy.ndimage.uniform_filter(self.getImageA, size=(3, 3))
+            #imageBb = scipy.ndimage.uniform_filter(self.getImageB, size=(3, 3))
+
+            # constants
+            #tempLimit = 147.0
+            #seaLimit = 25.0
+            #landLimit = 90.0
+
+            #orig
+            tempLimit = 155.0
+            seaLimit = 30.0
+            landLimit = 90.0
+
+            colorImg = []
+            for r in range(len(imageA)):
+                colorRow = []
+                for c in range(1040):
+                    v, t = imageA[r,c], imageB[r,c]
+                    #vb, tb = imageAb[r,c], imageBb[r,c]
+                    maxColor, minColor = None, None
+                    scaleVisible, scaleTemp = None, None
+                    # change to >
+                    if t < tempLimit:
+                        # clouds
+                        minColor, maxColor = [230/360.0, 0.2, 0.3], [230/360.0, 0.0, 1.0]
+                        scaleVisible = v / 256.0
+                        scaleTemp = (256.0 - t) / 256.0
+                    else:
+                        if v < seaLimit:
+                            # sea
+                            minColor, maxColor = [200.0/360.0, 0.7, 0.6], [240.0/360.0, 0.6, 0.4]
+                            scaleVisible = v / seaLimit
+                            scaleTemp = (256.0-t) / (256.0 - tempLimit)
+                        else:
+                            # ground
+                            minColor, maxColor = [60.0/360.0, 0.6, 0.2], [100.0/360.0, 0.0, 0.5]
+                            scaleVisible = (v - seaLimit) / (landLimit - seaLimit)
+                            scaleTemp = (256.0 - t) / (256.0 - tempLimit);
+
+                    finalS = maxColor[1] + scaleTemp * (minColor[1] - maxColor[1]);
+                    finalV = maxColor[2] + scaleVisible * (minColor[2] - maxColor[2]);
+                    finalH = maxColor[0] + scaleVisible * scaleTemp * (minColor[0] - maxColor[0]);
+                    pix = tuple([int(k * 255.0) for k in colorsys.hsv_to_rgb(finalH, finalS, finalV)])
+                    colorRow.append(pix)
+
+                colorImg.append(colorRow)
+            self.__color = np.uint8(np.array(colorImg))
+
+        return self.__color
 
     def __audio(self, audioFreq = constants.NOAA_AUDSAMPRATE, strictness = True):
 
@@ -300,7 +638,7 @@ class decode_noaa:
         amDemdulator = demod_am.demod_am()
         amOut = comm.commSignal(sig.sampRate)
 
-        chunkerObj = chunker.chunker(sig, chunkSize = 60000*18)
+        chunkerObj = chunker.chunker(sig, chunkSize = 60000*4)
 
         for i in chunkerObj.getChunks:
 
@@ -445,6 +783,19 @@ class decode_noaa:
             logging.info('Beginning SyncB detection')
             self.__syncB = self.__correlateAndFindPeaks(sig, constants.NOAA_SYNCB)
             logging.info('Done SyncB detection')
+
+            # determine if some data was found or not
+            syncAdiff = np.abs(np.diff(self.__syncA) - (self.__syncCrudeSampRate*0.5))
+            minSyncAdiff = np.min([np.max(syncAdiff[i:i+constants.NOAA_DETECTCONSSYNCSNUM]) for i in range(len(syncAdiff)-constants.NOAA_DETECTCONSSYNCSNUM+1)])
+
+            syncBdiff = np.abs(np.diff(self.__syncB) - (self.__syncCrudeSampRate*0.5))
+            minSyncBdiff = np.min([np.max(syncBdiff[i:i+constants.NOAA_DETECTCONSSYNCSNUM]) for i in range(len(syncBdiff)-constants.NOAA_DETECTCONSSYNCSNUM+1)])
+
+            if minSyncAdiff < constants.NOAA_DETECTMAXCHANGE or minSyncBdiff < constants.NOAA_DETECTMAXCHANGE:
+                logging.info('NOAA Signal was found')
+                self.__useful = 1
+            else:
+                logging.info('NOAA Signal was not found')
 
         return [self.__syncA, self.__syncB]
 

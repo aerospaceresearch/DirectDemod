@@ -8,54 +8,6 @@ import logging
 import scipy.signal as signal
 import matplotlib.pylab as plt
 
-def decode_nrzi(nrzi):
-    code_bit = []
-    # starting bit. with NRZI it doesn't matter, if 0 or 1 at the beginning
-    code_bit.append(1)
-
-    for bit in range(1, len(nrzi)):
-        if nrzi[bit - 1] == nrzi[bit]:
-            code_bit.append(1)
-        elif nrzi[bit - 1] != nrzi[bit]:
-            code_bit.append(0)
-
-    return code_bit
-
-def find_bit_stuffing(code_bit):
-    stuffed_bit = np.zeros(len(code_bit), dtype=np.int)
-
-    counter = 0
-    for bit in range(len(code_bit)):
-
-        if counter == 5 and code_bit[bit] == 1:
-            # could be ending, because 6th bit is not 0 and could be intentially left 1, as expected for the frame end
-            stuffed_bit[bit] = 2
-
-        if counter == 5 and code_bit[bit] == 0:
-            # normal bit stuffing
-            stuffed_bit[bit] = 1
-
-        #print(bit, code_bit[bit], stuffed_bit[bit], counter)
-
-        if code_bit[bit] == 1:
-            counter += 1
-        if code_bit[bit] == 0:
-            counter = 0
-
-    return stuffed_bit
-
-def reduce_stuffed_bit(code_bit, stuffed_bit):
-    out = []
-
-    for i in range(len(code_bit)):
-        if stuffed_bit[i] == 0:
-            out.append(code_bit[i])
-
-    return out
-
-
-
-
 '''
 Object to decode AFSK1200
 '''
@@ -76,10 +28,9 @@ class decode_afsk1200:
             bw (:obj:`int`, optional): Bandwidth
         '''
 
-        self.BAUDRATE = 1200
-        self.mark_frequency = 1200
-        self.space_frequency = 2200
-
+        self.__BAUDRATE = 1200
+        self.__mark_frequency = 1200
+        self.__space_frequency = 2200
         self.__bw = bw
         if self.__bw is None:
             self.__bw = 22050
@@ -87,6 +38,21 @@ class decode_afsk1200:
         self.__offset = offset
         self.__msg = None
         self.__graphs = 0
+        self.__useful = 0
+
+    @property
+    def useful(self):
+
+        '''See if atleast one message was found or not
+
+        Returns:
+            :obj:`int`: 0 if not found, 1 if found
+        '''
+
+        #if self.__msg is None:
+        #    self.getMsg
+
+        return self.__useful
 
     @property
     def getMsg(self):
@@ -97,46 +63,48 @@ class decode_afsk1200:
         '''
 
         if self.__msg is None:
-            ## Next create a signal object, reading data from the source
-            # Read all values from the source into an array
-            sigArray = self.__sigsrc.read(0, self.__sigsrc.length)
 
-            # a commSignal object basically stores the signal array and its samplingrate
-            # if you want the array do sig.signal
-            # if you want the samping rate do sig.sampRate
-            sig = comm.commSignal(self.__sigsrc.sampFreq, sigArray)
+            sig = comm.commSignal(self.__sigsrc.sampFreq)
 
-            ## Offset the frequency if required, not needed here
-            # sig.offsetFreq(0)
-
-            ## Apply a blackman harris filter to get rid of noise
+            chunkerObj = chunker.chunker(self.__sigsrc)
             bhFilter = filters.blackmanHarris(151)
-            sig.filter(bhFilter)
+            fmDemodObj = demod_fm.demod_fm()
+            
 
-            ## Limit bandwidth, say 30000
-            rate_out = self.__bw
-            sig.bwLim(rate_out)
+            for i in chunkerObj.getChunks:
+
+                logging.info('Processing chunk %d of %d chunks', chunkerObj.getChunks.index(i)+1, len(chunkerObj.getChunks))
+
+                # get the signal
+                chunkSig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i), chunkerObj)
+
+                ## Offset the frequency if required, not needed here
+                chunkSig.offsetFreq(self.__offset)
+
+                ## Apply a blackman harris filter to get rid of noise
+                chunkSig.filter(bhFilter)
+
+                ## Limit bandwidth
+                chunkSig.bwLim(self.__bw)
+
+                # store signal
+                sig.extend(chunkSig)
 
             ## FM demodulate
-            fmDemodulator = demod_fm.demod_fm()
-            sig.funcApply(fmDemodulator.demod)
+            sig.funcApply(fmDemodObj.demod)
+            logging.info('FM demod complete')
 
             ## APRS has two freqs 1200 and 2200, hence create a butter band pass filter from 1200-500 to 2200+500
-            bFilter = filters.butter(sig.sampRate, 1200 - 500, 2200 + 500, typeFlt=constants.FLT_BP)
-            sig.filter(bFilter)
+            sig.filter(filters.butter(sig.sampRate, 1200 - 500, 2200 + 500, typeFlt=constants.FLT_BP))
+            logging.info('Filtering complete')
 
             ## plot the signal
             if self.__graphs == 1:
                 plt.plot(sig.signal)
                 plt.show()
 
-            BAUDRATE = self.BAUDRATE
-            mark_frequency = self.mark_frequency
-            space_frequency = self.space_frequency
-
-            buffer_size = int(np.round(rate_out / BAUDRATE))
-            SAMPLE_PER_BAUD = rate_out // BAUDRATE
-
+            buffer_size = int(np.round(self.__bw / self.__BAUDRATE))
+            SAMPLE_PER_BAUD = self.__bw // self.__BAUDRATE
 
             # creating the “correlation list" for the comparison frequencies of the digital frequency filers
             corr_mark_i = np.zeros(buffer_size)
@@ -146,17 +114,17 @@ class decode_afsk1200:
 
             # filling the "correlation list" with sampled waveform for the two frequencies.
             for i in range(buffer_size):
-                mark_angle = (i * 1.0 / rate_out) / (1 / mark_frequency) * 2 * np.pi
+                mark_angle = (i * 1.0 / self.__bw) / (1 / self.__mark_frequency) * 2 * np.pi
                 corr_mark_i[i] = np.cos(mark_angle)
                 corr_mark_q[i] = np.sin(mark_angle)
 
-                space_angle = (i * 1.0 / rate_out) / (1 / space_frequency) * 2 * np.pi
+                space_angle = (i * 1.0 / self.__bw) / (1 / self.__space_frequency) * 2 * np.pi
                 corr_space_i[i] = np.cos(space_angle)
                 corr_space_q[i] = np.sin(space_angle)
 
-
             # now we check the full signal for the binary states, whether it is closer to 1200 hz or closer to 2200 Hz
             binary_filter = np.zeros(len(sig.signal))
+
 
             for sample in range(len(sig.signal) - buffer_size):
                 corr_mi = 0
@@ -172,7 +140,7 @@ class decode_afsk1200:
                     corr_sq = corr_sq + sig.signal[sample + sub] * corr_space_q[sub]
 
                 binary_filter[sample] = (corr_mi ** 2 + corr_mq ** 2 - corr_si ** 2 - corr_sq ** 2)
-
+            logging.info('Binary filter complete')
             if self.__graphs == 1:
                 plt.plot(sig.signal / np.max(sig.signal))
                 plt.plot(np.sign(binary_filter))
@@ -195,7 +163,6 @@ class decode_afsk1200:
                 plt.title("bit starts")
                 plt.show()
 
-
             # by using the edges of the bits for synching the sampling to the transmitted bits, the algo is
             # self synchronizing.
             # but sometimes the crossing areas between the bits can be uncertain. for that, a peak detection defines
@@ -217,8 +184,8 @@ class decode_afsk1200:
                 plt.plot(sig.signal / np.max(sig.signal))
                 plt.show()
 
-            bit_repeated = np.round(np.diff(peaks1_x) / (rate_out / BAUDRATE))
-
+            bit_repeated = np.round(np.diff(peaks1_x) / (self.__bw / self.__BAUDRATE))
+            logging.info('Bit repeat complete')
             if self.__graphs == 1:
                 plt.plot(np.sign(binary_filter))
                 plt.plot(peaks1_x[:-1], bit_repeated, "*")
@@ -240,7 +207,8 @@ class decode_afsk1200:
                     c += 1
 
             # here we convert the nrzi bits to normal bits
-            bitstream = decode_nrzi(np.sign(bitstream_nrzi))
+            bitstream = decode_afsk1200.decode_nrzi(np.sign(bitstream_nrzi))
+            logging.info('Decoding NRZI complete')
 
             if self.__graphs == 1:
                 plt.plot(np.sign(bitstream_nrzi))
@@ -264,7 +232,7 @@ class decode_afsk1200:
             length = np.diff(bit_startflag)
 
             # there are still the stuffed bits inside the bit stream, so we need to find them...
-            bitstream_stuffed = find_bit_stuffing(bitstream)
+            bitstream_stuffed = decode_afsk1200.find_bit_stuffing(bitstream)
 
             if self.__graphs == 1:
                 plt.plot(bitstream_nrzi)
@@ -274,14 +242,13 @@ class decode_afsk1200:
                 plt.plot(bitstream_stuffed, "*")
                 plt.title("test1")
                 plt.show()
-
-
+            logging.info('Stuffed bit removal complete')
             # checking at each possible start flag, if the bit stream was received correctly.
             # this is done by checking the crc16 at the end of the msg with the msg body.
             for flag in range(len(bit_startflag) - 1):
 
                 # and firstly, we need to get rid of the stuffed bits, that are still inside the bit stream
-                bits = reduce_stuffed_bit(bitstream[bit_startflag[flag] + 8: bit_startflag[flag + 1]],
+                bits = decode_afsk1200.reduce_stuffed_bit(bitstream[bit_startflag[flag] + 8: bit_startflag[flag + 1]],
                                           bitstream_stuffed[bit_startflag[flag] + 8: bit_startflag[flag + 1]])
 
                 msg = bits[:-16]
@@ -299,7 +266,12 @@ class decode_afsk1200:
                         crc_received += str(msg_rest[i])
 
                     if crc_received == crc:
-                        print("one aprs msg with correct crc is found. #", flag, "starts at", bit_startflag[flag], "length is", len(bits) / 8)
+                        msg_text = decode_afsk1200.bits_to_msg(msg)
+
+                        print("one aprs msg with correct crc is found. #", flag, "starts at", bit_startflag[flag],
+                              "length is", len(bits) / 8)
+                        msg_text
+
 
                         if self.__graphs == 1:
                             plt.plot(bitstream[bit_startflag[flag] + 8: bit_startflag[flag + 1] + 8], "o-")
@@ -309,10 +281,128 @@ class decode_afsk1200:
                         # there can be several messages per stream, so for now only the last is stored.
                         # to-do
                         self.__msg = "template: space rocks!"
+                        self.__useful = 1
 
             logging.info('Message extraction complete')
 
         return self.__msg
+
+
+    def bits_to_msg(bits):
+
+        msg_text = ""
+        header_text = ""
+
+        aprs_header = 1
+
+        for byte in range(0, len(bits), 8):
+
+            tmp = bits[byte: byte + 8]
+            character = ""
+            for bit in range(len(tmp)):
+                character += str(tmp[7 - bit])
+
+            if aprs_header == 1:
+                header_text += chr(int("0" + character[:7], 2))
+
+            else:
+                msg_text += chr(int(character, 2))
+
+            if character[-1] == "1" and aprs_header == 1:
+                # header is ending here!
+                aprs_header = 0
+
+        DESTINATION_ADDRESS = header_text[:7]
+        SOURCE_ADDRESS = header_text[7:14]
+        PATH = header_text[14:]
+        print("destination:\t", DESTINATION_ADDRESS)
+        print("source:\t\t", SOURCE_ADDRESS)
+        print("path:\t\t", PATH)
+
+        CONTROL_FIELD = hex(ord(msg_text[0]))
+        PROTOCOL_ID = hex(ord(msg_text[1]))
+        INFORMATION_FIELD = msg_text[2:]
+        print("control fields:\t", CONTROL_FIELD, PROTOCOL_ID)
+        print("information:\t", INFORMATION_FIELD)
+
+        return INFORMATION_FIELD
+
+
+    def decode_nrzi(nrzi):
+
+        '''Decode NRZI
+
+        Args:
+            nrzi (:obj:`list`): the NRZI bits
+
+        Returns:
+            :obj:`list`: decoded NRZI bits
+        '''
+
+        code_bit = []
+        # starting bit. with NRZI it doesn't matter, if 0 or 1 at the beginning
+        code_bit.append(1)
+
+        for bit in range(1, len(nrzi)):
+            if nrzi[bit - 1] == nrzi[bit]:
+                code_bit.append(1)
+            elif nrzi[bit - 1] != nrzi[bit]:
+                code_bit.append(0)
+
+        return code_bit
+
+    def find_bit_stuffing(code_bit):
+
+        '''To find bit stuffing
+
+        Args:
+            code_bit (:obj:`list`): the bits
+
+        Returns:
+            :obj:`list`: bit stuffing status
+        '''
+
+        stuffed_bit = np.zeros(len(code_bit), dtype=np.int)
+
+        counter = 0
+        for bit in range(len(code_bit)):
+
+            if counter == 5 and code_bit[bit] == 1:
+                # could be ending, because 6th bit is not 0 and could be intentially left 1, as expected for the frame end
+                stuffed_bit[bit] = 2
+
+            if counter == 5 and code_bit[bit] == 0:
+                # normal bit stuffing
+                stuffed_bit[bit] = 1
+
+            #print(bit, code_bit[bit], stuffed_bit[bit], counter)
+
+            if code_bit[bit] == 1:
+                counter += 1
+            if code_bit[bit] == 0:
+                counter = 0
+
+        return stuffed_bit
+
+    def reduce_stuffed_bit(code_bit, stuffed_bit):
+
+        '''To remove stuffed bits
+
+        Args:
+            code_bit (:obj:`list`): the bits
+            stuffed_bit (:obj:`list`): the result from find_bit_stuffing()
+
+        Returns:
+            :obj:`list`: bits free from stuffing
+        '''
+
+        out = []
+
+        for i in range(len(code_bit)):
+            if stuffed_bit[i] == 0:
+                out.append(code_bit[i])
+
+        return out
 
 
 if __name__== "__main__":
