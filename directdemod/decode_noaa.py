@@ -194,7 +194,7 @@ class decode_noaa:
             img = img[rf:re,cf:ce]
 
             img = Image.fromarray(img[97:-97,97:-97])
-            
+
             try:
                 img.save(destFileNoRot)
             except:
@@ -333,12 +333,13 @@ class decode_noaa:
                 endIB = startIB + int(0.25 * amSig.sampRate)
                 if 1+syncIndex < len(csyncA):
                     endIB = int(csyncA[syncIndex + 1])
-
-                if endIB > amSig.length or endIA > amSig.length:
+                    
+                if endIB > amSig.length or endIA > amSig.length or startIA < 0 or startIB < 0:
                     continue
 
                 imgLineA = amSig.signal[startIA:endIA]
                 imgLineB = amSig.signal[startIB:endIB]
+
 
                 imgLineA = signal.resample(imgLineA, int(int(len(imgLineA)/(numPixels*0.5)) * (numPixels*0.5)))
                 imgLineB = signal.resample(imgLineB, int(int(len(imgLineB)/(numPixels*0.5)) * (numPixels*0.5)))
@@ -637,7 +638,7 @@ class decode_noaa:
         amDemdulator = demod_am.demod_am()
         amOut = comm.commSignal(sig.sampRate)
 
-        chunkerObj = chunker.chunker(sig, chunkSize = 60000*18)
+        chunkerObj = chunker.chunker(sig, chunkSize = 60000*4)
 
         for i in chunkerObj.getChunks:
 
