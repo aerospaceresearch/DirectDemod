@@ -183,17 +183,20 @@ class decode_noaa:
             plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
 
             img = misc.imread(destFileRot)
-            img = img[100:-100,100:-100,:]
-            img = ndimage.rotate(img, -1 * (rot%180))
-
+            img = img[109:-109,109:-109,:]
             img = misc.imresize(img, rimg.shape)
-            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
-            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
-            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
-            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            if 90 < (rot%360) < 270:
+                img = ndimage.rotate(img, -1 * (rot%180))
+            else:
+                img = ndimage.rotate(img, -1 * rot)
+            
+            rf = int((img.shape[0]/2) - oim.shape[0]/2)
+            re = int((img.shape[0]/2) + oim.shape[0]/2)
+            cf = int((img.shape[1]/2) - oim.shape[1]/2)
+            ce = int((img.shape[1]/2) + oim.shape[1]/2)
             img = img[rf:re,cf:ce]
 
-            img = Image.fromarray(img[97:-97,97:-97])
+            img = Image.fromarray(img)
 
             try:
                 img.save(destFileNoRot)
@@ -229,17 +232,20 @@ class decode_noaa:
             plt.savefig(destFileRot, bbox_inches='tight', dpi=1000)
 
             img = misc.imread(destFileRot)
-            img = img[100:-100,100:-100,:]
-            img = ndimage.rotate(img, -1 * (rot%180))
-
+            img = img[109:-109,109:-109,:]
             img = misc.imresize(img, rimg.shape)
-            rf = int((img.shape[0]/2) - ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
-            re = int((img.shape[0]/2) + ((img.shape[0] * oim.shape[0] / rimg.shape[0])/2))
-            cf = int((img.shape[1]/2) - ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
-            ce = int((img.shape[1]/2) + ((img.shape[1] * oim.shape[1] / rimg.shape[1])/2))
+            if 90 < (rot%360) < 270:
+                img = ndimage.rotate(img, -1 * (rot%180))
+            else:
+                img = ndimage.rotate(img, -1 * rot)
+            
+            rf = int((img.shape[0]/2) - oim.shape[0]/2)
+            re = int((img.shape[0]/2) + oim.shape[0]/2)
+            cf = int((img.shape[1]/2) - oim.shape[1]/2)
+            ce = int((img.shape[1]/2) + oim.shape[1]/2)
             img = img[rf:re,cf:ce]
 
-            img = Image.fromarray(img[97:-97,97:-97])
+            img = Image.fromarray(img)
             try:
                 img.save(destFileNoRot)
             except:
