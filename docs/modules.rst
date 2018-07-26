@@ -33,6 +33,11 @@ Specific applications
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.decode_meteorm2.decode_meteorm2
+   :members:
+
+   .. automethod:: __init__
+
 Filters
 ---------------
 

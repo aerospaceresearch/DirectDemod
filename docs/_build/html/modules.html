@@ -564,6 +564,63 @@
 
 </dd></dl>
 
+<dl class="class">
+<dt id="directdemod.decode_meteorm2.decode_meteorm2">
+<em class="property">class </em><code class="descclassname">directdemod.decode_meteorm2.</code><code class="descname">decode_meteorm2</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_meteorm2.html#decode_meteorm2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_meteorm2.decode_meteorm2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Object to decode Meteor m2</p>
+<dl class="method">
+<dt id="directdemod.decode_meteorm2.decode_meteorm2.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>sigsrc</em>, <em>offset</em>, <em>bw</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/decode_meteorm2.html#decode_meteorm2.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.decode_meteorm2.decode_meteorm2.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sigsrc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">commSignal</span></code>) – IQ data source</li>
+<li><strong>offset</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – Frequency offset of source in Hz</li>
+<li><strong>bw</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – Bandwidth</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.decode_meteorm2.decode_meteorm2.getSyncs">
+<code class="descname">getSyncs</code><a class="headerlink" href="#directdemod.decode_meteorm2.decode_meteorm2.getSyncs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get syncs of Funcube</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of detected syncs</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="directdemod.decode_meteorm2.decode_meteorm2.useful">
+<code class="descname">useful</code><a class="headerlink" href="#directdemod.decode_meteorm2.decode_meteorm2.useful" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if signal was found</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">0 if not found, 1 if found</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="filters">
 <h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>

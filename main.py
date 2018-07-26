@@ -2,7 +2,7 @@
 noaa commandline interface
 '''
 
-from directdemod import source, chunker, comm, constants, filters, demod_fm, sink, demod_am, decode_noaa, log, decode_afsk1200, decode_funcube
+from directdemod import source, chunker, comm, constants, filters, demod_fm, sink, demod_am, decode_noaa, log, decode_afsk1200, decode_funcube, decode_meteorm2
 import numpy as np
 import sys, getopt, logging, json
 from time import gmtime, strftime
@@ -48,7 +48,8 @@ def usage(err = ""):
     print("\t\t--tle=<filename> : TLE source filename")
     print("\t\t-noimage : doesn't show/store image")
     print("\t-d afsk1200 : AFSK1200 decoder")
-    print("\t-d funcube : Funcube BSPK sync detector")
+    print("\t-d funcube : Funcube BPSK sync detector")
+    print("\t-d meteor : Meteor QPSK sync detector")
     print()
     exit()
 
@@ -305,7 +306,32 @@ for fileIndex in range(len(freqs)):
             logging.info('CSV file successfully created')
 
             entryDict['usefulness'] = funcubeObj.useful
+        
+        # if Meteor m2 QPSK was chosen
+        elif decoders[fileIndex] == "meteor":
+            logging.info('Detecting Meteor M2 Syncs')
+
+            entryDict['filesCreated'] = []
+
+            # create meteor object
+            meteorObj = decode_meteorm2.decode_meteorm2(sigsrc, freqOffset, bandwidths[fileIndex])
+            syncs = meteorObj.getSyncs
+
+            #print results
+            logging.info('Complete: detected %d syncs', len(syncs))
             
+            # write syncs
+            csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
+            if not outs[fileIndex] is None:
+                csvFileName = outs[fileIndex] + ".csv"
+
+            sink.csv(csvFileName, [syncs], titles = ["Meteor syncs"]).write
+            entryDict['filesCreated'].append(csvFileName)
+
+            logging.info('CSV file successfully created')
+
+            entryDict['usefulness'] = meteorObj.useful
+
         else:
             usage("Invalid decoder selected")
 
