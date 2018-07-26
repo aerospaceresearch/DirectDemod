@@ -28,6 +28,11 @@ Specific applications
 
    .. automethod:: __init__
 
+.. autoclass:: directdemod.decode_funcube.decode_funcube
+   :members:
+
+   .. automethod:: __init__
+
 Filters
 ---------------
 
