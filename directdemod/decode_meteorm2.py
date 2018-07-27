@@ -15,7 +15,7 @@ import math, time
 
 class agc():
     def __init__(self):
-        self.mean = 180.0
+        self.mean = 3.0
         self.dc = 0.0
 
     def adjust(self, inp):
@@ -28,8 +28,8 @@ class agc():
         self.mean = (self.mean * 1.0 * (65536.0 - 1) + ((np.real(inp)*np.real(inp) + np.imag(inp)*np.imag(inp))**0.5)) / 65536.0
 
         # multiply the input value
-        if 180.0 / self.mean > 20:
-            return inp * 20
+        if 180.0 / self.mean > 200:
+            return inp * 200
         else:
             return inp * 180.0 / self.mean
 
@@ -171,9 +171,36 @@ class decode_meteorm2:
 
         sync72khz = np.repeat(sync, 1)
 
+        sync72khz1 = []
+        for i in range(len(sync72khz)):
+            if i%2 == 0:
+                sync72khz1.append(sync72khz[i])
+            else:
+                sync72khz1.append(1-sync72khz[i])
+        sync72khz1 = np.array(sync72khz1)
+
+        sync72khz2 = []
+        for i in range(len(sync72khz)):
+            if i%2 == 1:
+                sync72khz2.append(sync72khz[i])
+            else:
+                sync72khz2.append(1-sync72khz[i])
+        sync72khz2 = np.array(sync72khz2)
+
+
         sync[sync == 1] = 127
         sync[sync == 0] = -128
         sync2mhz = np.repeat(sync, int(2048000/72000))
+
+        sync = np.array(sync72khz1[:])
+        sync[sync == 1] = 127
+        sync[sync == 0] = -128
+        sync2mhz1 = np.repeat(sync, int(2048000/72000))
+
+        sync = np.array(sync72khz2[:])
+        sync[sync == 1] = 127
+        sync[sync == 0] = -128
+        sync2mhz2 = np.repeat(sync, int(2048000/72000))
 
         maxResBuff = []
         minResBuff1 = []
@@ -189,10 +216,12 @@ class decode_meteorm2:
         lastMin = None
         ctrMain = 0
 
+        sync2mhzChosen = sync2mhz
+
         for i in chunkerObj.getChunks[:]:
 
             #interpolate
-            sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i)+ (127.5 + 1j*127.5))
+            sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i))
             sig.offsetFreq(self.__offset)
             sig.filter(bf)
 
@@ -202,7 +231,7 @@ class decode_meteorm2:
                 ### MAXSYNC detection by correlation
 
                 # start storing 2mhz values near sync possible regions
-                if not lastMin is None and (ctr > lastMin + (0.1*72000) - (2*len(sync72khz)) or not maxBuffRetain == -1):
+                if not lastMin is None and (ctr > lastMin + (0.1*72000) - (2*len(sync72khz)) or not maxBuffRetain == -1) and not ctr > lastMin + (1*72000):
                     if len(maxResBuff) == 0:
                         maxBuffStart = ctrMain
                     corrVal = i*pllObj.output
@@ -217,7 +246,7 @@ class decode_meteorm2:
                         maxResBuff.pop(0)
                 elif maxBuffRetain == 0:
                     maxBuffRetain -= 1
-                    corr = np.abs(np.correlate(maxResBuff,sync2mhz, mode='same'))
+                    corr = np.abs(np.correlate(maxResBuff,sync2mhzChosen, mode='same'))
                     logging.info("MAXSYNC %d", maxBuffStart+(np.argmax(corr)/2.0))
                     #print("MAXSYNC", maxBuffStart, np.argmax(corr), maxBuffStart+np.argmax(corr))
                     maxSyncs.append(maxBuffStart+(np.argmax(corr)/2.0))
@@ -241,15 +270,6 @@ class decode_meteorm2:
                     gardnerA = pllObj.loop(gardnerA)
                     ctr += 1
 
-                    # 72khz buffer
-                    minResBuff1.append(limBin(np.real(gardnerA)))
-                    minResBuff1.append(limBin(np.imag(gardnerA)))
-                    minResBuff1 = minResBuff1[-1*len(sync72khz):]
-
-                    minResBuff2.append(limBin(np.imag(gardnerA)))
-                    minResBuff2.append(limBin(np.real(gardnerA)))
-                    minResBuff2 = minResBuff2[-1*len(sync72khz):]
-
                     # print periodic status
                     try:
                         if ctr%1000 == 0:
@@ -258,19 +278,47 @@ class decode_meteorm2:
                     except:
                         pass
 
-                    buff1corr, buff2corr = 0, 0
-                    if len(minResBuff1) == len(sync72khz): 
-                        buff1corr = np.abs(np.sum(np.abs(np.array(minResBuff1) - sync72khz)) - (len(sync72khz)/2))
-                    if len(minResBuff2) == len(sync72khz): 
-                        buff2corr = np.abs(np.sum(np.abs(np.array(minResBuff2) - sync72khz)) - (len(sync72khz)/2))
+                    if lastMin is None or ctr > lastMin + 0.1*(72000):
+                        # 72khz buffer
+                        minResBuff1.append(limBin(np.real(gardnerA)))
+                        minResBuff1.append(limBin(np.imag(gardnerA)))
+                        minResBuff1 = minResBuff1[-1*len(sync72khz):]
 
-                    # see if sync is present
-                    if buff1corr > 30 or buff2corr > 30:
-                        logging.info("MINSYNC: %d %f %f",ctr, buff1corr, buff2corr)
-                        #print("MINSYNC:",ctr, np.abs(np.sum(np.abs(np.array(minResBuff) - sync72khz)) - (len(sync72khz)/2)))
-                        minSyncs.append(ctr)
-                        lastMin = ctr
-                        maxBuffRetain = 2 * len(sync2mhz)
+                        minResBuff2.append(limBin(np.imag(gardnerA)))
+                        minResBuff2.append(limBin(np.real(gardnerA)))
+                        minResBuff2 = minResBuff2[-1*len(sync72khz):]
+
+                        buff1corr, buff2corr, buff3corr, buff4corr, buff5corr, buff6corr = 0, 0, 0, 0, 0, 0
+                        if len(minResBuff1) == len(sync72khz): 
+                            buff1corr = np.abs(np.sum(np.abs(np.array(minResBuff1) - sync72khz)) - (len(sync72khz)/2))
+                        #if len(minResBuff2) == len(sync72khz): 
+                        #    buff2corr = np.abs(np.sum(np.abs(np.array(minResBuff2) - sync72khz)) - (len(sync72khz)/2))
+
+                        #if len(minResBuff1) == len(sync72khz1): 
+                        #    buff3corr = np.abs(np.sum(np.abs(np.array(minResBuff1) - sync72khz1)) - (len(sync72khz1)/2))
+                        if len(minResBuff2) == len(sync72khz1): 
+                            buff4corr = np.abs(np.sum(np.abs(np.array(minResBuff2) - sync72khz1)) - (len(sync72khz1)/2))
+
+                        #if len(minResBuff1) == len(sync72khz2): 
+                        #    buff5corr = np.abs(np.sum(np.abs(np.array(minResBuff1) - sync72khz2)) - (len(sync72khz2)/2))
+                        #if len(minResBuff2) == len(sync72khz2): 
+                        #    buff6corr = np.abs(np.sum(np.abs(np.array(minResBuff2) - sync72khz2)) - (len(sync72khz2)/2))
+
+                        if buff1corr > 30 or buff2corr > 30:
+                            sync2mhzChosen = sync2mhz
+                        if buff3corr > 30 or buff4corr > 30:
+                            sync2mhzChosen = sync2mhz1
+                        if buff4corr > 30 or buff6corr > 30:
+                            sync2mhzChosen = sync2mhz2
+
+                        # see if sync is present
+                        if buff1corr > 30 or buff2corr > 30 or buff3corr > 30 or buff4corr > 30 or buff5corr > 30 or buff6corr > 30:
+                            logging.info("MINSYNC: %d",ctr)
+                            #logging.info("MINSYNC: %d %f %f %f %f %f %f",ctr, buff1corr, buff2corr, buff3corr, buff4corr, buff5corr, buff6corr)
+                            #print("MINSYNC:",ctr, np.abs(np.sum(np.abs(np.array(minResBuff) - sync72khz)) - (len(sync72khz)/2)))
+                            minSyncs.append(ctr)
+                            lastMin = ctr
+                            maxBuffRetain = 2 * len(sync2mhz)
 
                 timing += 1
                 ctrMain += 1

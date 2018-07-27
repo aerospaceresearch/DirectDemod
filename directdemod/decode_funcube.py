@@ -181,7 +181,7 @@ class decode_funcube:
 
         numCtrs = int(chunkerObj.getChunks[-1][-1]*12000/2048000)
         start_time = time.time()
-        lastMin = 0
+        lastMin = None
         ctrMain = 0
         for i in chunkerObj.getChunks[:]:
 
@@ -196,7 +196,7 @@ class decode_funcube:
                 ### MAXSYNC detection by correlation
 
                 # start storing 2mhz values near sync possible regions
-                if ctr > lastMin + (4.9*12000) - (2*len(sync12khz)) or not maxBuffRetain == -1:
+                if not lastMin is None and (ctr > lastMin + (4.9*12000) - (2*len(sync12khz)) or not maxBuffRetain == -1):
                     if len(maxResBuff) == 0:
                         maxBuffStart = ctrMain
                     maxResBuff.append(lim(np.real(i*pllObj.output)/2))
@@ -255,9 +255,11 @@ class decode_funcube:
                 timing += 1
                 ctrMain += 1
 
-        # check usefulness
-        if np.min(np.abs(np.diff(maxSyncs) - (4.98*2048000))) < (0.2*2048000):
-            self.__useful = 1
-
-        return list(maxSyncs)[1:]
+        if len(maxSyncs) > 0:
+            # check usefulness
+            if np.min(np.abs(np.diff(maxSyncs) - (4.98*2048000))) < (0.2*2048000):
+                self.__useful = 1
+            return list(maxSyncs)[1:]
+        else:
+            return []
         
