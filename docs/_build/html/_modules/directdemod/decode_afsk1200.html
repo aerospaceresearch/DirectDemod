@@ -73,7 +73,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span> <span class="o">=</span> <span class="n">sigsrc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__offset</span> <span class="o">=</span> <span class="n">offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__msg</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">useful</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;See if atleast one message was found or not</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`int`: 0 if not found, 1 if found</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1">#if self.__msg is None:</span>
+        <span class="c1">#    self.getMsg</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">getMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -85,23 +100,39 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__msg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-            <span class="c1"># get the signal</span>
-            <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">)</span>
 
-            <span class="c1">## Offset the frequency if required, not needed here</span>
-            <span class="n">sig</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span>
+            <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="p">)</span>
+            <span class="n">bhFilter</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">)</span>
+            <span class="n">fmDemodObj</span> <span class="o">=</span> <span class="n">demod_fm</span><span class="o">.</span><span class="n">demod_fm</span><span class="p">()</span>
+            
 
-            <span class="c1">## Apply a blackman harris filter to get rid of noise</span>
-            <span class="n">sig</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">blackmanHarris</span><span class="p">(</span><span class="mi">151</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">:</span>
 
-            <span class="c1">## Limit bandwidth</span>
-            <span class="n">sig</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bw</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Processing chunk </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> chunks&#39;</span><span class="p">,</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">))</span>
+
+                <span class="c1"># get the signal</span>
+                <span class="n">chunkSig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">),</span> <span class="n">chunkerObj</span><span class="p">)</span>
+
+                <span class="c1">## Offset the frequency if required, not needed here</span>
+                <span class="n">chunkSig</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span>
+
+                <span class="c1">## Apply a blackman harris filter to get rid of noise</span>
+                <span class="n">chunkSig</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bhFilter</span><span class="p">)</span>
+
+                <span class="c1">## Limit bandwidth</span>
+                <span class="n">chunkSig</span><span class="o">.</span><span class="n">bwLim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bw</span><span class="p">)</span>
+
+                <span class="c1"># store signal</span>
+                <span class="n">sig</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">chunkSig</span><span class="p">)</span>
 
             <span class="c1">## FM demodulate</span>
-            <span class="n">sig</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">demod_fm</span><span class="o">.</span><span class="n">demod_fm</span><span class="p">()</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
+            <span class="n">sig</span><span class="o">.</span><span class="n">funcApply</span><span class="p">(</span><span class="n">fmDemodObj</span><span class="o">.</span><span class="n">demod</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;FM demod complete&#39;</span><span class="p">)</span>
 
             <span class="c1">## APRS has two freqs 1200 and 2200, hence create a butter band pass filter from 1200-500 to 2200+500</span>
             <span class="n">sig</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filters</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">,</span> <span class="mi">1200</span> <span class="o">-</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">2200</span> <span class="o">+</span> <span class="mi">500</span><span class="p">,</span> <span class="n">typeFlt</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Filtering complete&#39;</span><span class="p">)</span>
 
             <span class="c1">## plot the signal</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -130,6 +161,7 @@
             <span class="c1"># now we check the full signal for the binary states, whether it is closer to 1200 hz or closer to 2200 Hz</span>
             <span class="n">binary_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">))</span>
 
+
             <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span> <span class="o">-</span> <span class="n">buffer_size</span><span class="p">):</span>
                 <span class="n">corr_mi</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">corr_mq</span> <span class="o">=</span> <span class="mi">0</span>
@@ -144,7 +176,7 @@
                     <span class="n">corr_sq</span> <span class="o">=</span> <span class="n">corr_sq</span> <span class="o">+</span> <span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">[</span><span class="n">sample</span> <span class="o">+</span> <span class="n">sub</span><span class="p">]</span> <span class="o">*</span> <span class="n">corr_space_q</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span>
 
                 <span class="n">binary_filter</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">corr_mi</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">corr_mq</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">corr_si</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">corr_sq</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
-
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Binary filter complete&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">))</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">binary_filter</span><span class="p">))</span>
@@ -189,7 +221,7 @@
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
             <span class="n">bit_repeated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">peaks1_x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bw</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">__BAUDRATE</span><span class="p">))</span>
-
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Bit repeat complete&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">binary_filter</span><span class="p">))</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peaks1_x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">bit_repeated</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span>
@@ -212,6 +244,7 @@
 
             <span class="c1"># here we convert the nrzi bits to normal bits</span>
             <span class="n">bitstream</span> <span class="o">=</span> <span class="n">decode_afsk1200</span><span class="o">.</span><span class="n">decode_nrzi</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">bitstream_nrzi</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Decoding NRZI complete&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">bitstream_nrzi</span><span class="p">))</span>
@@ -245,7 +278,7 @@
                 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bitstream_stuffed</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;test1&quot;</span><span class="p">)</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Stuffed bit removal complete&#39;</span><span class="p">)</span>
             <span class="c1"># checking at each possible start flag, if the bit stream was received correctly.</span>
             <span class="c1"># this is done by checking the crc16 at the end of the msg with the msg body.</span>
             <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bit_startflag</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
@@ -269,7 +302,12 @@
                         <span class="n">crc_received</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg_rest</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
                     <span class="k">if</span> <span class="n">crc_received</span> <span class="o">==</span> <span class="n">crc</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;one aprs msg with correct crc is found. #&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="s2">&quot;starts at&quot;</span><span class="p">,</span> <span class="n">bit_startflag</span><span class="p">[</span><span class="n">flag</span><span class="p">],</span> <span class="s2">&quot;length is&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="n">msg_text</span> <span class="o">=</span> <span class="n">decode_afsk1200</span><span class="o">.</span><span class="n">bits_to_msg</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;one aprs msg with correct crc is found. #&quot;</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="s2">&quot;starts at&quot;</span><span class="p">,</span> <span class="n">bit_startflag</span><span class="p">[</span><span class="n">flag</span><span class="p">],</span>
+                              <span class="s2">&quot;length is&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+                        <span class="n">msg_text</span>
+
 
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__graphs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bitstream</span><span class="p">[</span><span class="n">bit_startflag</span><span class="p">[</span><span class="n">flag</span><span class="p">]</span> <span class="o">+</span> <span class="mi">8</span><span class="p">:</span> <span class="n">bit_startflag</span><span class="p">[</span><span class="n">flag</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">8</span><span class="p">],</span> <span class="s2">&quot;o-&quot;</span><span class="p">)</span>
@@ -279,10 +317,52 @@
                         <span class="c1"># there can be several messages per stream, so for now only the last is stored.</span>
                         <span class="c1"># to-do</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">__msg</span> <span class="o">=</span> <span class="s2">&quot;template: space rocks!&quot;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span> <span class="o">=</span> <span class="mi">1</span>
 
             <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Message extraction complete&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__msg</span>
+
+
+    <span class="k">def</span> <span class="nf">bits_to_msg</span><span class="p">(</span><span class="n">bits</span><span class="p">):</span>
+
+        <span class="n">msg_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">header_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="n">aprs_header</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">byte</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">bits</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
+
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">bits</span><span class="p">[</span><span class="n">byte</span><span class="p">:</span> <span class="n">byte</span> <span class="o">+</span> <span class="mi">8</span><span class="p">]</span>
+            <span class="n">character</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)):</span>
+                <span class="n">character</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">7</span> <span class="o">-</span> <span class="n">bit</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">aprs_header</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">header_text</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="s2">&quot;0&quot;</span> <span class="o">+</span> <span class="n">character</span><span class="p">[:</span><span class="mi">7</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">msg_text</span> <span class="o">+=</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">character</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">character</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span> <span class="ow">and</span> <span class="n">aprs_header</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># header is ending here!</span>
+                <span class="n">aprs_header</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">DESTINATION_ADDRESS</span> <span class="o">=</span> <span class="n">header_text</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">SOURCE_ADDRESS</span> <span class="o">=</span> <span class="n">header_text</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">14</span><span class="p">]</span>
+        <span class="n">PATH</span> <span class="o">=</span> <span class="n">header_text</span><span class="p">[</span><span class="mi">14</span><span class="p">:]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;destination:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">DESTINATION_ADDRESS</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;source:</span><span class="se">\t\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">SOURCE_ADDRESS</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;path:</span><span class="se">\t\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">PATH</span><span class="p">)</span>
+
+        <span class="n">CONTROL_FIELD</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">msg_text</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">PROTOCOL_ID</span> <span class="o">=</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="n">msg_text</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">INFORMATION_FIELD</span> <span class="o">=</span> <span class="n">msg_text</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;control fields:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">CONTROL_FIELD</span><span class="p">,</span> <span class="n">PROTOCOL_ID</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;information:</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">INFORMATION_FIELD</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">INFORMATION_FIELD</span>
+
 
 <div class="viewcode-block" id="decode_afsk1200.decode_nrzi"><a class="viewcode-back" href="../../modules.html#directdemod.decode_afsk1200.decode_afsk1200.decode_nrzi">[docs]</a>    <span class="k">def</span> <span class="nf">decode_nrzi</span><span class="p">(</span><span class="n">nrzi</span><span class="p">):</span>
 
