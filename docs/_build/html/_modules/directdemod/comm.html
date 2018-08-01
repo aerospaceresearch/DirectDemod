@@ -1,0 +1,256 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>directdemod.comm &#8212; DirectDemod  documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for directdemod.comm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Signal utilities</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">directdemod.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This is an object used to store a signal and its properties</span>
+<span class="sd">e.g. To use this to store a audio signal: audioSig = commSignal(ArrayWithSignalValues, SamplingRate)</span>
+<span class="sd">Refer: Experiment 1 for testing memory effeciency of the object</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<div class="viewcode-block" id="commSignal"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal">[docs]</a><span class="k">class</span> <span class="nc">commSignal</span><span class="p">:</span>
+    
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is an object used to store a signal and its properties</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="commSignal.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampRate</span><span class="p">,</span> <span class="n">sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">chunker</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sampRate (:obj:`int`): sampling rate in Hz, will be forced to be an integer</span>
+<span class="sd">            sig (:obj:`numpy array`, optional): must be one dimentional, will be forced to be a numpy array</span>
+<span class="sd">            chunker (:obj:`chunker`, optional): Chunking object, if this signal is going to be processed in chunks</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span> <span class="o">=</span> <span class="n">chunker</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sampRate</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The sampling rate must be greater than zero&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The signal array must be 1-D&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;:obj:`int`: get length of signal&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__len</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sampRate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;:obj:`int`: get sampling rate of signal&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">signal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;:obj:`numpy array`: get signal&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span>
+
+<div class="viewcode-block" id="commSignal.offsetFreq"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.offsetFreq">[docs]</a>    <span class="k">def</span> <span class="nf">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freqOffset</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Offset signal by a frequency by multiplying a complex envelope</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            freqOffset (:obj:`float`): offset frequency in Hz</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Signal offset by given frequency (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">CHUNK_FREQOFFSET</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">CHUNK_FREQOFFSET</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="n">j</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">freqOffset</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sampRate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="commSignal.filter"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filt</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Apply a filter to the signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filt (:obj:`filter`): filter object</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateSignal</span><span class="p">(</span><span class="n">filt</span><span class="o">.</span><span class="n">applyOn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="commSignal.bwLim"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.bwLim">[docs]</a>    <span class="k">def</span> <span class="nf">bwLim</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsampRate</span><span class="p">,</span> <span class="n">strict</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">uniq</span> <span class="o">=</span> <span class="s2">&quot;abcd&quot;</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Limit the bandwidth by downsampling</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tsampRate (:obj:`int`): target sample rate</span>
+<span class="sd">            strict (:obj:`bool`, optional): if true, the target sample rate will be matched exactly</span>
+<span class="sd">            uniq (:obj:`str`, optional): in case chunked signal, uniq is to differentiate different bwLim funcs</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">&lt;</span> <span class="n">tsampRate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The target sampling rate must be less than current sampling rate&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+
+            <span class="c1"># will be depreciated later on, try not to use</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">tsampRate</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sampRate</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">=</span> <span class="n">tsampRate</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">jumpIndex</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampRate</span> <span class="o">/</span> <span class="n">tsampRate</span><span class="p">)</span>
+
+            <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">CHUNK_BWLIM</span> <span class="o">+</span> <span class="n">uniq</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">nextOff</span> <span class="o">=</span> <span class="p">(</span><span class="n">jumpIndex</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span><span class="o">%</span><span class="n">jumpIndex</span><span class="p">)</span><span class="o">%</span><span class="n">jumpIndex</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__chunker</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">CHUNK_BWLIM</span> <span class="o">+</span> <span class="n">uniq</span><span class="p">,</span> <span class="n">nextOff</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">[</span><span class="n">offset</span><span class="p">::</span><span class="n">jumpIndex</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampRate</span><span class="o">/</span><span class="n">jumpIndex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="commSignal.funcApply"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.funcApply">[docs]</a>    <span class="k">def</span> <span class="nf">funcApply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39; Applies a function to the signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (function): function to be applied</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateSignal</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="commSignal.extend"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39; Adds another signal to this one at the tail end</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`commSignal`): Signal to be added</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampRate</span> <span class="o">==</span> <span class="n">sig</span><span class="o">.</span><span class="n">sampRate</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Signals must have same sampling rate to be extended&quot;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateSignal</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="commSignal.updateSignal"><a class="viewcode-back" href="../../modules.html#directdemod.comm.commSignal.updateSignal">[docs]</a>    <span class="k">def</span> <span class="nf">updateSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39; Updates the signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sig (:obj:`numpy array`): New signal array</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`commSignal`: Updated signal (self)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sig</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The signal array must be 1-D&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Vinay C K (7andahalf).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

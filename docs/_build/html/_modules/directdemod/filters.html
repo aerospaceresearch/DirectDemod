@@ -1,0 +1,401 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>directdemod.filters &#8212; DirectDemod  documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for directdemod.filters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Object for filters</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">directdemod.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Abstract model of a class, to keep the models consistent</span>
+<span class="sd">Any filter must inherit this abstract class</span>
+<span class="sd">The general structure is as follows</span>
+<span class="sd">The goal of having such a parent abstract class is that, the children are forced to implement the required methods</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="filter"><a class="viewcode-back" href="../../modules.html#directdemod.filters.filter">[docs]</a><span class="k">class</span> <span class="nc">filter</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This is a parent object of all filters, it implements all the necessary properties. Refer to experiment 3 for details.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="filter.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.filter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            b (:obj:`list`): list of &#39;b&#39; constants of filter</span>
+<span class="sd">            a (:obj:`list`): list of &#39;a&#39; constants of filter</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span> <span class="o">=</span> <span class="n">storeState</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__zeroPhase</span> <span class="o">=</span> <span class="n">zeroPhase</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__initOut</span> <span class="o">=</span> <span class="n">initOut</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span>  <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zeroPhase</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__initOut</span> <span class="o">==</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zeroPhase</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__initOut</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">lfilter_zi</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__initOut</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">a</span></div>
+
+<div class="viewcode-block" id="filter.applyOn"><a class="viewcode-back" href="../../modules.html#directdemod.filters.filter.applyOn">[docs]</a>    <span class="k">def</span> <span class="nf">applyOn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Apply the filter to a given array of signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (:obj:`numpy array`): The signal array on which the filter needs to be applied</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: Filtered signal array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__storeState</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">lfiltic</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__initOut</span><span class="p">)</span>
+
+            <span class="n">retDat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">lfilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">zi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zi</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">retDat</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__zeroPhase</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">signal</span><span class="o">.</span><span class="n">filtfilt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">signal</span><span class="o">.</span><span class="n">lfilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getA</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;:obj:`list`: Get &#39;a&#39; of the filter&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        
+        <span class="sd">&#39;&#39;&#39;:obj:`list`: Get &#39;b&#39; of the filter&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__b</span></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">A simple rolling average filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="rollingAverage"><a class="viewcode-back" href="../../modules.html#directdemod.filters.rollingAverage">[docs]</a><span class="k">class</span> <span class="nc">rollingAverage</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A simple rolling average filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="rollingAverage.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.rollingAverage.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n (:obj:`int`, optional): size of the rolling window</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">rollingAverage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="n">n</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Blackman Harris filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="blackmanHarris"><a class="viewcode-back" href="../../modules.html#directdemod.filters.blackmanHarris">[docs]</a><span class="k">class</span> <span class="nc">blackmanHarris</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Blackman Harris filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="blackmanHarris.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.blackmanHarris.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n (:obj:`int`): size of the window</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">blackmanHarris</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">blackmanharris</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Blackman Harris filter (by convolving)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="blackmanHarrisConv"><a class="viewcode-back" href="../../modules.html#directdemod.filters.blackmanHarrisConv">[docs]</a><span class="k">class</span> <span class="nc">blackmanHarrisConv</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Blackman Harris filter (by convolving, Not recommended for large signals)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="blackmanHarrisConv.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.blackmanHarrisConv.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">151</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n (:obj:`int`, optional): size of the window</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">blackmanharris</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="blackmanHarrisConv.applyOn"><a class="viewcode-back" href="../../modules.html#directdemod.filters.blackmanHarrisConv.applyOn">[docs]</a>    <span class="k">def</span> <span class="nf">applyOn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Apply the filter to a given array of signal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (:obj:`numpy array`): The signal array on which the filter needs to be applied</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`numpy array`: Filtered signal array</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">signal</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Hamming filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="hamming"><a class="viewcode-back" href="../../modules.html#directdemod.filters.hamming">[docs]</a><span class="k">class</span> <span class="nc">hamming</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Hamming filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="hamming.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.hamming.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n (:obj:`int`): size of the window</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">hamming</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">hamming</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Gaussian filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="gaussian"><a class="viewcode-back" href="../../modules.html#directdemod.filters.gaussian">[docs]</a><span class="k">class</span> <span class="nc">gaussian</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Gaussian filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="gaussian.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.gaussian.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n (:obj:`int`): size of the window</span>
+<span class="sd">            sigma (:obj:`float`): The standard deviation</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">gaussian</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">gaussian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Butterworth filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="butter"><a class="viewcode-back" href="../../modules.html#directdemod.filters.butter">[docs]</a><span class="k">class</span> <span class="nc">butter</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Butterworth filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="butter.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.butter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fs</span><span class="p">,</span> <span class="n">cutoffA</span><span class="p">,</span> <span class="n">cutoffB</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">typeFlt</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_LP</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Fs (:obj:`int`): Sampling frequency of signal</span>
+<span class="sd">            cutoffA (:obj:`float`): desired cutoff A of filter in Hz</span>
+<span class="sd">            cutoffB (:obj:`float`, optional): desired cutoff B of filter in Hz</span>
+<span class="sd">            n (:obj:`int`, optional): Order of filter</span>
+<span class="sd">            type (:obj:`constant`, optional): constants.FLT_LP to constants.FLT_BS, see constants module</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span> <span class="o">=</span> <span class="n">Fs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">=</span> <span class="n">cutoffA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">=</span> <span class="n">cutoffB</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">=</span> <span class="n">typeFlt</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BS</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CutoffB must be given&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_LP</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;lowpass&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_HP</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;highpass&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BP</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">)]</span> <span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;bandpass&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__type</span> <span class="o">==</span> <span class="n">constants</span><span class="o">.</span><span class="n">FLT_BS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__cutoffA</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cutoffB</span> <span class="o">/</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Fs</span><span class="p">)]</span> <span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="s1">&#39;bandstop&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid filter type&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">butter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__a</span><span class="p">,</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Remez band filter</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="remez"><a class="viewcode-back" href="../../modules.html#directdemod.filters.remez">[docs]</a><span class="k">class</span> <span class="nc">remez</span><span class="p">(</span><span class="nb">filter</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Remez band filter</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="remez.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.filters.remez.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Fs</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">gains</span><span class="p">,</span> <span class="n">ntaps</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="n">storeState</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">zeroPhase</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">initOut</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Fs (:obj:`int`): sampling frequency in Hz</span>
+<span class="sd">            bands (:obj:`list`): non-overlapping list of bands (in Hz) in increasing order. e.g [[0, 100], [400, 500], [600, 700]]</span>
+<span class="sd">            gains (:obj:`float`): Corresponding gains of the bands e.g. [0, 1, 0.5]</span>
+<span class="sd">            ntaps (:obj:`int`, optional): Number of taps of filter (number of terms in filter)</span>
+<span class="sd">            storeState (:obj:`bool`, optional): Whether the filter state must be stored. Useful when filtering a chunked signal to avoid border effects.</span>
+<span class="sd">            zeroPhase (:obj:`bool`, optional): Whether the filter has to provide zero phase error to the input i.e. no delay in the output (Note: Enabling this will disable &#39;storeState&#39; and &#39;initOut&#39;)</span>
+<span class="sd">            initOut (:obj:`list`, optional): Initial condition of the filter</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atleast one band must be given&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">bands</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">Fs</span><span class="o">/</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Last band must end before (Fs/2)Hz&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bands</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__gains</span> <span class="o">=</span> <span class="n">gains</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid bands/gains values&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">remez</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">remez</span><span class="p">(</span><span class="n">ntaps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bands</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__gains</span><span class="p">,</span> <span class="n">Hz</span> <span class="o">=</span> <span class="n">Fs</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">storeState</span><span class="p">,</span> <span class="n">zeroPhase</span><span class="p">,</span> <span class="n">initOut</span><span class="p">)</span></div></div>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">To be implemented later if needed</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">medianFilter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__n</span> <span class="o">=</span> <span class="n">n</span>
+    <span class="k">def</span> <span class="nf">applyOn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sig</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">signal</span><span class="o">.</span><span class="n">medfilt</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__n</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Vinay C K (7andahalf).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

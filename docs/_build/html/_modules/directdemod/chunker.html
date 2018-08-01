@@ -1,0 +1,159 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>directdemod.chunker &#8212; DirectDemod  documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for directdemod.chunker</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">chunking helper</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">directdemod.constants</span> <span class="k">as</span> <span class="nn">constants</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This object is just to help in chunking process</span>
+<span class="sd">It is responsible for creating chunks of the signal and store the info to be used later</span>
+<span class="sd">It can be helpful for avoiding border issues in filters and demods</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># POSSIBLE TODO: automatic distinction in get/set for every cycle. will avoid need of &#39;uniq&#39;</span>
+
+<div class="viewcode-block" id="chunker"><a class="viewcode-back" href="../../modules.html#directdemod.chunker.chunker">[docs]</a><span class="k">class</span> <span class="nc">chunker</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This object is just to help in chunking process</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="chunker.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.chunker.chunker.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigsrc</span><span class="p">,</span> <span class="n">chunkSize</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">PROC_CHUNKSIZE</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sampRate (:obj:`commSignal`): commSignal object to be chunked</span>
+<span class="sd">            chunkSize (:obj:`int`, optional): chunk size</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__nChunks</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">sigsrc</span><span class="o">.</span><span class="n">length</span><span class="o">*</span><span class="mf">1.0</span><span class="o">/</span><span class="n">chunkSize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># create normal sized chunks</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunkSize</span> <span class="o">&lt;</span> <span class="n">sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">i</span> <span class="o">+</span> <span class="n">chunkSize</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="n">chunkSize</span> 
+
+        <span class="c1"># has it exhaused the whole signal?</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># if not put the remaining as another smaller chunk</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">sigsrc</span><span class="o">.</span><span class="n">length</span><span class="p">])</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;:obj:`list`: get the created chunks&#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__chunks</span>
+
+<div class="viewcode-block" id="chunker.set"><a class="viewcode-back" href="../../modules.html#directdemod.chunker.chunker.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;set a variable for to be used during chunking</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (:obj:`str`): name of the variable</span>
+<span class="sd">            value (:obj:`anything`, optional): value of variable</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="chunker.get"><a class="viewcode-back" href="../../modules.html#directdemod.chunker.chunker.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;get a variable value for to be used during chunking</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (:obj:`str`): name of the variable</span>
+<span class="sd">            init (:obj:`anything`): initialize variable to this, if undefined previously</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`aything`: value of variable</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">init</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__vars</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Vinay C K (7andahalf).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,338 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>directdemod.decode_funcube &#8212; DirectDemod  documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for directdemod.decode_funcube</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Funcube</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">source</span><span class="p">,</span> <span class="n">sink</span><span class="p">,</span> <span class="n">chunker</span><span class="p">,</span> <span class="n">comm</span><span class="p">,</span> <span class="n">constants</span><span class="p">,</span> <span class="n">filters</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">scipy.signal</span> <span class="k">as</span> <span class="nn">signal</span>
+<span class="c1">#import matplotlib.pylab as plt</span>
+<span class="kn">import</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">time</span>
+
+<span class="c1">## Inspired from: https://github.com/dbdexter-dev/meteor_demod</span>
+<span class="c1"># Thank you!</span>
+
+<span class="c1">################# OBJECTS</span>
+
+<span class="k">class</span> <span class="nc">agc</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="mf">180.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dc</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">def</span> <span class="nf">adjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">):</span>
+
+        <span class="c1"># moving avg to get dc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dc</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">dc</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">inp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="o">*</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">inp</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dc</span>
+
+        <span class="c1"># moving avg of amplitude</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">*</span> <span class="p">(</span><span class="mf">65536.0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">inp</span><span class="p">))</span><span class="o">**</span><span class="mf">0.5</span><span class="p">))</span> <span class="o">/</span> <span class="mf">65536.0</span>
+
+        <span class="c1"># multiply the input value</span>
+        <span class="k">if</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">&gt;</span> <span class="mi">20</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">inp</span> <span class="o">*</span> <span class="mi">20</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">inp</span> <span class="o">*</span> <span class="mf">180.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+
+<span class="k">class</span> <span class="nc">costas</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="mf">0.001</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="mf">0.00</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">damping</span> <span class="o">=</span> <span class="mf">0.70710678118</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bw</span> <span class="o">=</span> <span class="mf">0.05235833333</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compAlphaBeta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plllock</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hypstore</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">256</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hypstore</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">128</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">compAlphaBeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">damping</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>
+        <span class="n">denom</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">damping</span><span class="o">*</span><span class="n">bw</span> <span class="o">+</span> <span class="n">bw</span><span class="o">*</span><span class="n">bw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">damping</span><span class="o">*</span><span class="n">bw</span><span class="p">)</span><span class="o">/</span><span class="n">denom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">bw</span><span class="o">*</span><span class="n">bw</span><span class="p">)</span><span class="o">/</span><span class="n">denom</span>
+
+    <span class="k">def</span> <span class="nf">loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samp</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+
+        <span class="n">correctedIn</span> <span class="o">=</span> <span class="n">samp</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span>
+
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">correctedIn</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hyp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">correctedIn</span><span class="p">))</span><span class="o">/</span><span class="mf">255.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="p">(</span><span class="mf">39999.0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">error</span><span class="p">))</span><span class="o">/</span><span class="mf">40000.0</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span> 
+            <span class="n">error</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">error</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">*</span><span class="n">error</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">*</span><span class="n">error</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">plllock</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compAlphaBeta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw</span><span class="o">/</span><span class="mf">2.0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plllock</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">plllock</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compAlphaBeta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">damping</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bw</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plllock</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">correctedIn</span>
+
+    <span class="k">def</span> <span class="nf">hyp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">127</span><span class="p">:</span> <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">128</span><span class="p">:</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hypstore</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">128</span><span class="p">)]</span>
+
+<span class="k">def</span> <span class="nf">lim</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">128.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">128</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mf">127.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">127</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">limBin</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Object to Funcube</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="decode_funcube"><a class="viewcode-back" href="../../modules.html#directdemod.decode_funcube.decode_funcube">[docs]</a><span class="k">class</span> <span class="nc">decode_funcube</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Object to decode Funcube</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="decode_funcube.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.decode_funcube.decode_funcube.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigsrc</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">bw</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sigsrc (:obj:`commSignal`): IQ data source</span>
+<span class="sd">            offset (:obj:`float`): Frequency offset of source in Hz</span>
+<span class="sd">            bw (:obj:`int`, optional): Bandwidth</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__bw</span> <span class="o">=</span> <span class="n">bw</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bw</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__bw</span> <span class="o">=</span> <span class="mi">7000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span> <span class="o">=</span> <span class="n">sigsrc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__offset</span> <span class="o">=</span> <span class="n">offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">useful</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;See if signal was found</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`int`: 0 if not found, 1 if found</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">getSyncs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Get syncs of Funcube</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`list`: list of detected syncs</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># create chunker object</span>
+        <span class="n">chunkerObj</span> <span class="o">=</span> <span class="n">chunker</span><span class="o">.</span><span class="n">chunker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="p">)</span>
+
+        <span class="c1"># butter filter</span>
+        <span class="n">bf</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__bw</span><span class="p">)</span>
+
+        <span class="c1"># init vars for gardner</span>
+        <span class="n">symbolPeriod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="o">/</span><span class="mi">12000</span>
+        <span class="n">timing</span> <span class="o">=</span> <span class="mf">0.00</span>
+        <span class="n">gardnerC</span><span class="p">,</span> <span class="n">gardnerB</span><span class="p">,</span> <span class="n">gardnerA</span> <span class="o">=</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.00</span>
+        <span class="n">agcObj</span> <span class="o">=</span> <span class="n">agc</span><span class="p">()</span>
+        <span class="n">pllObj</span> <span class="o">=</span> <span class="n">costas</span><span class="p">()</span>
+        <span class="n">ctr</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">sync</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="s2">&quot;101000110001000000000001010111100&quot;</span><span class="p">])</span>
+
+        <span class="n">sync12khz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="n">sync</span><span class="p">[</span><span class="n">sync</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">127</span>
+        <span class="n">sync</span><span class="p">[</span><span class="n">sync</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">128</span>
+        <span class="n">sync2mhz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">sync</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="mi">2048000</span><span class="o">/</span><span class="mi">1200</span><span class="p">))</span>
+
+        <span class="n">maxResBuff</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">minResBuff</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">maxBuffRetain</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">maxBuffStart</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">minSyncs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">maxSyncs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">numCtrs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">12000</span><span class="o">/</span><span class="mi">2048000</span><span class="p">)</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">lastMin</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ctrMain</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chunkerObj</span><span class="o">.</span><span class="n">getChunks</span><span class="p">[:]:</span>
+
+            <span class="c1">#interpolate</span>
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">commSignal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">sampFreq</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigsrc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">sig</span><span class="o">.</span><span class="n">offsetFreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__offset</span><span class="p">)</span>
+            <span class="n">sig</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">bf</span><span class="p">)</span>
+
+            <span class="c1"># main loop</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">signal</span><span class="p">:</span>
+
+                <span class="c1">### MAXSYNC detection by correlation</span>
+
+                <span class="c1"># start storing 2mhz values near sync possible regions</span>
+                <span class="k">if</span> <span class="n">ctr</span> <span class="o">&gt;</span> <span class="n">lastMin</span> <span class="o">+</span> <span class="p">(</span><span class="mf">4.9</span><span class="o">*</span><span class="mi">12000</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">sync12khz</span><span class="p">))</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">maxBuffRetain</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxResBuff</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">maxBuffStart</span> <span class="o">=</span> <span class="n">ctrMain</span>
+                    <span class="n">maxResBuff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">pllObj</span><span class="o">.</span><span class="n">output</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+
+                <span class="c1"># see if correlation is to be performed</span>
+                <span class="k">if</span> <span class="n">maxBuffRetain</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxResBuff</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sync2mhz</span><span class="p">)):</span>
+                        <span class="n">maxBuffStart</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">maxResBuff</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">maxBuffRetain</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">maxBuffRetain</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="n">corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">maxResBuff</span><span class="p">,</span><span class="n">sync2mhz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">))</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MAXSYNC </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">maxBuffStart</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">corr</span><span class="p">))</span>
+                    <span class="c1">#print(&quot;MAXSYNC&quot;, maxBuffStart, np.argmax(corr), maxBuffStart+np.argmax(corr))</span>
+                    <span class="n">maxSyncs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">maxBuffStart</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">corr</span><span class="p">))</span>
+                    <span class="n">maxResBuff</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="c1">#plt.plot(corr)</span>
+                    <span class="c1">#plt.show()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">maxBuffRetain</span> <span class="o">-=</span> <span class="mi">1</span>
+
+                <span class="c1"># Gardners algorithm</span>
+                <span class="k">if</span> <span class="n">timing</span> <span class="o">&gt;=</span> <span class="n">symbolPeriod</span><span class="o">/</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">timing</span> <span class="o">&lt;</span> <span class="p">((</span><span class="n">symbolPeriod</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">gardnerB</span> <span class="o">=</span> <span class="n">agcObj</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">timing</span> <span class="o">&gt;=</span> <span class="n">symbolPeriod</span><span class="p">:</span>
+                    <span class="n">gardnerA</span> <span class="o">=</span> <span class="n">agcObj</span><span class="o">.</span><span class="n">adjust</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">timing</span> <span class="o">-=</span> <span class="n">symbolPeriod</span>
+                    <span class="n">resync_error</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">gardnerA</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">gardnerC</span><span class="p">))</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">gardnerB</span><span class="p">)</span>
+                    <span class="n">timing</span> <span class="o">+=</span> <span class="p">(</span><span class="n">resync_error</span><span class="o">*</span><span class="n">symbolPeriod</span><span class="o">/</span><span class="p">(</span><span class="mf">2000000.0</span><span class="p">))</span>
+                    <span class="n">gardnerC</span> <span class="o">=</span> <span class="n">gardnerA</span>
+                    <span class="n">gardnerA</span> <span class="o">=</span> <span class="n">pllObj</span><span class="o">.</span><span class="n">loop</span><span class="p">(</span><span class="n">gardnerA</span><span class="p">)</span>
+                    <span class="n">ctr</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># 12khz buffer</span>
+                    <span class="n">minResBuff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">limBin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">gardnerA</span><span class="p">)))</span>
+                    <span class="n">minResBuff</span> <span class="o">=</span> <span class="n">minResBuff</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">sync12khz</span><span class="p">):]</span>
+
+                    <span class="c1"># print periodic status</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">ctr</span><span class="o">%</span><span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;[</span><span class="si">%.2f</span><span class="s2"> percent complete] [</span><span class="si">%.2f</span><span class="s2"> seconds elapsed] [</span><span class="si">%.2f</span><span class="s2"> seconds remain]&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">ctr</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">numCtrs</span><span class="p">),</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">),</span> <span class="p">(((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">ctr</span><span class="o">/</span><span class="n">numCtrs</span><span class="p">))</span><span class="o">-</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)))</span>
+                            <span class="c1">#print(ctr, &#39;[%.2f&#39; %(ctr*100/numCtrs),&quot;%]&quot;,&#39;[%.2f&#39; %(time.time() - start_time),&quot;seconds elapsed]&quot;,&#39;[%.2f&#39; %(((time.time() - start_time)/(ctr/numCtrs))-(time.time() - start_time)), &quot;seconds remaining]&quot;, pllObj.mean)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+
+                    <span class="c1"># see if sync is present</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">minResBuff</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sync12khz</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">minResBuff</span><span class="p">)</span> <span class="o">-</span> <span class="n">sync12khz</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sync12khz</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">120</span><span class="p">:</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MINSYNC: </span><span class="si">%d</span><span class="s2"> </span><span class="si">%f</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">ctr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">minResBuff</span><span class="p">)</span> <span class="o">-</span> <span class="n">sync12khz</span><span class="p">))</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sync12khz</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
+                        <span class="c1">#print(&quot;MINSYNC:&quot;,ctr, np.abs(np.sum(np.abs(np.array(minResBuff) - sync12khz)) - (len(sync12khz)/2)))</span>
+                        <span class="n">minSyncs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ctr</span><span class="p">)</span>
+                        <span class="n">lastMin</span> <span class="o">=</span> <span class="n">ctr</span>
+                        <span class="n">maxBuffRetain</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sync2mhz</span><span class="p">)</span>
+
+                <span class="n">timing</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">ctrMain</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># check usefulness</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">maxSyncs</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">4.98</span><span class="o">*</span><span class="mi">2048000</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mf">0.2</span><span class="o">*</span><span class="mi">2048000</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__useful</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">maxSyncs</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span></div>
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">DirectDemod  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Vinay C K (7andahalf).
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
+    </div>
+  </body>
+</html>
