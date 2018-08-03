@@ -196,7 +196,7 @@ class decode_funcube:
                 ### MAXSYNC detection by correlation
 
                 # start storing 2mhz values near sync possible regions
-                if not lastMin is None and (ctr > lastMin + (4.9*12000) - (2*len(sync12khz)) or not maxBuffRetain == -1):
+                if not lastMin is None and (ctr > lastMin + (4.9*12000) - (2*len(sync12khz)) or not maxBuffRetain == -1) and not ctr > lastMin + (5.2*12000):
                     if len(maxResBuff) == 0:
                         maxBuffStart = ctrMain
                     maxResBuff.append(lim(np.real(i*pllObj.output)/2))
