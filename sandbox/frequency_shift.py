@@ -57,7 +57,7 @@ def rolling_window(input, window):
     return output
 
 
-def find_shift(stream, samplerate, center_frequency, channel_frequency, bandwidth):
+def find_shift(iq_stream, samplerate, center_frequency, channel_frequency, bandwidth):
 
     window = 2048*2*2
     #http://docs.scipy.org/doc/scipy/reference/tutorial/fftpack.html
@@ -152,8 +152,7 @@ def correct(iq_stream, samplerate, center_frequency, channel_frequency, bandwidt
 if __name__ == "__main__":
 
     # need the stream as serial binary data. no complex.
-    iq_stream = np.memmap("C:/Users/station/Desktop/DirectDemod/SDRSharp_20180731_180542Z_145865000Hz_IQ_funcube1.wav",
-                          offset=44)
+    iq_streama = np.memmap("D:/rx/rx/fun_2018-07-30T064300Z_2018-07-30T065400Z_1234512345_5.dat")
 
     center_frequency = 145865000
     channel_frequency = 145938200
@@ -165,5 +164,5 @@ if __name__ == "__main__":
     chunk_length = 10
 
     print("doppler shift is",
-          correct(iq_stream, samplerate, center_frequency, channel_frequency, bandwidth, chunk_number, chunk_length),
+          correct(iq_streama, samplerate, center_frequency, channel_frequency, bandwidth, chunk_number, chunk_length),
           "Hz")

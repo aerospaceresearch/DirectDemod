@@ -2,6 +2,7 @@
 Funcube
 '''
 from directdemod import source, sink, chunker, comm, constants, filters
+from sandbox import frequency_shift
 import numpy as np
 import logging
 import scipy.signal as signal
@@ -41,7 +42,7 @@ class costas():
         self.output = np.exp(-1j*self.phase)
 
         self.damping = 0.70710678118
-        self.bw = 0.05235833333
+        self.bw = 0.05235833333*6
         self.compAlphaBeta(self.damping, self.bw)
 
         self.mean = 1.0
@@ -112,7 +113,7 @@ class decode_funcube:
     Object to decode Funcube
     '''
 
-    def __init__(self, sigsrc, offset, bw):
+    def __init__(self, sigsrc, offset, bw, center_frequency, signal_freq, corrfreq = False):
 
         '''Initialize the object
 
@@ -128,6 +129,9 @@ class decode_funcube:
         self.__sigsrc = sigsrc
         self.__offset = offset
         self.__useful = 0
+        self.__center_frequency = int(center_frequency)
+        self.__signal_freq = int(signal_freq)
+        self.__corrfreq = corrfreq
 
     @property
     def useful(self):
@@ -183,12 +187,49 @@ class decode_funcube:
         start_time = time.time()
         lastMin = None
         ctrMain = 0
-        for i in chunkerObj.getChunks[:]:
 
+
+        doppCorrect_target = None
+        doppCorrect_current = None
+
+        chunk_number = 0
+
+        for i in chunkerObj.getChunks[:]:
             #interpolate
             sig = comm.commSignal(self.__sigsrc.sampFreq, self.__sigsrc.read(*i))
-            sig.offsetFreq(self.__offset)
+            
+            doppCorrect_freqs = self.__offset
+            if self.__corrfreq:
+
+                bandwidth = 20000 # the bandwidth must cover the signal to be able to find it.
+                chunk_offset = frequency_shift.correct(self.__sigsrc.memmap, self.__sigsrc.sampFreq, self.__center_frequency, self.__signal_freq, bandwidth, chunk_number, len(chunkerObj.getChunks))
+
+                logging.info("doppler shift is %f Hz",chunk_offset)
+
+                chunk_number += 1
+
+                doppCorrect_target = self.__offset + chunk_offset
+                if doppCorrect_current == None:
+                    doppCorrect_current = doppCorrect_target
+
+                doppCorrect_bw = 2000.0/constants.PROC_CHUNKSIZE
+
+                if doppCorrect_target > doppCorrect_current:
+                    doppCorr_delta = doppCorrect_bw
+                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta), doppCorr_delta)
+                    doppCorrect_freqs[doppCorrect_freqs > doppCorrect_target] = doppCorrect_target
+                else:
+                    doppCorr_delta = -1*doppCorrect_bw
+                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta), doppCorr_delta)
+                    doppCorrect_freqs[doppCorrect_freqs < doppCorrect_target] = doppCorrect_target
+
+                doppCorrect_current = doppCorrect_freqs[-1]
+
+            sig.offsetFreq(doppCorrect_freqs)
+
             sig.filter(bf)
+
+            ctrCurr = 0
 
             # main loop
             for i in sig.signal:
@@ -240,7 +281,7 @@ class decode_funcube:
                     try:
                         if ctr%1000 == 0:
                             logging.info("[%.2f percent complete] [%.2f seconds elapsed] [%.2f seconds remain]", (ctr*100/numCtrs), (time.time() - start_time), (((time.time() - start_time)/(ctr/numCtrs))-(time.time() - start_time)))
-                            #print(ctr, '[%.2f' %(ctr*100/numCtrs),"%]",'[%.2f' %(time.time() - start_time),"seconds elapsed]",'[%.2f' %(((time.time() - start_time)/(ctr/numCtrs))-(time.time() - start_time)), "seconds remaining]", pllObj.mean)
+                            #print(ctr, '[%.2f' %(ctr*100/numCtrs),"%]",'[%.2f' %(time.time() - start_time),"seconds elapsed]",'[%.2f' %(((time.time() - start_time)/(ctr/numCtrs))-(time.time() - start_time)), "seconds remaining]", pllObj.mean, doppCorrect_freqs[ctrCurr], doppCorrect_target)
                     except:
                         pass
 
@@ -254,6 +295,7 @@ class decode_funcube:
 
                 timing += 1
                 ctrMain += 1
+                ctrCurr += 1
 
         if len(maxSyncs) > 0:
             # check usefulness
