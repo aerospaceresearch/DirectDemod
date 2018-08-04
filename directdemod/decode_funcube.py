@@ -216,11 +216,11 @@ class decode_funcube:
 
                 if doppCorrect_target > doppCorrect_current:
                     doppCorr_delta = doppCorrect_bw
-                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta), doppCorr_delta)
+                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta) + (10*doppCorr_delta), doppCorr_delta)[:len(sig.signal)]
                     doppCorrect_freqs[doppCorrect_freqs > doppCorrect_target] = doppCorrect_target
                 else:
                     doppCorr_delta = -1*doppCorrect_bw
-                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta), doppCorr_delta)
+                    doppCorrect_freqs = np.arange(doppCorrect_current, doppCorrect_current + ((i[1]-i[0]) * doppCorr_delta) + (10*doppCorr_delta), doppCorr_delta)[:len(sig.signal)]
                     doppCorrect_freqs[doppCorrect_freqs < doppCorrect_target] = doppCorrect_target
 
                 doppCorrect_current = doppCorrect_freqs[-1]
