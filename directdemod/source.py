@@ -63,6 +63,7 @@ class IQwav(source):
         '''
 
         self.__offset = 0
+        self.memmap = np.memmap(filename, offset=44)
         self.__sourceType = constants.SOURCE_IQWAV
         self.__sampFreq, self.__data = scipy.io.wavfile.read(filename, True)
         if not givenSampFreq is None:
@@ -154,6 +155,7 @@ class IQdat(source):
 
         self.__offset = 0
         self.__sourceType = constants.SOURCE_IQDAT
+        self.memmap = np.memmap(filename)
         self.__data = np.memmap(filename)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
@@ -248,6 +250,7 @@ class IQwavAlt(source):
         self.__offset = 0
         self.__sourceType = constants.SOURCE_IQWAV
         self.__data = np.memmap(filename, offset=44)
+        self.memmap = np.memmap(filename, offset=44)
         self.__length = int(len(self.__data)/2)
         self.__sampFreq = constants.IQ_SDRSAMPRATE
         if not givenSampFreq is None:

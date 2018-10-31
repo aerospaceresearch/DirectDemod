@@ -49,13 +49,15 @@ def usage(err = ""):
     print("\t\t-noimage : doesn't show/store image")
     print("\t-d afsk1200 : AFSK1200 decoder")
     print("\t-d funcube : Funcube BPSK sync detector")
+    print("\t\tFuncube specifc flags:")
+    print("\t\t--freqshift : Correct the doppler shift")
     print("\t-d meteor : Meteor QPSK sync detector")
     print()
     exit()
 
 # try to get the arguments, if error occurs display usage
 try:
-    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:qn:b:d:r:a:', ['help', 'map', 'tle='])
+    optlist, args = getopt.getopt(sys.argv[1:], 'c:f:s:e:ho:qn:b:d:r:a:', ['help', 'map', 'tle=', 'freqshift'])
 except getopt.GetoptError as e:
     usage(e)
 
@@ -67,6 +69,11 @@ if '-h' in [i[0] for i in optlist] or '--help' in [i[0] for i in optlist]:
 mapDraw = False# if args is to get help
 if '--map' in [i[0] for i in optlist]:
     mapDraw = True
+
+# Frequency map
+corrFreqShift = False# if args is to get help
+if '--freqshift' in [i[0] for i in optlist]:
+    corrFreqShift = True
 
 # check if file given
 if not (len(args) == 1):
@@ -289,7 +296,7 @@ for fileIndex in range(len(freqs)):
             entryDict['filesCreated'] = []
 
             # create funcube object
-            funcubeObj = decode_funcube.decode_funcube(sigsrc, freqOffset, bandwidths[fileIndex])
+            funcubeObj = decode_funcube.decode_funcube(sigsrc, freqOffset, bandwidths[fileIndex], reportDict['centreFreq'], freqs[fileIndex], corrFreqShift)
             syncs = funcubeObj.getSyncs
 
             #print results
