@@ -71,7 +71,7 @@ class chunker:
             init (:obj:`anything`): initialize variable to this, if undefined previously
 
         Returns:
-            :obj:`aything`: value of variable
+            :obj:`anything`: value of variable
         '''
 
         if init is None:

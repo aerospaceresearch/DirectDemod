@@ -20,7 +20,7 @@ class demod_am():
         '''AM demodulation by hilbert's transform
         
         Args:
-            sig (:obj:`numpy array`): Signal array to be demdodulated
+            sig (:obj:`numpy array`): Signal array to be demodulated
 
         Returns:
             :obj:`numpy array`: Demodulated signal
@@ -53,7 +53,7 @@ class demod_amFLT():
         '''AM demodulation by low pass filter
         
         Args:
-            sig (:obj:`numpy array`): Signal array to be demdodulated
+            sig (:obj:`numpy array`): Signal array to be demodulated
 
         Returns:
             :obj:`numpy array`: Demodulated signal
