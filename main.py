@@ -271,7 +271,7 @@ for fileIndex in range(len(freqs)):
                 entryDict['filesCreated'].append(csvFileName)
 
             if noaaObj.useful == 0:
-                logging.info('No NOAA data was found at this frequency')
+                logging.error('No NOAA data was found at this frequency')
 
             entryDict['usefulness'] = noaaObj.useful
             entryDict['syncDetect'] = calculateSync
