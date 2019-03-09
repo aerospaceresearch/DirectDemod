@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
 import os
-import config
+import constants
 
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from PIL import Image
-from lib_checker import Checker
+from misc import Checker
 from scipy import ndimage
 
 '''
@@ -26,7 +26,7 @@ class ImageMerger:
     Class for merging multiple images
     '''
 
-    def __init__(self, tle_file, resolution=config.RESOLUTION, aux_file_name="temp_image_file.png"):
+    def __init__(self, tle_file, resolution=constants.RESOLUTION, aux_file_name="temp_image_file.png"):
 
         '''Initialize the object
 
@@ -62,8 +62,8 @@ class ImageMerger:
         projection = plt.figure()
 
         axes = plt.axes(projection=ccrs.PlateCarree())
-        axes.coastlines(resolution='50m', color=config.COLOR, linewidth=0.2)
-        axes.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor=config.COLOR, linewidth=0.2)
+        axes.coastlines(resolution='50m', color=constants.COLOR, linewidth=0.2)
+        axes.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor=constants.COLOR, linewidth=0.2)
         axes.set_extent([-180, 180, -90, 90])
 
         self.left_ex  = 180
