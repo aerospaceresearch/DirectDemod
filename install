@@ -1,0 +1,61 @@
+#!/bin/sh
+
+##
+# This script is to install DirectDemod
+##
+
+## variables
+DIR="${HOME}/DirectDemod"
+
+## Colours
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW="\033[1;33m"
+NC='\033[0m'
+
+echo $YELLOW
+cat art.txt
+echo "\n\nDirect Demodulation of Radio-signals by aerospaceresearch.net
+https://github.com/aerospaceresearch/DirectDemod\n
+---------------------------------------------------------------"
+echo $NC
+
+echo "This script will install DirectDemod into your system.
+Following are the steps which will be executed in order
+to install the DirectDemod, also note this script require
+sudo access.
+
+${GREEN}[Task 1]${NC} Clone https://github.com/aerospaceresearch/DirectDemod
+         to '${DIR}' folder.
+${GREEN}[Task 2]${NC} Create a smbolic link between 'main.py' and CLI
+         command 'DirectDemod'.
+
+${YELLOW}---------------------------------------------------------------${NC}"
+
+echo "\n${GREEN}- Executing Task 1${NC}\n"
+
+if [ ! -d $DIR ];
+  then
+    echo "Creating ${DIR}"
+    git clone https://github.com/aerospaceresearch/DirectDemod $DIR
+elif [ ! -f "${DIR}/main.py" ];
+  then
+    echo "${DIR} already exist"
+    for FILE in "${DIR}/"
+      do
+        sudo rm -r "${FILE}"
+      done
+    git clone https://github.com/aerospaceresearch/DirectDemod $FILE
+else
+    echo "else"
+fi
+
+printf "\n${GREEN}✔ Task 1 Complete!${NC}\n"
+
+echo "\n${GREEN}- Executing Task 2${NC}\n"
+
+chmod +x "${DIR}/main.py"
+sudo ln -sf "${DIR}/main.py" "/usr/bin/DirectDemod"
+
+printf "\n${GREEN}✔ Task 2 Complete!${NC}\n"
