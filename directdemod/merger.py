@@ -97,8 +97,8 @@ class ImageMerger:
 
             if self.is_cartopy:
                 img = ndimage.rotate(image, degree - 180, cval=255)
-                dx = img.shape[0]*4000/2*0.81 # in meters
-                dy = img.shape[1]*4000/2*0.81 # in meters
+                dx = img.shape[0]*4000/2 # in meters
+                dy = img.shape[1]*4000/2 # in meters
                 left_bot  = self.add_m(center, -1*dx, -1*dy)
                 right_top = self.add_m(center, dx, dy)
                 img_extent = (left_bot[1], right_top[1], left_bot[0], right_top[0])
