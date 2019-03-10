@@ -3,6 +3,7 @@ image merger
 '''
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.image as mimg
 import cartopy
 import cartopy.crs as ccrs
 import os
@@ -91,14 +92,14 @@ class ImageMerger:
         self.top_ex   = -90
 
         for obj in jsons:
-            image  = plt.imread(obj["image_name"])
+            image  = mimg.imread(obj["image_name"])
             center = obj["center"]
             degree = obj["direction"]
 
             if self.is_cartopy:
-                img = ndimage.rotate(image, degree - 180, cval=255)
-                dx = img.shape[0]*4000/2 # in meters
-                dy = img.shape[1]*4000/2 # in meters
+                img = self.set_transparent(ndimage.rotate(image, degree - 180, cval=255))
+                dx = img.shape[0]*4000/2*0.81 # in meters
+                dy = img.shape[1]*4000/2*0.81 # in meters
                 left_bot  = self.add_m(center, -1*dx, -1*dy)
                 right_top = self.add_m(center, dx, dy)
                 img_extent = (left_bot[1], right_top[1], left_bot[0], right_top[0])
@@ -157,6 +158,25 @@ class ImageMerger:
             descriptors.append(descriptor)
 
         return self.merge(descriptors, whole, resolution)
+
+    def set_transparent(self, image):
+
+        '''Set right pixel transparency
+
+        Args:
+            image (:obj:`np.array`): image
+
+        Returns:
+            image (:obj:`np.array`): image with fixed transparency
+        '''
+
+        # Unoptimized version
+        for row in image:
+            for pixel in row:
+                if pixel[0] > 250 and pixel[1] > 250 and pixel[2] > 250:
+                    pixel[3] = 0
+
+        return image
 
     def update_extents(self, extent):
 
