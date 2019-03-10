@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
 import os
+import json
 import constants
 
 from datetime import datetime, timedelta
@@ -26,13 +27,12 @@ class ImageMerger:
     Class for merging multiple images
     '''
 
-    def __init__(self, tle_file, resolution=constants.RESOLUTION, aux_file_name="temp_image_file.png"):
+    def __init__(self, tle_file, aux_file_name="temp_image_file.png"):
 
         '''Initialize the object
 
         Args:
             tle_file (:obj:`string`): path to the tle file
-            resolution (:obj:`int`, optional): resolution of the output image
             aux_file_name (:obj:`string`, optional): auxiliary file name
         '''
 
@@ -40,23 +40,42 @@ class ImageMerger:
 
         self.is_basemap = Checker.check_basemap()
         self.is_cartopy = Checker.check_cartopy()
-        self.resolution = resolution
         self.tle_file   = tle_file
         self.aux_file_name = aux_file_name
 
-    def merge_images(self, objs, whole=False):
+    def merge_files(self, file_descriptors, whole=False, resolution=constants.RESOLUTION):
 
-        '''Merge multiple images
+        '''Merge images from image descriptors
 
         Args:
-            objs (:obj:`tuple(np.array, tuple(float, float), float)`): set of objects representing images
+            file_descriptors (:obj:`list(string))`): paths to image descriptors
             whole (:obj:`bool`, optinal): flag to generate whole image
+            resolution (:obj:`int`, optional): resolution of the output image
 
         Returns:
             :obj:`PIL.Image`: merged image
         '''
 
-        if objs is None:
+        if file_descriptors is None:
+            raise ValueError("Passed descriptors are null.")
+
+        descriptors = [json.load(open(f)) for f in file_descriptors if Checker.is_file(f)]
+        return self.merge(descriptors, whole, resolution)
+
+    def merge(self, jsons, whole=False, resolution=constants.RESOLUTION):
+
+        '''Merge multiple images from descriptors
+
+        Args:
+            objs (:obj:`dict`): set of dict objects, which describe images
+            whole (:obj:`bool`, optinal): flag to generate whole image
+            resolution (:obj:`int`, optional): resolution of the output image
+
+        Returns:
+            :obj:`PIL.Image`: merged image
+        '''
+
+        if jsons is None:
             raise ValueError("Passed objects are null.")
 
         projection = plt.figure()
@@ -71,10 +90,10 @@ class ImageMerger:
         self.bot_ex   = 90
         self.top_ex   = -90
 
-        for obj in objs:
-            image  = obj[0]
-            center = obj[1]
-            degree = obj[2]
+        for obj in jsons:
+            image  = plt.imread(obj["image_name"])
+            center = obj["center"]
+            degree = obj["direction"]
 
             if self.is_cartopy:
                 img = ndimage.rotate(image, degree - 180, cval=255)
@@ -89,22 +108,23 @@ class ImageMerger:
                 raise NotImplementedError("Basemap mapping not implemented.")
 
         if whole:
-            projection.savefig(self.aux_file_name, dpi=self.resolution, bbox_inches='tight')
+            projection.savefig(self.aux_file_name, dpi=resolution, bbox_inches='tight')
         else:
             axes.set_extent([self.left_ex, self.right_ex, self.bot_ex, self.top_ex])
-            projection.savefig(self.aux_file_name, dpi=self.resolution, bbox_inches='tight')
+            projection.savefig(self.aux_file_name, dpi=resolution, bbox_inches='tight')
 
         merged = Image.open(self.aux_file_name)
         os.remove(self.aux_file_name)
         return merged
 
-    def merge_from_files(self, objs, whole=False):
+    def merge_noaa(self, objs, whole=False, resolution=constants.RESOLUTION):
 
-        '''Merge multiple images from files
+        '''Merge multiple noadd images from image files
 
         Args:
             objs (:obj:`tuple(string, string)`): set of objects representing images
             whole (:obj:`bool`, optinal): flag to generate whole image
+            resolution (:obj:`int`, optional): resolution of the output image
 
         Returns:
             :obj:`PIL.Image`: merged image
@@ -113,7 +133,7 @@ class ImageMerger:
         if objs is None:
             raise ValueError("Passed objects are null.")
 
-        image_objects = []
+        descriptors = []
         for obj in objs:
             if not Checker.is_file(obj[0]):
                 continue
@@ -126,9 +146,17 @@ class ImageMerger:
             top, bot, center = self.extract_coords(image, sat_type, dtime)
             degree           = self.compute_angle(*bot, *top)
 
-            image_objects.append((image, center, degree))
+            descriptor = {
+                "image_name": file_name,
+                "sat_type": sat_type,
+                "date_time": "",
+                "center": list(center),
+                "direction": degree
+            }
 
-        return self.merge_images(image_objects, whole)
+            descriptors.append(descriptor)
+
+        return self.merge(descriptors, whole, resolution)
 
     def update_extents(self, extent):
 
