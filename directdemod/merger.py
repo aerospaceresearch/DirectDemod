@@ -97,7 +97,7 @@ class ImageMerger:
             degree = obj["direction"]
 
             if self.is_cartopy:
-                img = self.set_transparent(ndimage.rotate(image, degree - 180, cval=255))
+                img = self.set_transparent(ndimage.rotate(image, degree, cval=255))
                 dx = img.shape[0]*4000/2*0.81 # in meters
                 dy = img.shape[1]*4000/2*0.81 # in meters
                 left_bot  = self.add_m(center, -1*dx, -1*dy)
