@@ -81,7 +81,7 @@ class ImageMerger:
 
         projection = plt.figure()
 
-        axes = plt.axes(projection=ccrs.epsg(4326))
+        axes = plt.axes(projection=ccrs.PlateCarree())
         axes.coastlines(resolution='50m', color=constants.COLOR, linewidth=0.2)
         axes.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor=constants.COLOR, linewidth=0.2)
         axes.set_extent([-180, 180, -90, 90])

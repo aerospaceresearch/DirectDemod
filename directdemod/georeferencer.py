@@ -144,7 +144,6 @@ class Georeferencer:
 
         distance = self.dist(w, h, self.center_w, self.center_h)
         coords = Geodesic.WGS84.Direct(self.center[0], self.center[1], angle, distance)
-        #print(coords['lon2'], coords['lat2'], 0, h, w, distance)
         return gdal.GCP(coords['lon2'], coords['lat2'], 0, h, w)
 
     def dist(self, w1, h1, w2, h2):
