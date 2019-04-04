@@ -92,7 +92,7 @@ class ImageMerger:
         self.top_ex   = -90
 
         for obj in jsons:
-            image  = mimg.imread(obj["image_name"])
+            image, isGray = self.imread(obj["image_name"]))
             center = obj["center"]
             degree = obj["direction"]
 
@@ -104,7 +104,10 @@ class ImageMerger:
                 right_top = self.add_m(center, dx, dy)
                 img_extent = (left_bot[1], right_top[1], left_bot[0], right_top[0])
                 self.update_extents(img_extent)
-                axes.imshow(img, origin='upper', extent=img_extent)
+                if isGray:
+                    axes.imshow(img, origin='upper', extent=img_extent, cmap='gray')
+                else:
+                    axes.imshow(img, origin='upper', extent=img_extent)
             elif self.is_basemap:
                 raise NotImplementedError("Basemap mapping not implemented.")
 
@@ -158,6 +161,14 @@ class ImageMerger:
             descriptors.append(descriptor)
 
         return self.merge(descriptors, whole, resolution)
+
+    def imread(self, file_name):
+        if file_name.endswith(".tiff") or file_name.endswith(".tif"):
+            image_file = gdal.Open(file_name)
+            isGray = True if image_file.RasterCount == 1 else False
+            return (image_file.ReadAsArray(), isGray)
+        else:
+            return (mimg.imread(file_name), False)
 
     def set_transparent(self, image):
 
