@@ -23,7 +23,7 @@ class Georeferencer:
     Class for georeferencing
     '''
 
-    def georef(self, descriptor, output_file):
+    def georef(self, descriptor, output_file, desc=False):
 
         '''Main georeferencing routine
 
@@ -58,7 +58,9 @@ class Georeferencer:
                     options=options)
 
         os.remove(constants.TEMP_TIFF_FILE)
-        self.create_desc(descriptor, output_file)
+
+        if desc:
+            self.create_desc(descriptor, output_file)
 
     def create_desc(self, descriptor, output_file):
 
@@ -159,8 +161,8 @@ class Georeferencer:
         return 1000 * 3.18 * math.sqrt((w1 - w2)**2 + (h1 - h2)**2)
 
 if __name__ == "__main__":
-    file_name = "../samples/image_desc.json"
-    output_file = "../samples/image_sat_19_1.tiff"
+    file_name = "../samples/image_noaa19_1_desc.json"
+    output_file = "../samples/image_noaa19_1.tif"
     descriptor = JsonParser.from_file(file_name)
 
     referencer = Georeferencer()

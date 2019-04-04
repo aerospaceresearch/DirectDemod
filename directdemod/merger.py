@@ -28,7 +28,7 @@ class ImageMerger:
     Class for merging multiple images
     '''
 
-    def __init__(self, tle_file, aux_file_name="temp_image_file.png"):
+    def __init__(self, tle_file='', aux_file_name="temp_image_file.png"):
 
         '''Initialize the object
 
@@ -81,7 +81,7 @@ class ImageMerger:
 
         projection = plt.figure()
 
-        axes = plt.axes(projection=ccrs.PlateCarree())
+        axes = plt.axes(projection=ccrs.epsg(4326))
         axes.coastlines(resolution='50m', color=constants.COLOR, linewidth=0.2)
         axes.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor=constants.COLOR, linewidth=0.2)
         axes.set_extent([-180, 180, -90, 90])
@@ -92,12 +92,12 @@ class ImageMerger:
         self.top_ex   = -90
 
         for obj in jsons:
-            image, isGray = self.imread(obj["image_name"]))
+            image, isGray = self.imread(obj["image_name"])
             center = obj["center"]
             degree = obj["direction"]
 
             if self.is_cartopy:
-                img = self.set_transparent(ndimage.rotate(image, degree, cval=255))
+                img = self.set_transparent(ndimage.rotate(image, degree, cval=255), isGray)
                 dx = img.shape[0]*4000/2*0.81 # in meters
                 dy = img.shape[1]*4000/2*0.81 # in meters
                 left_bot  = self.add_m(center, -1*dx, -1*dy)
@@ -105,6 +105,7 @@ class ImageMerger:
                 img_extent = (left_bot[1], right_top[1], left_bot[0], right_top[0])
                 self.update_extents(img_extent)
                 if isGray:
+                    print('Gray')
                     axes.imshow(img, origin='upper', extent=img_extent, cmap='gray')
                 else:
                     axes.imshow(img, origin='upper', extent=img_extent)
@@ -163,31 +164,44 @@ class ImageMerger:
         return self.merge(descriptors, whole, resolution)
 
     def imread(self, file_name):
-        if file_name.endswith(".tiff") or file_name.endswith(".tif"):
-            image_file = gdal.Open(file_name)
-            isGray = True if image_file.RasterCount == 1 else False
-            return (image_file.ReadAsArray(), isGray)
-        else:
-            return (mimg.imread(file_name), False)
 
-    def set_transparent(self, image):
+        '''Read the image from file
+
+        Args:
+            file_name (:obj:`np.array`): file_name
+
+        Returns:
+            image (:obj:`np.ndarray`): image with fixed transparency
+            isGray (:obj:`bool`): true if image is gray, false otherwise
+        '''
+
+        image = mimg.imread(file_name)
+        return (image, len(image.shape) == 2)
+
+    def set_transparent(self, image, isGray):
 
         '''Set right pixel transparency
 
         Args:
             image (:obj:`np.array`): image
+            isGray (:obj:`bool`): flag
 
         Returns:
             image (:obj:`np.array`): image with fixed transparency
         '''
-
         # Unoptimized version
-        for row in image:
-            for pixel in row:
-                if pixel[0] > 250 and pixel[1] > 250 and pixel[2] > 250:
-                    pixel[3] = 0
-
-        return image
+        if not isGray:
+            for row in image:
+                for pixel in row:
+                    if pixel[0] > 250 and pixel[1] > 250 and pixel[2] > 250:
+                        pixel[3] = 0
+            return image
+        else:
+            array = np.zeros((image.shape[0], image.shape[1], 4))
+            for i, row in enumerate(image):
+                for index, val in enumerate(row):
+                    array[i][index] = np.array([val/255, val/255, val/255, (0 if val == 0 else 1)])
+            return array
 
     def update_extents(self, extent):
 
