@@ -5,6 +5,8 @@ import json
 import urllib
 import numpy as np
 
+from datetime import datetime
+
 '''
 These classes provide API for the input/output operations
 with json files.
@@ -26,6 +28,8 @@ class Encoder(json.JSONEncoder):
 
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, datetime):
+            return obj.isoformat()
         return super.default(self, obj)
 
 class JsonParser:

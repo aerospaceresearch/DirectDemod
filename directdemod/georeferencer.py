@@ -1,7 +1,9 @@
 '''
 image georeferencer
 '''
+import dateutil.parser as dparser
 import matplotlib.image as mimg
+import numpy as np
 import constants
 import math
 import os
@@ -9,6 +11,8 @@ import os
 from osgeo import gdal
 from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
+from datetime import datetime, timedelta
+from pyorbital.orbital import Orbital
 from json_parser import JsonParser
 
 '''
@@ -23,6 +27,17 @@ class Georeferencer:
     Class for georeferencing
     '''
 
+    def __init__(self, tle_file=""):
+
+        '''Georeferencer constructor
+
+        Args:
+            tle_file (:obj:`string`): file with orbit parameters
+
+        '''
+
+        self.tle_file = tle_file
+
     def georef(self, descriptor, output_file, desc=False):
 
         '''Main georeferencing routine
@@ -30,15 +45,15 @@ class Georeferencer:
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
+            desc (:obj:`bool`): descriptor flag
         '''
 
-        # os.system("gdal_translate/gdalwarp") is an alternative approach
         file_name = descriptor["image_name"]
         image     = mimg.imread(file_name)
         center    = descriptor["center"]
         direction = descriptor["direction"]
 
-        gcps = self.compute_gcps(image, center, direction)
+        gcps = self.compute_gcps(descriptor, image)
 
         options = gdal.TranslateOptions(format="GTiff",
                                         outputSRS=constants.DEFAULT_RS,
@@ -62,9 +77,42 @@ class Georeferencer:
         if desc:
             self.create_desc(descriptor, output_file)
 
+    def georef_os(self, descriptor, output_file, desc=False):
+
+        '''Main georeferencing routine
+
+        Args:
+            descriptor (:obj:`dict`): descriptor dictionary
+            output_file (:obj:`string`): name of the output file
+            desc (:obj:`bool`): descriptor flag
+        '''
+
+        file_name = descriptor["image_name"]
+        image     = mimg.imread(file_name)
+
+        gcps = self.compute_gcps(descriptor, image)
+
+        translate_flags = "-of GTiff -a_srs EPSG:4326"
+        warp_flags = "-r near -tps -s_srs EPSG:4326 -t_srs EPSG:4326"
+
+        translate_query = 'gdal_translate ' + translate_flags + ' ' + self.to_string_gcps(gcps) + ' "' + file_name + '" ' + ' "' + constants.TEMP_TIFF_FILE + '"'
+        warp_query = 'gdalwarp ' + warp_flags + ' "' + constants.TEMP_TIFF_FILE + '" ' + ' "' + output_file + '"'
+
+        os.system(translate_query)
+        os.system(warp_query)
+
+        os.remove(constants.TEMP_TIFF_FILE)
+
+        if desc:
+            self.create_desc(descriptor, output_file)
+
+    def to_string_gcps(self, gcps):
+        return " ".join([("-gcp " + str(gcp.GCPPixel) + " " + str(gcp.GCPLine) + " " + str(gcp.GCPX) + " " + str(gcp.GCPY)) for gcp in gcps])
+
+
     def create_desc(self, descriptor, output_file):
 
-        '''Create desctiptor file
+        '''Create descriptor file
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
@@ -83,56 +131,39 @@ class Georeferencer:
         desc_name = name + "_desc.json"
         JsonParser.save(desc, desc_name)
 
-    def compute_gcps(self, image, center, direction):
-
-        '''Compute set of GCPs
-
-        Args:
-            image (:obj:`np.ndarray`): input image
-            center (:obj:`list`): coordinates of center point
-            direction (:obj:`float`): direction of the satellite
-        '''
-
+    def compute_gcps(self, descriptor, image):
         height = image.shape[0]
         width  = image.shape[1]
-        self.center = center
-        self.center_w = width/2
-        self.center_h = height/2
-        self.A = direction
-        self.B = math.atan(width / height) * 180 / math.pi
+        center_w = width/2
+        center_h = height/2
 
         gcps = []
+        dtime = dparser.parse(descriptor["date_time"])
+        orbiter = Orbital(descriptor["sat_type"], tle_file=self.tle_file)
+        min_delta = 500
+        middle_dist = 3.22 * 455 / 2. * 1000
+        far_dist = 3.2 * 455 * 1000
+        prev = orbiter.get_lonlatalt(dtime - timedelta(milliseconds=min_delta*10))
 
-        gcps.append(gdal.GCP(center[1], center[0], 0, self.center_h, self.center_w))
+        for i in range(0, height, 100):
+            h = height - i - 1
+            gcp_time = dtime + timedelta(milliseconds=i*min_delta)
+            position = orbiter.get_lonlatalt(gcp_time)
+            gcps.append(gdal.GCP(position[0], position[1], 0, center_w, h))
 
-        gcps.append(self.compute_gcp(0, 0, 360 - self.A - self.B))
-        gcps.append(self.compute_gcp(0, width, 360 - self.A - self.B - (180 - 2*self.B)))
-        gcps.append(self.compute_gcp(height, width, self.B - self.A + (180 - 2*self.B)))
-        gcps.append(self.compute_gcp(height, 0, self.B - self.A))
+            angle = self.angleFromCoordinate(prev[0], prev[1], position[0], position[1])
+            azimuth = 90 - angle
 
-        #gcps.append(self.compute_gcp(height/2, 0, 360 - self.A))
-        #gcps.append(self.compute_gcp(0, width/2, 360 - self.A - 90))
-        #gcps.append(self.compute_gcp(height/2, width, 360 - self.A - 180))
-        #gcps.append(self.compute_gcp(height, width/2, 360 - self.A - 270))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist, 3*width/4, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width - 1, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist, width/4, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
 
-        #gcps.append(self.compute_gcp(height/4, width/4, 360 - self.A - self.B))
-        #gcps.append(self.compute_gcp(height/4, 3*width/4, 360 - self.A - self.B - (180 - 2*self.B)))
-        #gcps.append(self.compute_gcp(3*height/4, 3*width/4, self.B - self.A + (180 - 2*self.B)))
-        #gcps.append(self.compute_gcp(3*height/4, width/4, self.B - self.A))
-
-        #gcps.append(self.compute_gcp(height/2, width/4, 360 - self.A))
-        #gcps.append(self.compute_gcp(height/4, width/2, 360 - self.A - 90))
-        #gcps.append(self.compute_gcp(height/2, 3*width/4, 360 - self.A - 180))
-        #gcps.append(self.compute_gcp(3*height/4, width/2, 360 - self.A - 270))
-
-        #gcps.append(gdal.GCP(-11.79, 60.75, 0, 0, 0))
-        #gcps.append(gdal.GCP(34.65, 66.0025, 0, 1002, 0))
-        #gcps.append(gdal.GCP(5.63, 33.105, 0, 0, 910))
-        #gcps.append(gdal.GCP(41, 38.879, 0, 1002, 910))
+            prev = position
 
         return gcps
 
-    def compute_gcp(self, h, w, angle):
+    def compute_gcp(self, long, lat, angle, distance, w, h):
 
         '''Compute single GCP
 
@@ -142,27 +173,30 @@ class Georeferencer:
             angle (:obj:`float`): azimuth of point
         '''
 
-        distance = self.dist(w, h, self.center_w, self.center_h)
-        coords = Geodesic.WGS84.Direct(self.center[0], self.center[1], angle, distance)
-        return gdal.GCP(coords['lon2'], coords['lat2'], 0, h, w)
+        coords = Geodesic.WGS84.Direct(lat, long, angle, distance)
+        return gdal.GCP(coords['lon2'], coords['lat2'], 0, w, h)
 
-    def dist(self, w1, h1, w2, h2):
+    def angleFromCoordinate(self, long1, lat1, long2, lat2):
+        # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+        lat1 = np.radians(lat1)
+        long1 = np.radians(long1)
+        lat2 = np.radians(lat2)
+        long2 = np.radians(long2)
 
-        '''Compute distance between two points
+        dLon = (long2 - long1)
 
-        Args:
-            h1 (:obj:`float`): h-axis coordinate of point 1
-            w1 (:obj:`float`): w-axis coordinate of point 1
-            h2 (:obj:`float`): h-axis coordinate of point 2
-            w2 (:obj:`float`): w-axis coordinate of point 2
-        '''
-
-        return 1000 * 3.18 * math.sqrt((w1 - w2)**2 + (h1 - h2)**2)
+        y = np.sin(dLon) * np.cos(lat2)
+        x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(dLon)
+        brng = np.arctan2(y, x)
+        brng = np.degrees(brng)
+        brng = (brng + 360) % 360
+        brng = 360 - brng
+        return brng
 
 if __name__ == "__main__":
     file_name = "../samples/image_noaa19_1_desc.json"
-    output_file = "../samples/image_noaa19_1.tif"
+    output_file = "../samples/image_noaa19_2.tif"
     descriptor = JsonParser.from_file(file_name)
 
-    referencer = Georeferencer()
+    referencer = Georeferencer(tle_file="../tle/noaa18_June_14_2018.txt")
     referencer.georef(descriptor, output_file)
