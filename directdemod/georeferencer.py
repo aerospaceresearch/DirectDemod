@@ -50,8 +50,6 @@ class Georeferencer:
 
         file_name = descriptor["image_name"]
         image     = mimg.imread(file_name)
-        center    = descriptor["center"]
-        direction = descriptor["direction"]
 
         gcps = self.compute_gcps(descriptor, image)
 
@@ -155,7 +153,7 @@ class Georeferencer:
             azimuth = 90 - angle
 
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist, 3*width/4, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width - 1, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist, width/4, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
 
