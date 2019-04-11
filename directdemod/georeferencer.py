@@ -17,7 +17,7 @@ from json_parser import JsonParser
 
 '''
 This class provides an API for image georeferencing.
-It extracts the infromation from descriptor file and
+It extracts the information from descriptor file and
 warps the image to defined projection.
 '''
 
@@ -105,6 +105,13 @@ class Georeferencer:
             self.create_desc(descriptor, output_file)
 
     def to_string_gcps(self, gcps):
+
+        '''Create string representation of gcp points
+
+        Args:
+            gcps (:obj:`list`): list of gcp points
+        '''
+
         return " ".join([("-gcp " + str(gcp.GCPPixel) + " " + str(gcp.GCPLine) + " " + str(gcp.GCPX) + " " + str(gcp.GCPY)) for gcp in gcps])
 
 
@@ -130,6 +137,14 @@ class Georeferencer:
         JsonParser.save(desc, desc_name)
 
     def compute_gcps(self, descriptor, image):
+
+        '''Compute set of GCPs
+
+        Args:
+            h (:obj:`dict`): descriptor dictionary
+            w (:obj:`np.ndarray`): image as np.ndarray
+        '''
+
         height = image.shape[0]
         width  = image.shape[1]
         center_w = width/2
