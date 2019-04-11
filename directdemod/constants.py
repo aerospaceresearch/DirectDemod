@@ -25,6 +25,8 @@ NOAA_SATS = {137620000:"NOAA 15", 137100000:"NOAA 19", 137912500:"NOAA 18"}
 ## Merger settings
 RESOLUTION = 500
 COLOR = "black"
+TEMP_TIFF_FILE = "_temp.tiff"
+DEFAULT_RS = "EPSG:4326"
 
 ###### Do not change these
 

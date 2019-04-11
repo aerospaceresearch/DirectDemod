@@ -1,0 +1,7 @@
+{
+  "image_name": "../samples/image_noaa19_1.png",
+  "sat_type": "NOAA 19",
+  "date_time": "2018-06-15T14:07:52",
+  "center": [50.83550180700588, 16.430852851867176],
+  "direction": 18.3913296679117
+}
