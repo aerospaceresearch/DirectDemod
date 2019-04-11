@@ -13,7 +13,7 @@ from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
-from json_parser import JsonParser
+from misc import JsonParser
 
 '''
 This class provides an API for image georeferencing.
