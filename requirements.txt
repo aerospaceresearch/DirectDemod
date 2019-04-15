@@ -10,7 +10,7 @@ python-dateutil==2.6.1
 pytz==2018.3
 scipy==1.2.0
 six==1.11.0
-gdal==2.3.3
+#gdal==2.3.3
 geographiclib==1.49
 dateutil==2.8.0
 pyorbital==1.5.0
