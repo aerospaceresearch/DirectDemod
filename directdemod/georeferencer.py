@@ -4,7 +4,6 @@ image georeferencer
 import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
-import constants
 import math
 import os
 
@@ -13,7 +12,8 @@ from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
-from misc import JsonParser
+from directdemod import constants
+from directdemod.misc import JsonParser
 
 '''
 This class provides an API for image georeferencing.
@@ -24,7 +24,9 @@ warps the image to defined projection.
 class Georeferencer:
 
     '''
-    Class for georeferencing
+    This class provides an API for image georeferencing.
+    It extracts the information from descriptor file, translates
+    and warps the image to defined projection.
     '''
 
     def __init__(self, tle_file=""):
@@ -32,7 +34,7 @@ class Georeferencer:
         '''Georeferencer constructor
 
         Args:
-            tle_file (:obj:`string`): file with orbit parameters
+            tle_file (:obj:`string`, optional): file with orbit parameters
 
         '''
 
@@ -40,12 +42,14 @@ class Georeferencer:
 
     def georef(self, descriptor, output_file, desc=False):
 
-        '''Main georeferencing routine
+        '''georeferences the satellite image from descriptor file using GDAL
+        Python API
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`): descriptor flag
+            desc (:obj:`bool`, optional): descriptor flag, true if descriptor
+            should be generated
         '''
 
         file_name = descriptor["image_name"]
@@ -77,12 +81,14 @@ class Georeferencer:
 
     def georef_os(self, descriptor, output_file, desc=False):
 
-        '''Main georeferencing routine
+        '''georeferences the satellite image from descriptor file, using GDAL
+        compiled binaries
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`): descriptor flag
+            desc (:obj:`bool`): descriptor flag, true if descriptor should be
+            generated
         '''
 
         file_name = descriptor["image_name"]
@@ -106,10 +112,13 @@ class Georeferencer:
 
     def to_string_gcps(self, gcps):
 
-        '''Create string representation of gcp points
+        '''create string representation of gcp points
 
         Args:
             gcps (:obj:`list`): list of gcp points
+
+        Returns:
+            :obj:`string`: gcp points represented as a string
         '''
 
         return " ".join([("-gcp " + str(gcp.GCPPixel) + " " + str(gcp.GCPLine) + " " + str(gcp.GCPX) + " " + str(gcp.GCPY)) for gcp in gcps])
@@ -117,7 +126,7 @@ class Georeferencer:
 
     def create_desc(self, descriptor, output_file):
 
-        '''Create descriptor file
+        '''create descriptor file
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
@@ -138,11 +147,14 @@ class Georeferencer:
 
     def compute_gcps(self, descriptor, image):
 
-        '''Compute set of GCPs
+        '''compute set of Ground Control Points
 
         Args:
-            h (:obj:`dict`): descriptor dictionary
+            h (:obj:`dict`): descriptor dictionary, which describes the image
             w (:obj:`np.ndarray`): image as np.ndarray
+
+        Returns:
+            :obj:`list`: list of GCPs
         '''
 
         height = image.shape[0]
@@ -178,18 +190,37 @@ class Georeferencer:
 
     def compute_gcp(self, long, lat, angle, distance, w, h):
 
-        '''Compute single GCP
+        '''compute coordinate of GCP, using longitude and latitude of starting point,
+        azimuth angle and distance to the point
 
         Args:
+            long (:obj:`float`): longitude of start point
+            lat (:obj:`float`): latitude of start point
+            angle (:obj:`float`): azimuth between start point and GCP
             h (:obj:`float`): h-axis coordinate
             w (:obj:`float`): w-axis coordinate
-            angle (:obj:`float`): azimuth of point
+
+        Returns:
+            :obj:`gdal.GCP`: instance of GCP object
         '''
 
         coords = Geodesic.WGS84.Direct(lat, long, angle, distance)
         return gdal.GCP(coords['lon2'], coords['lat2'], 0, w, h)
 
     def angleFromCoordinate(self, long1, lat1, long2, lat2):
+
+        '''compute angle between 2 points, defined by latitude and longitude
+
+        Args:
+            long1 (:obj:`float`): longitude of start point
+            lat1 (:obj:`float`): latitude of start point
+            long2 (:obj:`float`): longitude of end point
+            lat2 (:obj:`float`): latitude of end point
+
+        Returns:
+            :obj:`float`: angle between points
+        '''
+
         # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
         lat1 = np.radians(lat1)
         long1 = np.radians(long1)

@@ -8,12 +8,12 @@ import cartopy
 import cartopy.crs as ccrs
 import os
 import json
-import constants
 
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from PIL import Image
-from misc import Checker
+from directdemod import constants
+from directdemod.misc import Checker
 from scipy import ndimage
 
 '''
@@ -25,7 +25,9 @@ projection.
 class ImageMerger:
 
     '''
-    Class for merging multiple images
+    This class provides an API for merging multiple images.
+    It extracts needed information and projects images on mercator
+    projection.
     '''
 
     def __init__(self, tle_file='', aux_file_name="temp_image_file.png"):
@@ -33,7 +35,7 @@ class ImageMerger:
         '''Initialize the object
 
         Args:
-            tle_file (:obj:`string`): path to the tle file
+            tle_file (:obj:`string`, optional): path to the tle file
             aux_file_name (:obj:`string`, optional): auxiliary file name
         '''
 
@@ -46,10 +48,10 @@ class ImageMerger:
 
     def merge_files(self, file_descriptors, whole=False, resolution=constants.RESOLUTION):
 
-        '''Merge images from image descriptors
+        '''merge images from image descriptors
 
         Args:
-            file_descriptors (:obj:`list(string))`): paths to image descriptors
+            file_descriptors (:obj:`list`): paths to image descriptors
             whole (:obj:`bool`, optinal): flag to generate whole image
             resolution (:obj:`int`, optional): resolution of the output image
 
@@ -65,10 +67,10 @@ class ImageMerger:
 
     def merge(self, jsons, whole=False, resolution=constants.RESOLUTION):
 
-        '''Merge multiple images from descriptors
+        '''merge multiple images from descriptors
 
         Args:
-            objs (:obj:`dict`): set of dict objects, which describe images
+            jsons (:obj:`dict`): set of dict objects, which describe images
             whole (:obj:`bool`, optinal): flag to generate whole image
             resolution (:obj:`int`, optional): resolution of the output image
 
@@ -124,10 +126,10 @@ class ImageMerger:
 
     def merge_noaa(self, objs, whole=False, resolution=constants.RESOLUTION):
 
-        '''Merge multiple noadd images from image files
+        '''merge multiple noaa images from image files
 
         Args:
-            objs (:obj:`tuple(string, string)`): set of objects representing images
+            objs (:obj:`tuple`): set of objects representing images
             whole (:obj:`bool`, optinal): flag to generate whole image
             resolution (:obj:`int`, optional): resolution of the output image
 
@@ -165,14 +167,14 @@ class ImageMerger:
 
     def imread(self, file_name):
 
-        '''Read the image from file
+        '''read the image from file
 
         Args:
-            file_name (:obj:`np.array`): file_name
+            file_name (:obj:`string`): file_name
 
         Returns:
-            image (:obj:`np.ndarray`): image with fixed transparency
-            isGray (:obj:`bool`): true if image is gray, false otherwise
+            image :obj:`np.ndarray`: image with fixed transparency
+            isGray :obj:`bool`: true if image is gray, false otherwise
         '''
 
         image = mimg.imread(file_name)
@@ -180,14 +182,14 @@ class ImageMerger:
 
     def set_transparent(self, image, isGray):
 
-        '''Set right pixel transparency
+        '''set pixel transparency
 
         Args:
             image (:obj:`np.array`): image
             isGray (:obj:`bool`): flag
 
         Returns:
-            image (:obj:`np.array`): image with fixed transparency
+            image :obj:`np.array`: image with fixed transparency
         '''
         # Unoptimized version
         if not isGray:
@@ -205,10 +207,10 @@ class ImageMerger:
 
     def update_extents(self, extent):
 
-        '''Update bounds of the projection
+        '''update bounds of the projection
 
         Args:
-            extent (:obj:`tuple(float, float, float, float)`): current image bounds
+            extent (:obj:`tuple`): current image bounds
         '''
 
         self.left_ex  = min(self.left_ex,  extent[0])
@@ -225,7 +227,7 @@ class ImageMerger:
     @staticmethod
     def extract_date(filename):
 
-        '''Extracts date from filename
+        '''extracts date from filename
 
         Args:
             filename (:obj:`string`): name of the file
@@ -249,7 +251,7 @@ class ImageMerger:
     @staticmethod
     def to_datetime(image_time, image_date):
 
-        '''Builds datetime object
+        '''builds datetime object
 
         Args:
             image_time (:obj:`string`): time when the image was captured
@@ -274,9 +276,9 @@ class ImageMerger:
 
     def extract_coords(self, image, satellite, dtime):
 
-        '''Extracts coordinates of the image bounds
+        '''extracts coordinates of the image bounds
 
-        Args
+        Args:
             image (:obj:`np.array`): captured image
             satellite (:obj:`string`): name of the satellite
             dtime (:obj:`datetime`): time when the image was captured
@@ -297,12 +299,12 @@ class ImageMerger:
 
     def compute_alt(self, orbiter, dtime, image, accumulate):
 
-        '''Compute coordinates of the satellite
+        '''compute coordinates of the satellite
 
-        Args
-            orbiter (:obj:`Orbital`): object for orbit calculation
+        Args:
+            orbiter (:obj:`Orbital`): object representing orbit of satellite
             dtime (:obj:`datetime`): time when the image was captured
-            image (:obj:`np.array`): capturedimage
+            image (:obj:`np.array`): captured image
             accumulate (:obj:`float`): distance shift
 
         Returns:
@@ -312,6 +314,19 @@ class ImageMerger:
         return orbiter.get_lonlatalt(dtime + timedelta(seconds=int(image.shape[0]/4) + accumulate))[:2][::-1]
 
     def compute_angle(self, lat1, long1, lat2, long2):
+
+        '''compute angle between 2 points, defined by latitude and longitude
+
+        Args:
+            lat1 (:obj:`float`): latitude of start point
+            long1 (:obj:`float`): longitude of start point
+            lat2 (:obj:`float`): latitude of end point
+            long2 (:obj:`float`): longitude of end point
+
+        Returns:
+            :obj:`float`: angle between points
+        '''
+
         # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
         lat1 = np.radians(lat1)
         long1 = np.radians(long1)

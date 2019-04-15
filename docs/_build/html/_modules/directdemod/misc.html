@@ -1,0 +1,424 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>directdemod.misc &mdash; DirectDemod  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> DirectDemod
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">DirectDemod: Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">DirectDemod: Modules documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">DirectDemod</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>directdemod.misc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for directdemod.misc</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">library checker</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">The class provides functionality to determine whether all needed</span>
+<span class="sd">libraries are installed and functional.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Checker"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker">[docs]</a><span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The class provides functionality to determine whether all needed</span>
+<span class="sd">    libraries are installed and functional.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Checker.is_file"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.is_file">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;check if given path is a file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (:obj:`string`): path</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`bool`: true if file, else otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Checker.is_dir"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.is_dir">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;check if given path is directory</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dirname (:obj:`string`): path</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`bool`: true directory, else otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_libs</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;check if pyorbital and (cartopy or basemap) are installed</span>
+
+<span class="sd">        Throws:</span>
+<span class="sd">            :obj:`ModuleNotFoundError`: if module is not installed</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_pyorbital</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Pyorbital must be installed.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_cartopy</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_basemap</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cartopy or Basemap must be installed.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Checker.check_pyorbital"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_pyorbital">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_pyorbital</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;check if pyorbital is installed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pyorbital</span>
+            <span class="kn">from</span> <span class="nn">pyorbital</span> <span class="k">import</span> <span class="n">tlefile</span>
+            <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Checker.check_cartopy"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_cartopy">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_cartopy</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;check if cartopy is installed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cartopy</span>
+            <span class="kn">import</span> <span class="nn">cartopy.crs</span>
+            <span class="kn">import</span> <span class="nn">cartopy.feature</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Checker.check_basemap"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_basemap">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_basemap</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;check if basemap is installed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">mpl_toolkits.basemap</span>
+            <span class="kn">from</span> <span class="nn">mpl_toolkits.basemap</span> <span class="k">import</span> <span class="n">Basemap</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div></div>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Object for json manipulation</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">These classes provide API for the input/output operations</span>
+<span class="sd">with json files.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    JSON encoder</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Encoder.default"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Encoder.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Encode the object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj (:obj:`object`): oject to encode</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`object`: encoded object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="JsonParser"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser">[docs]</a><span class="k">class</span> <span class="nc">JsonParser</span><span class="p">:</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper class over json module to add numpy and datetime json serialization</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="JsonParser.to_string"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.to_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="n">json_dict</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;convert dict to json string</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            json_dict (:obj:`dict`): object to convert</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`string`: json string</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JsonParser.from_string"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;convert json string to dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            str (:obj:`string`): string to convert</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`dict`: json dictionary</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JsonParser.from_file"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;convert text from file into json dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (:obj:`string`): path to file</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`dict`: json dictionary</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="JsonParser.from_url"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;convert text from url into json dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (:obj:`string`): path to url</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`dict`: json dictionary</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="JsonParser.save"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.save">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;serialize json dict into file</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            json_dict (:obj:`dict`): dictionary</span>
+<span class="sd">            output_file (:obj:`string`): path to file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;../samples/image_desc.json&quot;</span>
+
+    <span class="n">jstr1</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">jstr2</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">jstr1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">jstr2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">jstr1</span> <span class="o">==</span> <span class="n">jstr2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">jstr1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">)</span>
+
+    <span class="n">test_file</span> <span class="o">=</span> <span class="s1">&#39;sample_desc.json&#39;</span>
+    <span class="n">JsonParser</span><span class="o">.</span><span class="n">save_json</span><span class="p">(</span><span class="n">jstr1</span><span class="p">,</span> <span class="n">test_file</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Vinay C K (7andahalf)
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
