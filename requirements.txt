@@ -3,7 +3,7 @@ cycler==0.10.0
 numpy==1.14.0
 pluggy==0.6.0
 py==1.5.2
-pykep==2.1
+pykep==2.3
 pyparsing==2.2.0
 pytest==3.4.0
 python-dateutil==2.6.1
