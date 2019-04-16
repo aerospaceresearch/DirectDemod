@@ -82,6 +82,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">DirectDemod: Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">DirectDemod: Modules documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../visualization.html">Visualizations routine</a></li>
 </ul>
 
             
@@ -169,7 +170,7 @@
 <span class="sd">projection.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="ImageMerger"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger">[docs]</a><span class="k">class</span> <span class="nc">ImageMerger</span><span class="p">:</span>
+<div class="viewcode-block" id="ImageMerger"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger">[docs]</a><span class="k">class</span> <span class="nc">ImageMerger</span><span class="p">:</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This class provides an API for merging multiple images.</span>
@@ -177,7 +178,7 @@
 <span class="sd">    projection.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="ImageMerger.__init__"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">aux_file_name</span><span class="o">=</span><span class="s2">&quot;temp_image_file.png&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.__init__"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">aux_file_name</span><span class="o">=</span><span class="s2">&quot;temp_image_file.png&quot;</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;Initialize the object</span>
 
@@ -193,7 +194,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">tle_file</span>   <span class="o">=</span> <span class="n">tle_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span> <span class="o">=</span> <span class="n">aux_file_name</span></div>
 
-<div class="viewcode-block" id="ImageMerger.merge_files"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.merge_files">[docs]</a>    <span class="k">def</span> <span class="nf">merge_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.merge_files"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge_files">[docs]</a>    <span class="k">def</span> <span class="nf">merge_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;merge images from image descriptors</span>
 
@@ -212,7 +213,7 @@
         <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">file_descriptors</span> <span class="k">if</span> <span class="n">Checker</span><span class="o">.</span><span class="n">is_file</span><span class="p">(</span><span class="n">f</span><span class="p">)]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.merge"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsons</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.merge"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsons</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;merge multiple images from descriptors</span>
 
@@ -271,7 +272,7 @@
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">merged</span></div>
 
-<div class="viewcode-block" id="ImageMerger.merge_noaa"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.merge_noaa">[docs]</a>    <span class="k">def</span> <span class="nf">merge_noaa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.merge_noaa"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge_noaa">[docs]</a>    <span class="k">def</span> <span class="nf">merge_noaa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;merge multiple noaa images from image files</span>
 
@@ -312,7 +313,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.imread"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.imread">[docs]</a>    <span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.imread"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.imread">[docs]</a>    <span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;read the image from file</span>
 
@@ -327,7 +328,7 @@
         <span class="n">image</span> <span class="o">=</span> <span class="n">mimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.set_transparent"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.set_transparent">[docs]</a>    <span class="k">def</span> <span class="nf">set_transparent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">isGray</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.set_transparent"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.set_transparent">[docs]</a>    <span class="k">def</span> <span class="nf">set_transparent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">isGray</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;set pixel transparency</span>
 
@@ -352,7 +353,7 @@
                     <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)])</span>
             <span class="k">return</span> <span class="n">array</span></div>
 
-<div class="viewcode-block" id="ImageMerger.update_extents"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.update_extents">[docs]</a>    <span class="k">def</span> <span class="nf">update_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.update_extents"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.update_extents">[docs]</a>    <span class="k">def</span> <span class="nf">update_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;update bounds of the projection</span>
 
@@ -371,7 +372,7 @@
         <span class="n">new_longitude</span> <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">dx</span> <span class="o">/</span> <span class="mf">6371000.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">new_latitude</span><span class="p">,</span> <span class="n">new_longitude</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ImageMerger.extract_date"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.extract_date">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ImageMerger.extract_date"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.extract_date">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">extract_date</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;extracts date from filename</span>
@@ -395,7 +396,7 @@
 
         <span class="k">return</span> <span class="n">ImageMerger</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.to_datetime"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.to_datetime">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ImageMerger.to_datetime"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.to_datetime">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;builds datetime object</span>
@@ -421,7 +422,7 @@
             <span class="c1"># add error logging</span>
             <span class="k">raise</span></div>
 
-<div class="viewcode-block" id="ImageMerger.extract_coords"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.extract_coords">[docs]</a>    <span class="k">def</span> <span class="nf">extract_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">satellite</span><span class="p">,</span> <span class="n">dtime</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.extract_coords"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.extract_coords">[docs]</a>    <span class="k">def</span> <span class="nf">extract_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">satellite</span><span class="p">,</span> <span class="n">dtime</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;extracts coordinates of the image bounds</span>
 
@@ -444,7 +445,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">top_coord</span><span class="p">,</span> <span class="n">bot_coord</span><span class="p">,</span> <span class="n">center_coord</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.compute_alt"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.compute_alt">[docs]</a>    <span class="k">def</span> <span class="nf">compute_alt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">accumulate</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.compute_alt"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.compute_alt">[docs]</a>    <span class="k">def</span> <span class="nf">compute_alt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">accumulate</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;compute coordinates of the satellite</span>
 
@@ -460,7 +461,7 @@
 
         <span class="k">return</span> <span class="n">orbiter</span><span class="o">.</span><span class="n">get_lonlatalt</span><span class="p">(</span><span class="n">dtime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">accumulate</span><span class="p">))[:</span><span class="mi">2</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ImageMerger.compute_angle"><a class="viewcode-back" href="../../modules.html#directdemod.merger.ImageMerger.compute_angle">[docs]</a>    <span class="k">def</span> <span class="nf">compute_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">long1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">long2</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageMerger.compute_angle"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.compute_angle">[docs]</a>    <span class="k">def</span> <span class="nf">compute_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">long1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">long2</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;compute angle between 2 points, defined by latitude and longitude</span>
 

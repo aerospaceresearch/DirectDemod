@@ -82,6 +82,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../gettingstarted.html">DirectDemod: Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../modules.html">DirectDemod: Modules documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../visualization.html">Visualizations routine</a></li>
 </ul>
 
             
@@ -160,14 +161,14 @@
 <span class="sd">libraries are installed and functional.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Checker"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker">[docs]</a><span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
+<div class="viewcode-block" id="Checker"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker">[docs]</a><span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    The class provides functionality to determine whether all needed</span>
 <span class="sd">    libraries are installed and functional.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Checker.is_file"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.is_file">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.is_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.is_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;check if given path is a file</span>
@@ -181,7 +182,7 @@
 
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Checker.is_dir"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.is_dir">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.is_dir"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.is_dir">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;check if given path is directory</span>
@@ -195,7 +196,7 @@
 
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_libs</span><span class="p">():</span>
         <span class="sd">&#39;&#39;&#39;check if pyorbital and (cartopy or basemap) are installed</span>
 
@@ -209,7 +210,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_cartopy</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_basemap</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cartopy or Basemap must be installed.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Checker.check_pyorbital"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_pyorbital">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.check_pyorbital"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_pyorbital">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_pyorbital</span><span class="p">():</span>
         <span class="sd">&#39;&#39;&#39;check if pyorbital is installed</span>
 
@@ -225,7 +226,7 @@
         <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="Checker.check_cartopy"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_cartopy">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.check_cartopy"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_cartopy">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_cartopy</span><span class="p">():</span>
         <span class="sd">&#39;&#39;&#39;check if cartopy is installed</span>
 
@@ -241,7 +242,7 @@
         <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="Checker.check_basemap"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Checker.check_basemap">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Checker.check_basemap"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_basemap">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_basemap</span><span class="p">():</span>
         <span class="sd">&#39;&#39;&#39;check if basemap is installed</span>
 
@@ -265,13 +266,13 @@
 <span class="sd">with json files.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+<div class="viewcode-block" id="Encoder"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Encoder">[docs]</a><span class="k">class</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    JSON encoder</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Encoder.default"><a class="viewcode-back" href="../../modules.html#directdemod.misc.Encoder.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<div class="viewcode-block" id="Encoder.default"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Encoder.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;Encode the object</span>
 
@@ -288,13 +289,13 @@
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">super</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="JsonParser"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser">[docs]</a><span class="k">class</span> <span class="nc">JsonParser</span><span class="p">:</span>
+<div class="viewcode-block" id="JsonParser"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser">[docs]</a><span class="k">class</span> <span class="nc">JsonParser</span><span class="p">:</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Wrapper class over json module to add numpy and datetime json serialization</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="JsonParser.to_string"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.to_string">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JsonParser.to_string"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.to_string">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="n">json_dict</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert dict to json string</span>
@@ -308,7 +309,7 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_string"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JsonParser.from_string"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert json string to dict</span>
@@ -322,7 +323,7 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_file"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JsonParser.from_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert text from file into json dict</span>
@@ -337,7 +338,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_url"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JsonParser.from_url"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert text from url into json dict</span>
@@ -351,7 +352,7 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="JsonParser.save"><a class="viewcode-back" href="../../modules.html#directdemod.misc.JsonParser.save">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JsonParser.save"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.save">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;serialize json dict into file</span>
