@@ -91,8 +91,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#sinks">Sinks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#chunking-helper">Chunking helper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#georeferencer">Georeferencer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#image-merger">Image merger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#georeferencer">Georeferencer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#library-checker">Library checker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-encoder">Json encoder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-parser">Json parser</a></li>
@@ -1503,187 +1503,6 @@
 </dd></dl>
 
 </div>
-<div class="section" id="georeferencer">
-<h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="directdemod.georeferencer.Georeferencer">
-<em class="property">class </em><code class="descclassname">directdemod.georeferencer.</code><code class="descname">Georeferencer</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class provides an API for image georeferencing.
-It extracts the information from descriptor file, translates
-and warps the image to defined projection.</p>
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Georeferencer constructor</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tle_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>, optional) – file with orbit parameters</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.angleFromCoordinate">
-<code class="descname">angleFromCoordinate</code><span class="sig-paren">(</span><em>long1</em>, <em>lat1</em>, <em>long2</em>, <em>lat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.angleFromCoordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.angleFromCoordinate" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute angle between 2 points, defined by latitude and longitude</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>long1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
-<li><strong>lat1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
-<li><strong>long2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of end point</li>
-<li><strong>lat2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of end point</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">angle between points</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.compute_gcp">
-<code class="descname">compute_gcp</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em>, <em>angle</em>, <em>distance</em>, <em>w</em>, <em>h</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcp" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute coordinate of GCP, using longitude and latitude of starting point,
-azimuth angle and distance to the point</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>long</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
-<li><strong>lat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
-<li><strong>angle</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – azimuth between start point and GCP</li>
-<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – h-axis coordinate</li>
-<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – w-axis coordinate</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">instance of GCP object</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gdal.GCP</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.compute_gcps">
-<code class="descname">compute_gcps</code><span class="sig-paren">(</span><em>descriptor</em>, <em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcps" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute set of Ground Control Points</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary, which describes the image</li>
-<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>) – image as np.ndarray</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of GCPs</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.create_desc">
-<code class="descname">create_desc</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.create_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.create_desc" title="Permalink to this definition">¶</a></dt>
-<dd><p>create descriptor file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
-<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.georef">
-<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
-<dd><p>georeferences the satellite image from descriptor file using GDAL
-Python API</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
-<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – descriptor flag, true if descriptor</li>
-<li><strong>be generated</strong> (<em>should</em>) – </li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.georef_os">
-<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
-<dd><p>georeferences the satellite image from descriptor file, using GDAL
-compiled binaries</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
-<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – descriptor flag, true if descriptor should be</li>
-<li><strong>generated</strong> – </li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.to_string_gcps">
-<code class="descname">to_string_gcps</code><span class="sig-paren">(</span><em>gcps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.to_string_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.to_string_gcps" title="Permalink to this definition">¶</a></dt>
-<dd><p>create string representation of gcp points</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gcps</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of gcp points</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">gcp points represented as a string</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 <div class="section" id="image-merger">
 <h2>Image merger<a class="headerlink" href="#image-merger" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -1956,6 +1775,185 @@ isGray <code class="xref py py-obj docutils literal notranslate"><span class="pr
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extent</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code>) – current image bounds</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="georeferencer">
+<h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="directdemod.georeferencer.Georeferencer">
+<em class="property">class </em><code class="descclassname">directdemod.georeferencer.</code><code class="descname">Georeferencer</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class provides an API for image georeferencing.
+It extracts the information from descriptor file, translates
+and warps the image to defined projection.</p>
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Georeferencer constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tle_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>, optional) – file with orbit parameters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.angleFromCoordinate">
+<code class="descname">angleFromCoordinate</code><span class="sig-paren">(</span><em>long1</em>, <em>lat1</em>, <em>long2</em>, <em>lat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.angleFromCoordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.angleFromCoordinate" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute angle between 2 points, defined by latitude and longitude</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>long1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
+<li><strong>lat1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
+<li><strong>long2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of end point</li>
+<li><strong>lat2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of end point</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">angle between points</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.compute_gcp">
+<code class="descname">compute_gcp</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em>, <em>angle</em>, <em>distance</em>, <em>w</em>, <em>h</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcp" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute coordinate of GCP, using longitude and latitude of starting point,
+azimuth angle and distance to the point</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>long</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
+<li><strong>lat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
+<li><strong>angle</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – azimuth between start point and GCP</li>
+<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – h-axis coordinate</li>
+<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – w-axis coordinate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">instance of GCP object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">gdal.GCP</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.compute_gcps">
+<code class="descname">compute_gcps</code><span class="sig-paren">(</span><em>descriptor</em>, <em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcps" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute set of Ground Control Points</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary, which describes the image</li>
+<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>) – image as np.ndarray</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of GCPs</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.create_desc">
+<code class="descname">create_desc</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.create_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.create_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>create descriptor file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
+<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.georef">
+<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
+<dd><p>georeferences the satellite image from descriptor file using GDAL
+Python API</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
+<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
+<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – descriptor flag, true if descriptor should be generated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.georef_os">
+<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
+<dd><p>georeferences the satellite image from descriptor file, using GDAL
+compiled binaries</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
+<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
+<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – descriptor flag, true if descriptor should be generated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.to_string_gcps">
+<code class="descname">to_string_gcps</code><span class="sig-paren">(</span><em>gcps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.to_string_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.to_string_gcps" title="Permalink to this definition">¶</a></dt>
+<dd><p>create string representation of gcp points</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>gcps</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of gcp points</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">gcp points represented as a string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code></td>
 </tr>
 </tbody>
 </table>

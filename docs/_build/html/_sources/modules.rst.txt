@@ -139,19 +139,19 @@ Logging
    :members:
 
    .. automethod:: __init__
-   
-Georeferencer
--------------
-
-.. autoclass:: directdemod.georeferencer.Georeferencer
-   :members:
-   
-   .. automethod:: __init__
-   
+      
 Image merger
 ------------
 
 .. autoclass:: directdemod.merger.ImageMerger
+   :members:
+   
+   .. automethod:: __init__
+   
+Georeferencer
+---------------
+
+.. autoclass:: directdemod.georeferencer.Georeferencer
    :members:
    
    .. automethod:: __init__
