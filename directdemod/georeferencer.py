@@ -48,8 +48,7 @@ class Georeferencer:
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`, optional): descriptor flag, true if descriptor
-            should be generated
+            desc (:obj:`bool`, optional): descriptor flag, true if descriptor should be generated
         '''
 
         file_name = descriptor["image_name"]
@@ -87,8 +86,7 @@ class Georeferencer:
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`): descriptor flag, true if descriptor should be
-            generated
+            desc (:obj:`bool`): descriptor flag, true if descriptor should be generated
         '''
 
         file_name = descriptor["image_name"]
