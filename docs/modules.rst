@@ -148,6 +148,14 @@ Image merger
    
    .. automethod:: __init__
    
+Georeferencer
+---------------
+
+.. autoclass:: directdemod.georeferencer.Georeferencer
+   :members:
+   
+   .. automethod:: __init__
+   
 Library checker
 ---------------
 
