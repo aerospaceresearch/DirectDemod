@@ -1,4 +1,4 @@
 name: stats
 dependencies:
-  - gdal=2.3.6
+  - gdal=2.3.2
   - cartopy=0.16.0
