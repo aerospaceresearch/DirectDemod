@@ -2,4 +2,4 @@ name: stats
 dependencies:
   - gdal=2.3.2
   - cartopy=0.16.0
-  - pyorbital=1.5.0
+  - conda-forge::pyorbital=1.5.0
