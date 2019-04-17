@@ -2,6 +2,11 @@
 library checker
 '''
 import os.path
+import json
+import urllib
+import numpy as np
+
+from datetime import datetime
 
 '''
 The class provides functionality to determine whether all needed
@@ -11,19 +16,20 @@ libraries are installed and functional.
 class Checker:
 
     '''
-    Class for checking libraries installation
+    The class provides functionality to determine whether all needed
+    libraries are installed and functional.
     '''
 
     @staticmethod
     def is_file(filename):
 
-        '''Check if give path is file
+        '''check if given path is a file
 
         Args:
             filename (:obj:`string`): path
 
         Returns:
-            :obj:`bool`: is file
+            :obj:`bool`: true if file, else otherwise
         '''
 
         return os.path.isfile(filename)
@@ -31,20 +37,24 @@ class Checker:
     @staticmethod
     def is_dir(dirname):
 
-        '''Check if give path is directory
+        '''check if given path is directory
 
         Args:
             dirname (:obj:`string`): path
 
         Returns:
-            :obj:`bool`: is directory
+            :obj:`bool`: true directory, else otherwise
         '''
 
         return os.path.isdir(filename)
 
     @staticmethod
     def check_libs():
-        '''Check if pyorbital and (cartopy or basemap) are installed.'''
+        '''check if pyorbital and (cartopy or basemap) are installed
+
+        Throws:
+            :obj:`ModuleNotFoundError`: if module is not installed
+        '''
 
         if not Checker.check_pyorbital():
             raise ModuleNotFoundError("Pyorbital must be installed.")
@@ -54,7 +64,11 @@ class Checker:
 
     @staticmethod
     def check_pyorbital():
-        '''Check if pyorbital is installed.'''
+        '''check if pyorbital is installed
+
+        Returns:
+            :obj:`bool`: true if installed, false otherwise
+        '''
 
         try:
             import pyorbital
@@ -66,7 +80,11 @@ class Checker:
 
     @staticmethod
     def check_cartopy():
-        '''Check if cartopy is installed.'''
+        '''check if cartopy is installed
+
+        Returns:
+            :obj:`bool`: true if installed, false otherwise
+        '''
 
         try:
             import cartopy
@@ -78,7 +96,11 @@ class Checker:
 
     @staticmethod
     def check_basemap():
-        '''Check if basemap is installed.'''
+        '''check if basemap is installed
+
+        Returns:
+            :obj:`bool`: true if installed, false otherwise
+        '''
 
         try:
             import mpl_toolkits.basemap
@@ -90,11 +112,6 @@ class Checker:
 '''
 Object for json manipulation
 '''
-import json
-import urllib
-import numpy as np
-
-from datetime import datetime
 
 '''
 These classes provide API for the input/output operations
@@ -113,6 +130,9 @@ class Encoder(json.JSONEncoder):
 
         Args:
             obj (:obj:`object`): oject to encode
+
+        Returns:
+            :obj:`object`: encoded object
         '''
 
         if isinstance(obj, np.ndarray):
@@ -124,13 +144,13 @@ class Encoder(json.JSONEncoder):
 class JsonParser:
 
     '''
-    Wrapper class over json module to add numpy serialization.
+    Wrapper class over json module to add numpy and datetime json serialization
     '''
 
     @staticmethod
     def to_string(json_dict):
 
-        '''Convert dict to json string
+        '''convert dict to json string
 
         Args:
             json_dict (:obj:`dict`): object to convert
@@ -144,7 +164,7 @@ class JsonParser:
     @staticmethod
     def from_string(str):
 
-        '''Convert json string to dict
+        '''convert json string to dict
 
         Args:
             str (:obj:`string`): string to convert
@@ -158,7 +178,7 @@ class JsonParser:
     @staticmethod
     def from_file(filename):
 
-        '''Convert text from file into json dict
+        '''convert text from file into json dict
 
         Args:
             filename (:obj:`string`): path to file
@@ -173,7 +193,7 @@ class JsonParser:
     @staticmethod
     def from_url(url):
 
-        '''Convert text from url into json dict
+        '''convert text from url into json dict
 
         Args:
             filename (:obj:`string`): path to url
@@ -187,7 +207,7 @@ class JsonParser:
     @staticmethod
     def save(json_dict, output_file):
 
-        '''Serialize json dict into file
+        '''serialize json dict into file
 
         Args:
             json_dict (:obj:`dict`): dictionary

@@ -12,11 +12,12 @@ To get started on directly using this software for decoding: NOAA or demodulatin
 Some tutorials on how to use the modules and write your own scripts or to extend existing libraries, can be found at the tutorial folder in the repo.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    gettingstarted.rst
    modules.rst
+   visualization.rst
 
 
 Indices and tables

@@ -1,40 +1,163 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>DirectDemod: Modules documentation &#8212; DirectDemod  documentation</title>
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>DirectDemod: Modules documentation &mdash; DirectDemod  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Welcome to DirectDemod’s documentation!" href="index.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to DirectDemod’s documentation!"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">DirectDemod  documentation</a> &#187;</li> 
-      </ul>
-    </div>  
+    <link rel="next" title="Visualizations routine" href="visualization.html" />
+    <link rel="prev" title="DirectDemod: Getting Started" href="gettingstarted.html" /> 
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DirectDemod
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">DirectDemod: Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DirectDemod: Modules documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#signal-object">Signal object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specific-applications">Specific applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#filters">Filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#demodulators">Demodulators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sources">Sources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sinks">Sinks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#chunking-helper">Chunking helper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">Logging</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualizations routine</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DirectDemod</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>DirectDemod: Modules documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="directdemod-modules-documentation">
 <h1>DirectDemod: Modules documentation<a class="headerlink" href="#directdemod-modules-documentation" title="Permalink to this headline">¶</a></h1>
@@ -145,7 +268,15 @@
 <dl class="attribute">
 <dt id="directdemod.comm.commSignal.length">
 <code class="descname">length</code><a class="headerlink" href="#directdemod.comm.commSignal.length" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> – get length of signal</p>
+<dd><p>get length of signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -169,13 +300,29 @@
 <dl class="attribute">
 <dt id="directdemod.comm.commSignal.sampRate">
 <code class="descname">sampRate</code><a class="headerlink" href="#directdemod.comm.commSignal.sampRate" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> – get sampling rate of signal</p>
+<dd><p>get sampling rate of signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="directdemod.comm.commSignal.signal">
 <code class="descname">signal</code><a class="headerlink" href="#directdemod.comm.commSignal.signal" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code> – get signal</p>
+<dd><p>get signal</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -377,7 +524,7 @@
 <dl class="attribute">
 <dt id="directdemod.decode_noaa.decode_noaa.useful">
 <code class="descname">useful</code><a class="headerlink" href="#directdemod.decode_noaa.decode_noaa.useful" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>See if some data was found or not</em> – 10 consecutive syncs apart by 0.5s+-error</p>
+<dd><p>10 consecutive syncs apart by 0.5s+-error</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -385,6 +532,8 @@
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">0 if not found, 1 if found</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">See if some data was found or not</td>
 </tr>
 </tbody>
 </table>
@@ -670,13 +819,29 @@
 <dl class="attribute">
 <dt id="directdemod.filters.filter.getA">
 <code class="descname">getA</code><a class="headerlink" href="#directdemod.filters.filter.getA" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – Get ‘a’ of the filter</p>
+<dd><p>Get ‘a’ of the filter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="directdemod.filters.filter.getB">
 <code class="descname">getB</code><a class="headerlink" href="#directdemod.filters.filter.getB" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – Get ‘b’ of the filter</p>
+<dd><p>Get ‘b’ of the filter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -936,7 +1101,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Signal array to be demdodulated</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Signal array to be demodulated</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Demodulated signal</td>
 </tr>
@@ -1012,7 +1177,7 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Signal array to be demdodulated</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sig</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">array</span></code>) – Signal array to be demodulated</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Demodulated signal</td>
 </tr>
@@ -1048,7 +1213,15 @@
 <dl class="attribute">
 <dt id="directdemod.source.IQwav.length">
 <code class="descname">length</code><a class="headerlink" href="#directdemod.source.IQwav.length" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> – get source length</p>
+<dd><p>get source length</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1096,13 +1269,29 @@
 <dl class="attribute">
 <dt id="directdemod.source.IQwav.sampFreq">
 <code class="descname">sampFreq</code><a class="headerlink" href="#directdemod.source.IQwav.sampFreq" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> – get sampling freq of source</p>
+<dd><p>get sampling freq of source</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="directdemod.source.IQwav.sourceType">
 <code class="descname">sourceType</code><a class="headerlink" href="#directdemod.source.IQwav.sourceType" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code> – get source type</p>
+<dd><p>get source type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1135,7 +1324,15 @@
 <dl class="attribute">
 <dt id="directdemod.sink.wavFile.write">
 <code class="descname">write</code><a class="headerlink" href="#directdemod.sink.wavFile.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>sig (<a class="reference internal" href="#directdemod.sink.wavFile" title="directdemod.sink.wavFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wavFile</span></code></a>) – writes the signal to file</p>
+<dd><p>writes the signal to file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">sig (<a class="reference internal" href="#directdemod.sink.wavFile" title="directdemod.sink.wavFile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wavFile</span></code></a>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1165,13 +1362,29 @@
 <dl class="attribute">
 <dt id="directdemod.sink.image.show">
 <code class="descname">show</code><a class="headerlink" href="#directdemod.sink.image.show" title="Permalink to this definition">¶</a></dt>
-<dd><p>sig (<a class="reference internal" href="#directdemod.sink.image" title="directdemod.sink.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>) – shows the image</p>
+<dd><p>shows the image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">sig (<a class="reference internal" href="#directdemod.sink.image" title="directdemod.sink.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="directdemod.sink.image.write">
 <code class="descname">write</code><a class="headerlink" href="#directdemod.sink.image.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>sig (<a class="reference internal" href="#directdemod.sink.image" title="directdemod.sink.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>) – writes the image to file</p>
+<dd><p>writes the image to file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">sig (<a class="reference internal" href="#directdemod.sink.image" title="directdemod.sink.image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">image</span></code></a>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1218,7 +1431,7 @@
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">value of variable</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aything</span></code></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anything</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -1228,7 +1441,15 @@
 <dl class="attribute">
 <dt id="directdemod.chunker.chunker.getChunks">
 <code class="descname">getChunks</code><a class="headerlink" href="#directdemod.chunker.chunker.getChunks" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code> – get the created chunks</p>
+<dd><p>get the created chunks</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1282,67 +1503,52 @@
 </div>
 
 
+           </div>
+           
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">DirectDemod: Modules documentation</a><ul>
-<li><a class="reference internal" href="#signal-object">Signal object</a></li>
-<li><a class="reference internal" href="#specific-applications">Specific applications</a></li>
-<li><a class="reference internal" href="#filters">Filters</a></li>
-<li><a class="reference internal" href="#demodulators">Demodulators</a></li>
-<li><a class="reference internal" href="#sources">Sources</a></li>
-<li><a class="reference internal" href="#sinks">Sinks</a></li>
-<li><a class="reference internal" href="#chunking-helper">Chunking helper</a></li>
-<li><a class="reference internal" href="#logging">Logging</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="visualization.html" class="btn btn-neutral float-right" title="Visualizations routine" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="gettingstarted.html" class="btn btn-neutral float-left" title="DirectDemod: Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to DirectDemod’s documentation!</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/modules.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Vinay C K (7andahalf)
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to DirectDemod’s documentation!"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">DirectDemod  documentation</a> &#187;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2018, Vinay C K (7andahalf).
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.4.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>

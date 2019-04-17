@@ -22,13 +22,20 @@ Mandatory:
 
 * colorsys
 
-Optional: (Only used for map overlay for NOAA images)
+Optional (used for map overlay, georeferencing and image merger):
 
 * pyorbital
 
 * Basemap
 
 * cartopy
+
+* GeographicLib
+
+* GDAL
+
+* dateutil
+
 
 Please make sure you have all the mandatory libraries installed.
 
