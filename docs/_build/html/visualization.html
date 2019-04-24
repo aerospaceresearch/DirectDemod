@@ -157,6 +157,8 @@
             
   <div class="section" id="visualizations-routine">
 <h1>Visualizations routine<a class="headerlink" href="#visualizations-routine" title="Permalink to this headline">¶</a></h1>
+<p>In this section are presented classes that are related to visualization of satellite imagery,
+along with their helper classes, which provide IO operations.</p>
 <div class="section" id="image-merger">
 <h2>Image merger<a class="headerlink" href="#image-merger" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -439,6 +441,22 @@ isGray <code class="xref py py-obj docutils literal notranslate"><span class="pr
 </div>
 <div class="section" id="georeferencer">
 <h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
+<p>This class provides an API for image georeferencing.
+Sample command to run georeferencer.py:
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-f</span> <span class="pre">../samples/image_noaa19_1_desc.json</span> <span class="pre">-o</span> <span class="pre">../samples/image_noaa19_2.tif.</span></code>
+Console options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-f</span></kbd></td>
+<td>path to descriptor file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-o</span></kbd></td>
+<td>path to output file</td></tr>
+</tbody>
+</table>
 <dl class="class">
 <dt id="directdemod.georeferencer.Georeferencer">
 <em class="property">class </em><code class="descclassname">directdemod.georeferencer.</code><code class="descname">Georeferencer</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer" title="Permalink to this definition">¶</a></dt>

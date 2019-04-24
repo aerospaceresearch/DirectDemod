@@ -4,6 +4,7 @@ image georeferencer
 import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
+import argparse
 import math
 import os
 
@@ -164,15 +165,20 @@ class Georeferencer:
         dtime = dparser.parse(descriptor["date_time"])
         orbiter = Orbital(descriptor["sat_type"], tle_file=self.tle_file)
         min_delta = 500
-        middle_dist = 3.22 * 455 / 2. * 1000
-        far_dist = 3.2 * 455 * 1000
+        middle_dist = 3.24 * 455 / 2. * 1000
+        far_dist = 3.24 * 455 * 1000
         prev = orbiter.get_lonlatalt(dtime - timedelta(milliseconds=min_delta*10))
+
+        for i in range(0, height, 10):
+            h = height - i - 1
+            gcp_time = dtime + timedelta(milliseconds=i*min_delta)
+            position = orbiter.get_lonlatalt(gcp_time)
+            gcps.append(gdal.GCP(position[0], position[1], 0, center_w, h))
 
         for i in range(0, height, 100):
             h = height - i - 1
             gcp_time = dtime + timedelta(milliseconds=i*min_delta)
             position = orbiter.get_lonlatalt(gcp_time)
-            gcps.append(gdal.GCP(position[0], position[1], 0, center_w, h))
 
             angle = self.angleFromCoordinate(prev[0], prev[1], position[0], position[1])
             azimuth = 90 - angle
@@ -181,6 +187,11 @@ class Georeferencer:
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist, width/4, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
+
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist/2, 5*width/8, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth, 3*middle_dist/2, 7*width/8, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist/2, 3*width/8, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, 3*middle_dist/2, width/8, h))
 
             prev = position
 
@@ -219,7 +230,6 @@ class Georeferencer:
             :obj:`float`: angle between points
         '''
 
-        # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
         lat1 = np.radians(lat1)
         long1 = np.radians(long1)
         lat2 = np.radians(lat2)
@@ -236,8 +246,14 @@ class Georeferencer:
         return brng
 
 if __name__ == "__main__":
-    file_name = "../samples/image_noaa19_1_desc.json"
-    output_file = "../samples/image_noaa19_2.tif"
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--file', required=True)
+    parser.add_argument('-o', '--output_file', required=True)
+
+    args = parser.parse_args()
+
+    file_name = args.file
+    output_file = args.output_file
     descriptor = JsonParser.from_file(file_name)
 
     referencer = Georeferencer(tle_file="../tle/noaa18_June_14_2018.txt")
