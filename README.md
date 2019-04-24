@@ -16,6 +16,15 @@ sudo docker run --rm -it \
    direct_demod python main.py samples/SDRSharp_20170830_073907Z_145825000Hz_IQ_autogain.wav
 ```
 
+## Install
+
+### Linux
+
+You can install DirectDemod on linux, using the `install.sh` script. Steps are given below.
+
+1. Change the mode of file, to make it executable. `sudo chmod +x ./install`.
+
+2. Execute the file using sudo only. `sudo ./install`.
 
 ## Documentation
 Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
 noaa commandline interface
 '''
@@ -38,7 +39,7 @@ def usage(err = ""):
     print("\t\t-o <str> : output file names (in order)")
     print("\t\t-s <in sample#> : starts of signals (in order)")
     print("\t\t-e <in sample#> : ends of signals (in order)")
-    
+
     print()
     print("for each -f channel use following flags to indicate which decoder to use:")
     print("\t-d noaa : APT e.g. NOAA satellites decoder")
@@ -271,7 +272,7 @@ for fileIndex in range(len(freqs)):
                 entryDict['filesCreated'].append(csvFileName)
 
             if noaaObj.useful == 0:
-                logging.info('No NOAA data was found at this frequency')
+                logging.error('No NOAA data was found at this frequency')
 
             entryDict['usefulness'] = noaaObj.useful
             entryDict['syncDetect'] = calculateSync
@@ -301,7 +302,7 @@ for fileIndex in range(len(freqs)):
 
             #print results
             logging.info('Complete: detected %d syncs', len(syncs))
-            
+
             # write syncs
             csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
             if not outs[fileIndex] is None:
@@ -313,7 +314,7 @@ for fileIndex in range(len(freqs)):
             logging.info('CSV file successfully created')
 
             entryDict['usefulness'] = funcubeObj.useful
-        
+
         # if Meteor m2 QPSK was chosen
         elif decoders[fileIndex] == "meteor":
             logging.info('Detecting Meteor M2 Syncs')
@@ -326,7 +327,7 @@ for fileIndex in range(len(freqs)):
 
             #print results
             logging.info('Complete: detected %d syncs', len(syncs))
-            
+
             # write syncs
             csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
             if not outs[fileIndex] is None:
