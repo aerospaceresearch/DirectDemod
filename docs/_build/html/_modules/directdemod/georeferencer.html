@@ -152,6 +152,7 @@
 <span class="kn">import</span> <span class="nn">dateutil.parser</span> <span class="k">as</span> <span class="nn">dparser</span>
 <span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mimg</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -367,7 +368,6 @@
 <span class="sd">            :obj:`float`: angle between points</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="c1"># source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points</span>
         <span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
         <span class="n">long1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long1</span><span class="p">)</span>
         <span class="n">lat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
@@ -384,8 +384,14 @@
         <span class="k">return</span> <span class="n">brng</span></div></div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;../samples/image_noaa19_1_desc.json&quot;</span>
-    <span class="n">output_file</span> <span class="o">=</span> <span class="s2">&quot;../samples/image_noaa19_2.tif&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">file</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span>
     <span class="n">descriptor</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
 
     <span class="n">referencer</span> <span class="o">=</span> <span class="n">Georeferencer</span><span class="p">(</span><span class="n">tle_file</span><span class="o">=</span><span class="s2">&quot;../tle/noaa18_June_14_2018.txt&quot;</span><span class="p">)</span>
