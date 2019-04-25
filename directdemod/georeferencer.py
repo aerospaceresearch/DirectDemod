@@ -162,11 +162,11 @@ class Georeferencer:
         center_h = height/2
 
         gcps = []
-        dtime = dparser.parse(descriptor["date_time"])
+        dtime = dparser.parse(descriptor["date_time"])+timedelta(milliseconds=2000) # start capture date in 2s (it is hands-on parameter)
         orbiter = Orbital(descriptor["sat_type"], tle_file=self.tle_file)
         min_delta = 500
-        middle_dist = 3.24 * 455 / 2. * 1000
-        far_dist = 3.24 * 455 * 1000
+        middle_dist = 3.25 * 455 / 2. * 1000
+        far_dist = 3.15 * 455 * 1000 # 3.15 is because of image distortions towards to boudaries
         prev = orbiter.get_lonlatalt(dtime - timedelta(milliseconds=min_delta*10))
 
         for i in range(0, height, 10):
@@ -185,13 +185,13 @@ class Georeferencer:
 
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist, 3*width/4, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist, width/4, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, middle_dist, width/4, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
 
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist/2, 5*width/8, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, 3*middle_dist/2, 7*width/8, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, middle_dist/2, 3*width/8, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 183, 3*middle_dist/2, width/8, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, middle_dist/2, 3*width/8, h))
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, 3*middle_dist/2, width/8, h))
 
             prev = position
 
