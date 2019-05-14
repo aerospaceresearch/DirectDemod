@@ -25,8 +25,12 @@ NOAA_SATS = {137620000:"NOAA 15", 137100000:"NOAA 19", 137912500:"NOAA 18"}
 ## Merger settings
 RESOLUTION = 500
 COLOR = "black"
+
+## Georeferencer settings
 TEMP_TIFF_FILE = "_temp.tiff"
 DEFAULT_RS = "EPSG:4326"
+TLE = "../tle/noaa18_June_14_2018.txt"    # should be used in directdemod directory
+BORDERS = "../samples/shapes/borders.shp" # should be used in directdemod directory
 
 ###### Do not change these
 

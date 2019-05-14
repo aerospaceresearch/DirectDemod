@@ -8,6 +8,7 @@ import argparse
 import math
 import os
 
+from PIL import Image
 from osgeo import gdal
 from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
@@ -137,7 +138,7 @@ class Georeferencer:
             "sat_type": descriptor["sat_type"],
             "date_time": descriptor["date_time"],
             "center": descriptor["center"],
-            "direction": 0
+            "direction": descriptor["direction"]
         }
 
         name, extension = os.path.splitext(output_file)
@@ -167,7 +168,7 @@ class Georeferencer:
         min_delta = 500
         middle_dist = 3.25 * 455 / 2. * 1000
         far_dist = 3.15 * 455 * 1000 # 3.15 is because of image distortions towards to boudaries
-        prev = orbiter.get_lonlatalt(dtime - timedelta(milliseconds=min_delta*10))
+        prev_position = orbiter.get_lonlatalt(dtime - timedelta(milliseconds=min_delta*10))
 
         for i in range(0, height, 10):
             h = height - i - 1
@@ -180,20 +181,20 @@ class Georeferencer:
             gcp_time = dtime + timedelta(milliseconds=i*min_delta)
             position = orbiter.get_lonlatalt(gcp_time)
 
-            angle = self.angleFromCoordinate(prev[0], prev[1], position[0], position[1])
+            angle = self.angleFromCoordinate(prev_position[0], prev_position[1], position[0], position[1])
             azimuth = 90 - angle
 
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist, 3*width/4, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, far_dist, width, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, middle_dist, width/4, h))
-            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, far_dist, 0, h)) # FIXME: Note +3 degrees is hand constant
+            gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, far_dist, 0, h)) # FIXME: Note +2 degrees is hand constant
 
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, middle_dist/2, 5*width/8, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth, 3*middle_dist/2, 7*width/8, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, middle_dist/2, 3*width/8, h))
             gcps.append(self.compute_gcp(position[0], position[1], azimuth + 182, 3*middle_dist/2, width/8, h))
 
-            prev = position
+            prev_position = position
 
         return gcps
 
@@ -245,16 +246,40 @@ class Georeferencer:
         brng = 360 - brng
         return brng
 
+    @staticmethod
+    def overlay(raster_path, shapefile=constants.BORDERS):
+
+        '''create map overlay of borders shape file over raster
+
+            Args:
+                raster_path (:obj:`string`): path to raster (.tif)
+                shapefile (:obj:`string`): path to shape file (.shp)
+        '''
+
+        vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
+        ds = gdal.Open(raster_path, gdal.GA_Update)
+        gdal.Rasterize(ds, vector_ds, bands=[1], burnValues=[255])
+
+    @staticmethod
+    def tif_to_png(filename, png, grayscale=True):
+        if grayscale:
+            img = Image.open(filename).convert("LA")
+            img.save(png)
+        else:
+            raise NotImplementedError();
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Noaa georeferencer.")
     parser.add_argument('-f', '--file', required=True)
     parser.add_argument('-o', '--output_file', required=True)
+    parser.add_argument('-m', '--map', required=False, nargs='?', const=True, type=bool)
 
     args = parser.parse_args()
 
-    file_name = args.file
-    output_file = args.output_file
-    descriptor = JsonParser.from_file(file_name)
+    descriptor = JsonParser.from_file(args.file)
 
-    referencer = Georeferencer(tle_file="../tle/noaa18_June_14_2018.txt")
-    referencer.georef(descriptor, output_file)
+    referencer = Georeferencer(tle_file=constants.TLE)
+    referencer.georef(descriptor, args.output_file)
+
+    if args.map is not None:
+        Georeferencer.overlay(args.output_file)

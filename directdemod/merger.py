@@ -291,13 +291,14 @@ class ImageMerger:
         delta = int(image.shape[0]/16)
         delta = max(delta, 10)
 
-        top_coord    = self.compute_alt(orbiter, dtime, image, -delta)
-        bot_coord    = self.compute_alt(orbiter, dtime, image,  delta)
-        center_coord = self.compute_alt(orbiter, dtime, image, 0)
+        top_coord    = ImageMerger.compute_alt(orbiter, dtime, image, -delta)
+        bot_coord    = ImageMerger.compute_alt(orbiter, dtime, image,  delta)
+        center_coord = ImageMerger.compute_alt(orbiter, dtime, image, 0)
 
         return (top_coord, bot_coord, center_coord)
 
-    def compute_alt(self, orbiter, dtime, image, accumulate):
+    @staticmethod
+    def compute_alt(orbiter, dtime, image, accumulate):
 
         '''compute coordinates of the satellite
 
