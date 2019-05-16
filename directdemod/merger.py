@@ -14,6 +14,7 @@ from pyorbital.orbital import Orbital
 from PIL import Image
 from directdemod import constants
 from directdemod.misc import Checker
+from misc import compute_alt, to_datetime, extract_date, extract_coords, compute_angle
 from scipy import ndimage
 
 '''
@@ -41,7 +42,7 @@ class ImageMerger:
 
         Checker.check_libs()
 
-        self.is_basemap = Checker.check_basemap()
+        self.is_basemap = False
         self.is_cartopy = Checker.check_cartopy()
         self.tle_file   = tle_file
         self.aux_file_name = aux_file_name
@@ -224,122 +225,5 @@ class ImageMerger:
         new_longitude = center[1] + (dx / 6371000.0) * (180 / np.pi) / np.cos(center[0] * np.pi/180)
         return (new_latitude, new_longitude)
 
-    @staticmethod
-    def extract_date(filename):
-
-        '''extracts date from filename
-
-        Args:
-            filename (:obj:`string`): name of the file
-
-        Returns:
-            :obj:`datetime`: contructed datetime object
-        '''
-
-        parts = filename.split('_')
-        image_date, image_time = None, None
-        for index, part in reversed(list(enumerate(parts))):
-            if part[-1] == "Z":
-                image_time = part[:-1]
-                image_date = parts[index - 1]
-
-        if image_date is None or image_time is None:
-            raise ValueError("Invalid file name format.")
-
-        return ImageMerger.to_datetime(image_time, image_date)
-
-    @staticmethod
-    def to_datetime(image_time, image_date):
-
-        '''builds datetime object
-
-        Args:
-            image_time (:obj:`string`): time when the image was captured
-            image_date (:obj:`string`): date when the image was captured
-
-        Returns:
-            :obj:`datetime`: contructed datetime object
-        '''
-
-        try:
-            year   = int(image_date[0:4])
-            month  = int(image_date[4:6])
-            day    = int(image_date[6:8])
-            hour   = int(image_time[0:2])
-            minute = int(image_time[2:4])
-            second = int(image_time[4:6])
-
-            return datetime(year, month, day, hour, minute, second)
-        except ValueError as e:
-            # add error logging
-            raise
-
-    def extract_coords(self, image, satellite, dtime):
-
-        '''extracts coordinates of the image bounds
-
-        Args:
-            image (:obj:`np.array`): captured image
-            satellite (:obj:`string`): name of the satellite
-            dtime (:obj:`datetime`): time when the image was captured
-
-        Returns:
-            :obj:`tuple`: extracted coordinates
-        '''
-
-        orbiter = Orbital(satellite) if self.tle_file is None else Orbital(satellite, tle_file=self.tle_file)
-        delta = int(image.shape[0]/16)
-        delta = max(delta, 10)
-
-        top_coord    = ImageMerger.compute_alt(orbiter, dtime, image, -delta)
-        bot_coord    = ImageMerger.compute_alt(orbiter, dtime, image,  delta)
-        center_coord = ImageMerger.compute_alt(orbiter, dtime, image, 0)
-
-        return (top_coord, bot_coord, center_coord)
-
-    @staticmethod
-    def compute_alt(orbiter, dtime, image, accumulate):
-
-        '''compute coordinates of the satellite
-
-        Args:
-            orbiter (:obj:`Orbital`): object representing orbit of satellite
-            dtime (:obj:`datetime`): time when the image was captured
-            image (:obj:`np.array`): captured image
-            accumulate (:obj:`float`): distance shift
-
-        Returns:
-            :obj:`tuple`: coordinates of satellite at certain point of time
-        '''
-
-        return orbiter.get_lonlatalt(dtime + timedelta(seconds=int(image.shape[0]/4) + accumulate))[:2][::-1]
-
-    def compute_angle(self, lat1, long1, lat2, long2):
-
-        '''compute angle between 2 points, defined by latitude and longitude
-
-        Args:
-            lat1 (:obj:`float`): latitude of start point
-            long1 (:obj:`float`): longitude of start point
-            lat2 (:obj:`float`): latitude of end point
-            long2 (:obj:`float`): longitude of end point
-
-        Returns:
-            :obj:`float`: angle between points
-        '''
-
-        # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
-        lat1 = np.radians(lat1)
-        long1 = np.radians(long1)
-        lat2 = np.radians(lat2)
-        long2 = np.radians(long2)
-
-        dLon = (long2 - long1)
-
-        y = np.sin(dLon) * np.cos(lat2)
-        x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(dLon)
-        brng = np.arctan2(y, x)
-        brng = np.degrees(brng)
-        brng = (brng + 360) % 360
-        brng = 360 - brng
-        return brng
+if __name__ == "__main__":
+    m = ImageMerger()

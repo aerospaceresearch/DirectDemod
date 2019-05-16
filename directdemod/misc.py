@@ -5,8 +5,10 @@ import os.path
 import json
 import urllib
 import numpy as np
+import matplotlib.pyplot as plt
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from pyorbital.orbital import Orbital
 
 '''
 The class provides functionality to determine whether all needed
@@ -106,7 +108,7 @@ class Checker:
             import mpl_toolkits.basemap
             from mpl_toolkits.basemap import Basemap
             return True
-        except ModuleNotFoundError:
+        except Error as e:
             return False
 
 '''
@@ -217,19 +219,165 @@ class JsonParser:
         with open(output_file, 'w') as out:
             json.dump(json_dict, out, cls=Encoder)
 
+
+def to_datetime(image_time, image_date):
+
+    '''builds datetime object
+
+    Args:
+        image_time (:obj:`string`): time when the image was captured
+        image_date (:obj:`string`): date when the image was captured
+
+    Returns:
+        :obj:`datetime`: contructed datetime object
+    '''
+
+    try:
+        year   = int(image_date[0:4])
+        month  = int(image_date[4:6])
+        day    = int(image_date[6:8])
+        hour   = int(image_time[0:2])
+        minute = int(image_time[2:4])
+        second = int(image_time[4:6])
+
+        return datetime(year, month, day, hour, minute, second)
+    except ValueError as e:
+            # add error logging
+        raise
+
+def compute_alt(orbiter, dtime, image, accumulate):
+
+    '''compute coordinates of the satellite
+
+    Args:
+        orbiter (:obj:`Orbital`): object representing orbit of satellite
+        dtime (:obj:`datetime`): time when the image was captured
+        image (:obj:`np.array`): captured image
+        accumulate (:obj:`float`): distance shift
+
+    Returns:
+        :obj:`tuple`: coordinates of satellite at certain point of time
+    '''
+
+    return orbiter.get_lonlatalt(dtime + timedelta(seconds=int(image.shape[0]/4) + accumulate))[:2][::-1]
+
+
+def extract_date(filename):
+
+    '''extracts date from filename
+
+    Args:
+        filename (:obj:`string`): name of the file
+
+    Returns:
+        :obj:`datetime`: contructed datetime object
+    '''
+
+    parts = filename.split('_')
+    image_date, image_time = None, None
+    for index, part in reversed(list(enumerate(parts))):
+        if part[-1] == "Z":
+            image_time = part[:-1]
+            image_date = parts[index - 1]
+
+    if image_date is None or image_time is None:
+        raise ValueError("Invalid file name format.")
+
+    return to_datetime(image_time, image_date)
+
+def extract_coords(image, satellite, dtime, tle_file=None):
+
+    '''extracts coordinates of the image bounds
+
+    Args:
+        image (:obj:`np.array`): captured image
+        satellite (:obj:`string`): name of the satellite
+        dtime (:obj:`datetime`): time when the image was captured
+
+    Returns:
+        :obj:`tuple`: extracted coordinates
+    '''
+
+    orbiter = Orbital(satellite) if tle_file is None else Orbital(satellite, tle_file=tle_file)
+    delta = int(image.shape[0]/16)
+    delta = max(delta, 10)
+
+    top_coord    = compute_alt(orbiter, dtime, image, -delta)
+    bot_coord    = compute_alt(orbiter, dtime, image,  delta)
+    center_coord = compute_alt(orbiter, dtime, image, 0)
+
+    return (top_coord, bot_coord, center_coord)
+
+def compute_angle(lat1, long1, lat2, long2):
+
+    '''compute angle between 2 points, defined by latitude and longitude
+
+    Args:
+        lat1 (:obj:`float`): latitude of start point
+        long1 (:obj:`float`): longitude of start point
+        lat2 (:obj:`float`): latitude of end point
+        long2 (:obj:`float`): longitude of end point
+
+    Returns:
+        :obj:`float`: angle between points
+    '''
+
+        # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+    lat1 = np.radians(lat1)
+    long1 = np.radians(long1)
+    lat2 = np.radians(lat2)
+    long2 = np.radians(long2)
+
+    dLon = (long2 - long1)
+
+    y = np.sin(dLon) * np.cos(lat2)
+    x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(dLon)
+    brng = np.arctan2(y, x)
+    brng = np.degrees(brng)
+    brng = (brng + 360) % 360
+    brng = 360 - brng
+    return brng
+
+def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_file=None):
+
+    '''create descriptor file for audio record
+
+    Args:
+        file_name (:obj:`string`): path to audio record
+        output_file (:obj:`string`): output file name
+        image_name (:obj:`string`): path to image file
+        sat_type (:obj:`string`): name of the satellite
+        tle_file (:obj:`string`): path to tle file
+    '''
+
+    name, ext = os.path.splitext(file_name)
+    desc_name = name + "_desc.json"
+    image = plt.imread(image_name)
+
+    dtime            = extract_date(file_name)
+    top, bot, center = extract_coords(image, sat_type, dtime, tle_file=tle_file)
+    degree           = compute_angle(*bot, *top)
+
+    descriptor = {
+        "image_name": os.path.abspath(image_name),
+        "sat_type": sat_type,
+        "date_time": dtime,
+        "center": list(center),
+        "direction": degree
+    }
+
+    if output_file:
+        JsonParser.save(descriptor, output_file)
+    else:
+        JsonParser.save(descriptor, desc_name)
+
+
 if __name__ == "__main__":
-    import os
+    ## Test create_desc
+    filename = "../samples/SDRSharp_20180615_140752Z_137120000Hz_IQ.wav"
+    image_name = "../samples/image_noaa19_1.png"
+    output_file = "_desc.json"
+    tle_file = "../tle/noaa18_June_14_2018.txt"
 
-    filename = "../samples/image_desc.json"
-
-    jstr1 = JsonParser.from_file(filename)
-    jstr2 = JsonParser.from_string(open(filename, 'r').read())
-
-    print(jstr1)
-    print(jstr2)
-    print(jstr1 == jstr2)
-    print(type(jstr1) == dict)
-
-    test_file = 'sample_desc.json'
-    JsonParser.save_json(jstr1, test_file)
-    os.remove(test_file)
+    create_desc(filename, image_name, output_file, tle_file=tle_file)
+    os.remove(output_file)
