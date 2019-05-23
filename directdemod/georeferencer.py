@@ -4,6 +4,7 @@ image georeferencer
 import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
+import constants
 import argparse
 import math
 import os
@@ -14,8 +15,7 @@ from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
-from directdemod import constants
-from directdemod.misc import JsonParser
+from misc import JsonParser
 
 '''
 This class provides an API for image georeferencing.
@@ -163,7 +163,7 @@ class Georeferencer:
         center_h = height/2
 
         gcps = []
-        dtime = dparser.parse(descriptor["date_time"])+timedelta(milliseconds=2000) # start capture date in 2s (it is hands-on parameter)
+        dtime = dparser.parse(descriptor["date_time"])-timedelta(seconds=180) # start capture date in 2s (it is hands-on parameter)
         orbiter = Orbital(descriptor["sat_type"], tle_file=self.tle_file)
         min_delta = 500
         middle_dist = 3.25 * 455 / 2. * 1000
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
     descriptor = JsonParser.from_file(args.file)
 
-    referencer = Georeferencer(tle_file=constants.TLE)
+    referencer = Georeferencer(tle_file=constants.TLE_NOAA)
     referencer.georef(descriptor, args.output_file)
 
     if args.map is not None:

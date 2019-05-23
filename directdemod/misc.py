@@ -4,6 +4,8 @@ library checker
 import os.path
 import json
 import urllib
+import constants
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -322,7 +324,7 @@ def compute_angle(lat1, long1, lat2, long2):
         :obj:`float`: angle between points
     '''
 
-        # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+    # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
     lat1 = np.radians(lat1)
     long1 = np.radians(long1)
     lat2 = np.radians(lat2)
@@ -371,13 +373,35 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
     else:
         JsonParser.save(descriptor, desc_name)
 
+# Example arguments
+# -f = "../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav"
+# -i = "../samples/image_noaa_2.png"
+# -o = "image_desc.json"
+# -t = "../tle/noaa_May_2019.txt"
 
 if __name__ == "__main__":
-    ## Test create_desc
-    filename = "../samples/SDRSharp_20180615_140752Z_137120000Hz_IQ.wav"
-    image_name = "../samples/image_noaa19_1.png"
-    output_file = "_desc.json"
-    tle_file = "../tle/noaa18_June_14_2018.txt"
+    parser = argparse.ArgumentParser(description="Create descriptor file from SDR")
+    parser.add_argument('-f', '--file_sdr', required=True, help='Path to SDR recording file.')
+    parser.add_argument('-i', '--image_name', required=True, help='Path to decoded image.')
+    parser.add_argument('-o', '--output_file', required=False, help='Name of output file.', default="")
+    parser.add_argument('-t', '--tle', required=False, help='Path to tle file.')
+    parser.add_argument('-s', '--sat_type', required=False, help='Satellite type. \'NOAA 19\' by default.', default="NOAA 19")
 
-    create_desc(filename, image_name, output_file, tle_file=tle_file)
-    os.remove(output_file)
+    args = parser.parse_args()
+
+    filename    = args.file_sdr
+    image_name  = args.image_name
+    output_file = args.output_file
+    sat_type    = args.sat_type
+
+    allowed_sats = ['NOAA 18', 'NOAA 19', 'NOAA 15']
+
+    if sat_type not in allowed_sats:
+        raise ValueError('Invalid satellite type: {0}'.format(sat_type))
+
+    tle_file = args.tle
+
+    if tle_file is None:
+        tle_file = constants.TLE_NOAA
+    
+    create_desc(filename, image_name, output_file, sat_type, tle_file)

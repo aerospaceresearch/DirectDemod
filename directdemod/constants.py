@@ -27,10 +27,11 @@ RESOLUTION = 500
 COLOR = "black"
 
 ## Georeferencer settings
-TEMP_TIFF_FILE = "_temp.tiff"
+TEMP_TIFF_FILE = "_temp.tif"
 DEFAULT_RS = "EPSG:4326"
-TLE = "../tle/noaa18_June_14_2018.txt"    # should be used in directdemod directory
-BORDERS = "../samples/shapes/borders.shp" # should be used in directdemod directory
+
+TLE_NOAA = "../tle/noaa18_June_14_2018.txt"
+BORDERS = "../samples/shapes/borders.shp"  # should be used in directdemod directory
 
 ###### Do not change these
 
