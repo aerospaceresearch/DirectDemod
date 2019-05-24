@@ -4,7 +4,6 @@ image georeferencer
 import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
-import constants
 import argparse
 import math
 import os
@@ -15,7 +14,8 @@ from osgeo.gdal import GRA_NearestNeighbour
 from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
-from misc import JsonParser
+from directdemod import constants
+from directdemod.misc import JsonParser
 
 '''
 This class provides an API for image georeferencing.

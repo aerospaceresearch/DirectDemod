@@ -13,8 +13,7 @@ from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from PIL import Image
 from directdemod import constants
-from directdemod.misc import Checker
-from misc import compute_alt, to_datetime, extract_date, extract_coords, compute_angle
+from directdemod.misc import Checker, compute_alt, to_datetime, extract_date, extract_coords, compute_angle
 from scipy import ndimage
 
 '''

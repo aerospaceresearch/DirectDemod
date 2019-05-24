@@ -186,101 +186,6 @@ projection.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.merger.ImageMerger.compute_alt">
-<code class="descname">compute_alt</code><span class="sig-paren">(</span><em>orbiter</em>, <em>dtime</em>, <em>image</em>, <em>accumulate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.compute_alt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.compute_alt" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute coordinates of the satellite</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>orbiter</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">Orbital</span></code>) – object representing orbit of satellite</li>
-<li><strong>dtime</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code>) – time when the image was captured</li>
-<li><strong>image</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code>) – captured image</li>
-<li><strong>accumulate</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – distance shift</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">coordinates of satellite at certain point of time</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.compute_angle">
-<code class="descname">compute_angle</code><span class="sig-paren">(</span><em>lat1</em>, <em>long1</em>, <em>lat2</em>, <em>long2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.compute_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.compute_angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>compute angle between 2 points, defined by latitude and longitude</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>lat1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
-<li><strong>long1</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
-<li><strong>lat2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of end point</li>
-<li><strong>long2</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of end point</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">angle between points</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.extract_coords">
-<code class="descname">extract_coords</code><span class="sig-paren">(</span><em>image</em>, <em>satellite</em>, <em>dtime</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.extract_coords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.extract_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>extracts coordinates of the image bounds</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>image</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code>) – captured image</li>
-<li><strong>satellite</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the satellite</li>
-<li><strong>dtime</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code>) – time when the image was captured</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">extracted coordinates</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="directdemod.merger.ImageMerger.extract_date">
-<em class="property">static </em><code class="descname">extract_date</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.extract_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.extract_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>extracts date from filename</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">contructed datetime object</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="directdemod.merger.ImageMerger.imread">
 <code class="descname">imread</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.imread" title="Permalink to this definition">¶</a></dt>
 <dd><p>read the image from file</p>
@@ -392,30 +297,6 @@ isGray <code class="xref py py-obj docutils literal notranslate"><span class="pr
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">image <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="directdemod.merger.ImageMerger.to_datetime">
-<em class="property">static </em><code class="descname">to_datetime</code><span class="sig-paren">(</span><em>image_time</em>, <em>image_date</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.to_datetime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.to_datetime" title="Permalink to this definition">¶</a></dt>
-<dd><p>builds datetime object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>image_time</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – time when the image was captured</li>
-<li><strong>image_date</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – date when the image was captured</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">contructed datetime object</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetime</span></code></p>
 </td>
 </tr>
 </tbody>
@@ -674,6 +555,21 @@ libraries are installed and functional.</p>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if installed, false otherwise</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="directdemod.misc.Checker.check_gdal">
+<em class="property">static </em><code class="descname">check_gdal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Checker.check_gdal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Checker.check_gdal" title="Permalink to this definition">¶</a></dt>
+<dd><p>check if basemap is installed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">obj:`
+bool`: true if installed, false otherwise</td>
 </tr>
 </tbody>
 </table>

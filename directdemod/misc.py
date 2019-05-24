@@ -4,13 +4,13 @@ library checker
 import os.path
 import json
 import urllib
-import constants
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
+from directdemod import constants
 
 '''
 The class provides functionality to determine whether all needed

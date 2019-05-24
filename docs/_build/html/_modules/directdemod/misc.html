@@ -152,9 +152,13 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
+<span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">The class provides functionality to determine whether all needed</span>
@@ -198,6 +202,7 @@
 
 <div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_libs</span><span class="p">():</span>
+
         <span class="sd">&#39;&#39;&#39;check if pyorbital and (cartopy or basemap) are installed</span>
 
 <span class="sd">        Throws:</span>
@@ -212,6 +217,7 @@
 
 <div class="viewcode-block" id="Checker.check_pyorbital"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_pyorbital">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_pyorbital</span><span class="p">():</span>
+
         <span class="sd">&#39;&#39;&#39;check if pyorbital is installed</span>
 
 <span class="sd">        Returns:</span>
@@ -228,6 +234,7 @@
 
 <div class="viewcode-block" id="Checker.check_cartopy"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_cartopy">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_cartopy</span><span class="p">():</span>
+
         <span class="sd">&#39;&#39;&#39;check if cartopy is installed</span>
 
 <span class="sd">        Returns:</span>
@@ -244,6 +251,7 @@
 
 <div class="viewcode-block" id="Checker.check_basemap"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_basemap">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_basemap</span><span class="p">():</span>
+
         <span class="sd">&#39;&#39;&#39;check if basemap is installed</span>
 
 <span class="sd">        Returns:</span>
@@ -254,7 +262,22 @@
             <span class="kn">import</span> <span class="nn">mpl_toolkits.basemap</span>
             <span class="kn">from</span> <span class="nn">mpl_toolkits.basemap</span> <span class="k">import</span> <span class="n">Basemap</span>
             <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Checker.check_gdal"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_gdal">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check_gdal</span><span class="p">():</span>
+        <span class="sd">&#39;&#39;&#39;check if basemap is installed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :obj:`</span>
+<span class="sd">            bool`: true if installed, false otherwise</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span></div></div>
 
 <span class="sd">&#39;&#39;&#39;</span>
@@ -365,22 +388,194 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div></div>
 
+
+<span class="k">def</span> <span class="nf">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;builds datetime object</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        image_time (:obj:`string`): time when the image was captured</span>
+<span class="sd">        image_date (:obj:`string`): date when the image was captured</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`datetime`: contructed datetime object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">year</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_date</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">month</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_date</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+        <span class="n">day</span>    <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_date</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">hour</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_time</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_time</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_time</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># add error logging</span>
+        <span class="k">raise</span>
+
+<span class="k">def</span> <span class="nf">compute_alt</span><span class="p">(</span><span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">accumulate</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;compute coordinates of the satellite</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        orbiter (:obj:`Orbital`): object representing orbit of satellite</span>
+<span class="sd">        dtime (:obj:`datetime`): time when the image was captured</span>
+<span class="sd">        image (:obj:`np.array`): captured image</span>
+<span class="sd">        accumulate (:obj:`float`): distance shift</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`tuple`: coordinates of satellite at certain point of time</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">orbiter</span><span class="o">.</span><span class="n">get_lonlatalt</span><span class="p">(</span><span class="n">dtime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">accumulate</span><span class="p">))[:</span><span class="mi">2</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">extract_date</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;extracts date from filename</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (:obj:`string`): name of the file</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`datetime`: contructed datetime object</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+    <span class="n">image_date</span><span class="p">,</span> <span class="n">image_time</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">parts</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="n">part</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Z&quot;</span><span class="p">:</span>
+            <span class="n">image_time</span> <span class="o">=</span> <span class="n">part</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">image_date</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">image_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">image_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid file name format.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">extract_coords</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">satellite</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;extracts coordinates of the image bounds</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        image (:obj:`np.array`): captured image</span>
+<span class="sd">        satellite (:obj:`string`): name of the satellite</span>
+<span class="sd">        dtime (:obj:`datetime`): time when the image was captured</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`tuple`: extracted coordinates</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">orbiter</span> <span class="o">=</span> <span class="n">Orbital</span><span class="p">(</span><span class="n">satellite</span><span class="p">)</span> <span class="k">if</span> <span class="n">tle_file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Orbital</span><span class="p">(</span><span class="n">satellite</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="n">tle_file</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">top_coord</span>    <span class="o">=</span> <span class="n">compute_alt</span><span class="p">(</span><span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">-</span><span class="n">delta</span><span class="p">)</span>
+    <span class="n">bot_coord</span>    <span class="o">=</span> <span class="n">compute_alt</span><span class="p">(</span><span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span>  <span class="n">delta</span><span class="p">)</span>
+    <span class="n">center_coord</span> <span class="o">=</span> <span class="n">compute_alt</span><span class="p">(</span><span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">top_coord</span><span class="p">,</span> <span class="n">bot_coord</span><span class="p">,</span> <span class="n">center_coord</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">compute_angle</span><span class="p">(</span><span class="n">lat1</span><span class="p">,</span> <span class="n">long1</span><span class="p">,</span> <span class="n">lat2</span><span class="p">,</span> <span class="n">long2</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;compute angle between 2 points, defined by latitude and longitude</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lat1 (:obj:`float`): latitude of start point</span>
+<span class="sd">        long1 (:obj:`float`): longitude of start point</span>
+<span class="sd">        lat2 (:obj:`float`): latitude of end point</span>
+<span class="sd">        long2 (:obj:`float`): longitude of end point</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :obj:`float`: angle between points</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points</span>
+    <span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+    <span class="n">long1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long1</span><span class="p">)</span>
+    <span class="n">lat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">long2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long2</span><span class="p">)</span>
+
+    <span class="n">dLon</span> <span class="o">=</span> <span class="p">(</span><span class="n">long2</span> <span class="o">-</span> <span class="n">long1</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dLon</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dLon</span><span class="p">)</span>
+    <span class="n">brng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+    <span class="n">brng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">brng</span><span class="p">)</span>
+    <span class="n">brng</span> <span class="o">=</span> <span class="p">(</span><span class="n">brng</span> <span class="o">+</span> <span class="mi">360</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span>
+    <span class="n">brng</span> <span class="o">=</span> <span class="mi">360</span> <span class="o">-</span> <span class="n">brng</span>
+    <span class="k">return</span> <span class="n">brng</span>
+
+<span class="k">def</span> <span class="nf">create_desc</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">sat_type</span><span class="o">=</span><span class="s2">&quot;NOAA 19&quot;</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;create descriptor file for audio record</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_name (:obj:`string`): path to audio record</span>
+<span class="sd">        output_file (:obj:`string`): output file name</span>
+<span class="sd">        image_name (:obj:`string`): path to image file</span>
+<span class="sd">        sat_type (:obj:`string`): name of the satellite</span>
+<span class="sd">        tle_file (:obj:`string`): path to tle file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">desc_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_desc.json&quot;</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+
+    <span class="n">dtime</span>            <span class="o">=</span> <span class="n">extract_date</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">top</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="n">extract_coords</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="n">tle_file</span><span class="p">)</span>
+    <span class="n">degree</span>           <span class="o">=</span> <span class="n">compute_angle</span><span class="p">(</span><span class="o">*</span><span class="n">bot</span><span class="p">,</span> <span class="o">*</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">descriptor</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;image_name&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">image_name</span><span class="p">),</span>
+        <span class="s2">&quot;sat_type&quot;</span><span class="p">:</span> <span class="n">sat_type</span><span class="p">,</span>
+        <span class="s2">&quot;date_time&quot;</span><span class="p">:</span> <span class="n">dtime</span><span class="p">,</span>
+        <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">center</span><span class="p">),</span>
+        <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="n">degree</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="n">JsonParser</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">JsonParser</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Descriptor CLI interface&#39;&#39;&#39;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Create descriptor file from SDR&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file_sdr&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to SDR recording file.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--image_name&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to decoded image.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of output file.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;--tle&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to tle file.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--sat_type&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Satellite type. </span><span class="se">\&#39;</span><span class="s1">NOAA 19</span><span class="se">\&#39;</span><span class="s1"> by default.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;NOAA 19&quot;</span><span class="p">)</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">filename</span>    <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">file_sdr</span>
+    <span class="n">image_name</span>  <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">image_name</span>
+    <span class="n">output_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span>
+    <span class="n">sat_type</span>    <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">sat_type</span>
+
+    <span class="n">allowed_sats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NOAA 18&#39;</span><span class="p">,</span> <span class="s1">&#39;NOAA 19&#39;</span><span class="p">,</span> <span class="s1">&#39;NOAA 15&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">sat_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_sats</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid satellite type: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sat_type</span><span class="p">))</span>
+
+    <span class="n">tle_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tle</span>
+
+    <span class="k">if</span> <span class="n">tle_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tle_file</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">TLE_NOAA</span>
+
+    <span class="n">create_desc</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">tle_file</span><span class="p">)</span>
+
+<span class="c1"># Example arguments</span>
+<span class="c1"># -f = &quot;../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav&quot;</span>
+<span class="c1"># -i = &quot;../samples/image_noaa_2.png&quot;</span>
+<span class="c1"># -o = &quot;image_desc.json&quot;</span>
+<span class="c1"># -t = &quot;../tle/noaa_May_2019.txt&quot;</span>
+
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">os</span>
-
-    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;../samples/image_desc.json&quot;</span>
-
-    <span class="n">jstr1</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">jstr2</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-
-    <span class="nb">print</span><span class="p">(</span><span class="n">jstr1</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">jstr2</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">jstr1</span> <span class="o">==</span> <span class="n">jstr2</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">jstr1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">)</span>
-
-    <span class="n">test_file</span> <span class="o">=</span> <span class="s1">&#39;sample_desc.json&#39;</span>
-    <span class="n">JsonParser</span><span class="o">.</span><span class="n">save_json</span><span class="p">(</span><span class="n">jstr1</span><span class="p">,</span> <span class="n">test_file</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">test_file</span><span class="p">)</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>
