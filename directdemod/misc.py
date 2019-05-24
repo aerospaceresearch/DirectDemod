@@ -54,6 +54,7 @@ class Checker:
 
     @staticmethod
     def check_libs():
+
         '''check if pyorbital and (cartopy or basemap) are installed
 
         Throws:
@@ -68,6 +69,7 @@ class Checker:
 
     @staticmethod
     def check_pyorbital():
+
         '''check if pyorbital is installed
 
         Returns:
@@ -84,6 +86,7 @@ class Checker:
 
     @staticmethod
     def check_cartopy():
+
         '''check if cartopy is installed
 
         Returns:
@@ -100,6 +103,7 @@ class Checker:
 
     @staticmethod
     def check_basemap():
+
         '''check if basemap is installed
 
         Returns:
@@ -109,6 +113,21 @@ class Checker:
         try:
             import mpl_toolkits.basemap
             from mpl_toolkits.basemap import Basemap
+            return True
+        except Error as e:
+            return False
+
+    @staticmethod
+    def check_gdal():
+        '''check if basemap is installed
+
+        Returns:
+            :obj:`
+            bool`: true if installed, false otherwise
+        '''
+
+        try:
+            from osgeo import gdal
             return True
         except Error as e:
             return False
@@ -373,13 +392,8 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
     else:
         JsonParser.save(descriptor, desc_name)
 
-# Example arguments
-# -f = "../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav"
-# -i = "../samples/image_noaa_2.png"
-# -o = "image_desc.json"
-# -t = "../tle/noaa_May_2019.txt"
-
-if __name__ == "__main__":
+def main():
+    '''Descriptor CLI interface'''
     parser = argparse.ArgumentParser(description="Create descriptor file from SDR")
     parser.add_argument('-f', '--file_sdr', required=True, help='Path to SDR recording file.')
     parser.add_argument('-i', '--image_name', required=True, help='Path to decoded image.')
@@ -403,5 +417,14 @@ if __name__ == "__main__":
 
     if tle_file is None:
         tle_file = constants.TLE_NOAA
-    
+
     create_desc(filename, image_name, output_file, sat_type, tle_file)
+
+# Example arguments
+# -f = "../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav"
+# -i = "../samples/image_noaa_2.png"
+# -o = "image_desc.json"
+# -t = "../tle/noaa_May_2019.txt"
+
+if __name__ == "__main__":
+    main()

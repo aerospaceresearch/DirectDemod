@@ -246,29 +246,40 @@ class Georeferencer:
         brng = 360 - brng
         return brng
 
-    @staticmethod
-    def overlay(raster_path, shapefile=constants.BORDERS):
+def overlay(raster_path, shapefile=constants.BORDERS):
 
-        '''create map overlay of borders shape file over raster
+    '''create map overlay of borders shape file over raster
 
-            Args:
-                raster_path (:obj:`string`): path to raster (.tif)
-                shapefile (:obj:`string`): path to shape file (.shp)
-        '''
+        Args:
+            raster_path (:obj:`string`): path to raster (.tif)
+            shapefile (:obj:`string`): path to shape file (.shp)
+    '''
 
-        vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
-        ds = gdal.Open(raster_path, gdal.GA_Update)
-        gdal.Rasterize(ds, vector_ds, bands=[1], burnValues=[255])
+    vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
+    ds = gdal.Open(raster_path, gdal.GA_Update)
+    gdal.Rasterize(ds, vector_ds, bands=[1], burnValues=[255])
 
-    @staticmethod
-    def tif_to_png(filename, png, grayscale=True):
-        if grayscale:
-            img = Image.open(filename).convert("LA")
-            img.save(png)
-        else:
-            raise NotImplementedError();
+def tif_to_png(filename, png, grayscale=True):
 
-if __name__ == "__main__":
+    '''covert tif image to png
+
+        Args:
+            filename (:obj:`string`): path to image (.tif)
+            png (:obj:`string`): name of output file (.png)
+
+        Throws:
+            error (:obj:`NotImplementedError`): if passed grayscale False
+    '''
+
+    if grayscale:
+        img = Image.open(filename).convert("LA")
+        img.save(png)
+    else:
+        raise NotImplementedError;
+
+def main():
+    '''Georeferencer CLI interface'''
+
     parser = argparse.ArgumentParser(description="Noaa georeferencer.")
     parser.add_argument('-f', '--file', required=True)
     parser.add_argument('-o', '--output_file', required=True)
@@ -282,4 +293,7 @@ if __name__ == "__main__":
     referencer.georef(descriptor, args.output_file)
 
     if args.map is not None:
-        Georeferencer.overlay(args.output_file)
+        overlay(args.output_file)
+
+if __name__ == "__main__":
+    main()
