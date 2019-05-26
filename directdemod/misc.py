@@ -1,6 +1,7 @@
 '''
 library checker
 '''
+import io
 import os.path
 import json
 import urllib
@@ -23,34 +24,6 @@ class Checker:
     The class provides functionality to determine whether all needed
     libraries are installed and functional.
     '''
-
-    @staticmethod
-    def is_file(filename):
-
-        '''check if given path is a file
-
-        Args:
-            filename (:obj:`string`): path
-
-        Returns:
-            :obj:`bool`: true if file, else otherwise
-        '''
-
-        return os.path.isfile(filename)
-
-    @staticmethod
-    def is_dir(dirname):
-
-        '''check if given path is directory
-
-        Args:
-            dirname (:obj:`string`): path
-
-        Returns:
-            :obj:`bool`: true directory, else otherwise
-        '''
-
-        return os.path.isdir(filename)
 
     @staticmethod
     def check_libs():
@@ -164,14 +137,14 @@ class Encoder(json.JSONEncoder):
             return obj.isoformat()
         return super.default(self, obj)
 
-class JsonParser:
+class JSON:
 
     '''
     Wrapper class over json module to add numpy and datetime json serialization
     '''
 
     @staticmethod
-    def to_string(json_dict):
+    def stringify(json_dict):
 
         '''convert dict to json string
 
@@ -185,7 +158,7 @@ class JsonParser:
         return json.dumps(json_dict, cls=Encoder)
 
     @staticmethod
-    def from_string(str):
+    def parse(str):
 
         '''convert json string to dict
 
@@ -209,6 +182,9 @@ class JsonParser:
         Returns:
             :obj:`dict`: json dictionary
         '''
+
+        if isinstance(filename, io.IOBase):
+            return json.load(f)
 
         with open(filename, 'r') as f:
             return json.load(f)
@@ -253,6 +229,9 @@ def to_datetime(image_time, image_date):
         :obj:`datetime`: contructed datetime object
     '''
 
+    if len(image_date) != 8 or len(image_time) != 6:
+        raise ValueError('Invalid length of input dates.')
+
     try:
         year   = int(image_date[0:4])
         month  = int(image_date[4:6])
@@ -263,7 +242,7 @@ def to_datetime(image_time, image_date):
 
         return datetime(year, month, day, hour, minute, second)
     except ValueError as e:
-            # add error logging
+        # add error logging
         raise
 
 def compute_alt(orbiter, dtime, image, accumulate):
@@ -388,9 +367,9 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
     }
 
     if output_file:
-        JsonParser.save(descriptor, output_file)
+        JSON.save(descriptor, output_file)
     else:
-        JsonParser.save(descriptor, desc_name)
+        JSON.save(descriptor, desc_name)
 
 def main():
     '''Descriptor CLI interface'''

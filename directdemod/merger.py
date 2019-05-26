@@ -62,7 +62,7 @@ class ImageMerger:
         if file_descriptors is None:
             raise ValueError("Passed descriptors are null.")
 
-        descriptors = [json.load(open(f)) for f in file_descriptors if Checker.is_file(f)]
+        descriptors = [json.load(open(f)) for f in file_descriptors if os.path.isfile(f)]
         return self.merge(descriptors, whole, resolution)
 
     def merge(self, jsons, whole=False, resolution=constants.RESOLUTION):
@@ -142,7 +142,7 @@ class ImageMerger:
 
         descriptors = []
         for obj in objs:
-            if not Checker.is_file(obj[0]):
+            if not os.path.isfile(obj[0]):
                 continue
 
             file_name = obj[0]

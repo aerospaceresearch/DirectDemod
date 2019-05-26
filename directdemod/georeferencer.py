@@ -15,7 +15,7 @@ from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
-from directdemod.misc import JsonParser
+from directdemod.misc import JSON
 
 '''
 This class provides an API for image georeferencing.
@@ -143,7 +143,7 @@ class Georeferencer:
 
         name, extension = os.path.splitext(output_file)
         desc_name = name + "_desc.json"
-        JsonParser.save(desc, desc_name)
+        JSON.save(desc, desc_name)
 
     def compute_gcps(self, descriptor, image):
 
@@ -287,7 +287,7 @@ def main():
 
     args = parser.parse_args()
 
-    descriptor = JsonParser.from_file(args.file)
+    descriptor = JSON.from_file(args.file)
 
     referencer = Georeferencer(tle_file=constants.TLE_NOAA)
     referencer.georef(descriptor, args.output_file)
