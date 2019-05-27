@@ -250,9 +250,9 @@ def overlay(raster_path, shapefile=constants.BORDERS):
 
     '''create map overlay of borders shape file over raster
 
-        Args:
-            raster_path (:obj:`string`): path to raster (.tif)
-            shapefile (:obj:`string`): path to shape file (.shp)
+    Args:
+        raster_path (:obj:`string`): path to raster (.tif)
+        shapefile (:obj:`string`): path to shape file (.shp)
     '''
 
     vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
@@ -263,12 +263,12 @@ def tif_to_png(filename, png, grayscale=True):
 
     '''covert tif image to png
 
-        Args:
-            filename (:obj:`string`): path to image (.tif)
-            png (:obj:`string`): name of output file (.png)
+    Args:
+        filename (:obj:`string`): path to image (.tif)
+        png (:obj:`string`): name of output file (.png)
 
-        Throws:
-            error (:obj:`NotImplementedError`): if passed grayscale False
+    Throws:
+        error (:obj:`NotImplementedError`): if passed grayscale False
     '''
 
     if grayscale:
@@ -276,6 +276,22 @@ def tif_to_png(filename, png, grayscale=True):
         img.save(png)
     else:
         raise NotImplementedError;
+
+def set_nodata(filename, output_file, value=0):
+
+    '''sets nodata value of tif 'file_name' to 'value', saves to output_file
+
+    Args:
+        filename (:obj:`string`): path to image (.tif)
+        output_file (:obj:`string`): name of output file (.tif)
+    '''
+
+    options = gdal.TranslateOptions(format="GTiff",
+                                    noData=value)
+
+    gdal.Translate(destName=output_file,
+                    srcDS=filename,
+                    options=options)
 
 def main():
     '''Georeferencer CLI interface'''
@@ -297,10 +313,11 @@ def main():
         resample = GRA_Bilinear
     elif resample == 'cubic':
         resample = GRA_Cubic
-    else raise ValueError("ERROR: Invalid resample algorithm (nearest, bilinear, cubic): " + str(resample))
+    else:
+        raise ValueError("ERROR: Invalid resample algorithm (nearest, bilinear, cubic): " + str(resample))
 
     referencer = Georeferencer(tle_file=constants.TLE_NOAA)
-    referencer.georef(descriptor, args.output_file)
+    referencer.georef(descriptor, args.output_file, resampleAlg=resample)
 
     if args.map is not None:
         overlay(args.output_file)

@@ -9,10 +9,10 @@ class TestOverlay(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        self.borders = os.path.abspath('tests/data/overlay/shapes/borders.shp')
+        self.borders   = os.path.abspath('tests/data/overlay/shapes/borders.shp')
         self.with_over = os.path.abspath('tests/data/overlay/with_overlay.tif')
-        self.no_over = os.path.abspath('tests/data/overlay/no_overlay.tif')
-        self.f = os.path.abspath('tests/data/overlay/_sample.tif')
+        self.no_over   = os.path.abspath('tests/data/overlay/no_overlay.tif')
+        self.f         = os.path.abspath('tests/data/overlay/_sample.tif')
 
         copyfile(self.no_over, self.f)
 
