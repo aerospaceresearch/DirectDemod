@@ -10,7 +10,7 @@ import os
 
 from PIL import Image
 from osgeo import gdal
-from osgeo.gdal import GRA_NearestNeighbour
+from osgeo.gdal import GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic
 from geographiclib.geodesic import Geodesic
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
@@ -42,7 +42,7 @@ class Georeferencer:
 
         self.tle_file = tle_file
 
-    def georef(self, descriptor, output_file, desc=False):
+    def georef(self, descriptor, output_file, resampleAlg=GRA_NearestNeighbour, desc=False):
 
         '''georeferences the satellite image from descriptor file using GDAL
         Python API
@@ -69,7 +69,7 @@ class Georeferencer:
         options = gdal.WarpOptions(srcSRS=constants.DEFAULT_RS,
                                     dstSRS=constants.DEFAULT_RS,
                                     tps=True,
-                                    resampleAlg=GRA_NearestNeighbour)
+                                    resampleAlg=resampleAlg)
 
         gdal.Warp(destNameOrDestDS=output_file,
                     srcDSOrSrcDSTab=constants.TEMP_TIFF_FILE,
@@ -284,10 +284,20 @@ def main():
     parser.add_argument('-f', '--file', required=True)
     parser.add_argument('-o', '--output_file', required=True)
     parser.add_argument('-m', '--map', required=False, nargs='?', const=True, type=bool)
+    parser.add_argument('-r', '--resample', required=False)
 
     args = parser.parse_args()
 
     descriptor = JSON.from_file(args.file)
+
+    resample = args.resample
+    if resample is None or resample == 'nearest':
+        resample = GRA_NearestNeighbour
+    elif resample == 'bilinear':
+        resample = GRA_Bilinear
+    elif resample == 'cubic':
+        resample = GRA_Cubic
+    else raise ValueError("ERROR: Invalid resample algorithm (nearest, bilinear, cubic): " + str(resample))
 
     referencer = Georeferencer(tle_file=constants.TLE_NOAA)
     referencer.georef(descriptor, args.output_file)

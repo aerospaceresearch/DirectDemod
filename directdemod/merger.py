@@ -60,7 +60,7 @@ class ImageMerger:
         '''
 
         if file_descriptors is None:
-            raise ValueError("Passed descriptors are null.")
+            raise ValueError("ERROR: Passed descriptors are null.")
 
         descriptors = [json.load(open(f)) for f in file_descriptors if os.path.isfile(f)]
         return self.merge(descriptors, whole, resolution)
@@ -79,7 +79,7 @@ class ImageMerger:
         '''
 
         if jsons is None:
-            raise ValueError("Passed objects are null.")
+            raise ValueError("ERROR: Passed objects are null.")
 
         projection = plt.figure()
 
@@ -138,7 +138,7 @@ class ImageMerger:
         '''
 
         if objs is None:
-            raise ValueError("Passed objects are null.")
+            raise ValueError("ERROR: Passed objects are null.")
 
         descriptors = []
         for obj in objs:

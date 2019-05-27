@@ -5,10 +5,12 @@ import io
 import os.path
 import json
 import urllib
+#import piexif
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 
+from PIL import Image
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
@@ -230,7 +232,7 @@ def to_datetime(image_time, image_date):
     '''
 
     if len(image_date) != 8 or len(image_time) != 6:
-        raise ValueError('Invalid length of input dates.')
+        raise ValueError('ERROR: Invalid length of input dates.')
 
     try:
         year   = int(image_date[0:4])
@@ -281,7 +283,7 @@ def extract_date(filename):
             image_date = parts[index - 1]
 
     if image_date is None or image_time is None:
-        raise ValueError("Invalid file name format.")
+        raise ValueError("ERROR: Invalid file name format \'" + str(filename) + "\'.")
 
     return to_datetime(image_time, image_date)
 
@@ -352,10 +354,10 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
 
     name, ext = os.path.splitext(file_name)
     desc_name = name + "_desc.json"
-    image = plt.imread(image_name)
+    image = Image.open(image_name)
 
     dtime            = extract_date(file_name)
-    top, bot, center = extract_coords(image, sat_type, dtime, tle_file=tle_file)
+    top, bot, center = extract_coords(np.array(image), sat_type, dtime, tle_file=tle_file)
     degree           = compute_angle(*bot, *top)
 
     descriptor = {
@@ -366,6 +368,7 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
         "direction": degree
     }
 
+    #image.save(image_name, "png", exif=piexif.dump(descriptor))
     if output_file:
         JSON.save(descriptor, output_file)
     else:
@@ -390,7 +393,7 @@ def main():
     allowed_sats = ['NOAA 18', 'NOAA 19', 'NOAA 15']
 
     if sat_type not in allowed_sats:
-        raise ValueError('Invalid satellite type: {0}'.format(sat_type))
+        raise ValueError('ERROR: Invalid satellite type: {0}'.format(sat_type))
 
     tle_file = args.tle
 
