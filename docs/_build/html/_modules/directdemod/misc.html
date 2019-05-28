@@ -149,13 +149,16 @@
 <span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">library checker</span>
 <span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">tifffile</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
@@ -171,34 +174,6 @@
 <span class="sd">    The class provides functionality to determine whether all needed</span>
 <span class="sd">    libraries are installed and functional.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-
-<div class="viewcode-block" id="Checker.is_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.is_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">is_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-
-        <span class="sd">&#39;&#39;&#39;check if given path is a file</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filename (:obj:`string`): path</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true if file, else otherwise</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Checker.is_dir"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.is_dir">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">is_dir</span><span class="p">(</span><span class="n">dirname</span><span class="p">):</span>
-
-        <span class="sd">&#39;&#39;&#39;check if given path is directory</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            dirname (:obj:`string`): path</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true directory, else otherwise</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">check_libs</span><span class="p">():</span>
@@ -312,14 +287,14 @@
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">super</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="JsonParser"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser">[docs]</a><span class="k">class</span> <span class="nc">JsonParser</span><span class="p">:</span>
+<div class="viewcode-block" id="JSON"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON">[docs]</a><span class="k">class</span> <span class="nc">JSON</span><span class="p">:</span>
 
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Wrapper class over json module to add numpy and datetime json serialization</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="JsonParser.to_string"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.to_string">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span><span class="n">json_dict</span><span class="p">):</span>
+<div class="viewcode-block" id="JSON.stringify"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.stringify">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">stringify</span><span class="p">(</span><span class="n">json_dict</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert dict to json string</span>
 
@@ -332,8 +307,8 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_string"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_string">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="JSON.parse"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.parse">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert json string to dict</span>
 
@@ -346,7 +321,7 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JSON.from_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert text from file into json dict</span>
@@ -358,10 +333,13 @@
 <span class="sd">            :obj:`dict`: json dictionary</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">IOBase</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="JsonParser.from_url"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JSON.from_url"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;convert text from url into json dict</span>
@@ -375,7 +353,7 @@
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="JsonParser.save"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JsonParser.save">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="JSON.save"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.save">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;serialize json dict into file</span>
@@ -401,6 +379,9 @@
 <span class="sd">        :obj:`datetime`: contructed datetime object</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_date</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">8</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_time</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ERROR: Invalid length of input dates.&#39;</span><span class="p">)</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">year</span>   <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_date</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
         <span class="n">month</span>  <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">image_date</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">])</span>
@@ -411,7 +392,7 @@
 
         <span class="k">return</span> <span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="p">,</span> <span class="n">hour</span><span class="p">,</span> <span class="n">minute</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="c1"># add error logging</span>
+        <span class="c1"># add error logging</span>
         <span class="k">raise</span>
 
 <span class="k">def</span> <span class="nf">compute_alt</span><span class="p">(</span><span class="n">orbiter</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">accumulate</span><span class="p">):</span>
@@ -450,7 +431,7 @@
             <span class="n">image_date</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">image_date</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">image_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid file name format.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Invalid file name format </span><span class="se">\&#39;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&#39;</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">)</span>
 
@@ -521,7 +502,40 @@
 
     <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
     <span class="n">desc_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_desc.json&quot;</span>
-    <span class="n">image</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+
+    <span class="n">dtime</span>            <span class="o">=</span> <span class="n">extract_date</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">top</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="n">extract_coords</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image</span><span class="p">),</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="n">tle_file</span><span class="p">)</span>
+    <span class="n">degree</span>           <span class="o">=</span> <span class="n">compute_angle</span><span class="p">(</span><span class="o">*</span><span class="n">bot</span><span class="p">,</span> <span class="o">*</span><span class="n">top</span><span class="p">)</span>
+
+    <span class="n">descriptor</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;image_name&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">image_name</span><span class="p">),</span>
+        <span class="s2">&quot;sat_type&quot;</span><span class="p">:</span> <span class="n">sat_type</span><span class="p">,</span>
+        <span class="s2">&quot;date_time&quot;</span><span class="p">:</span> <span class="n">dtime</span><span class="p">,</span>
+        <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">center</span><span class="p">),</span>
+        <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="n">degree</span>
+    <span class="p">}</span>
+
+    <span class="c1">#image.save(image_name, &quot;png&quot;, exif=piexif.dump(descriptor))</span>
+    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="n">JSON</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">JSON</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">save_metadata</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">sat_type</span><span class="o">=</span><span class="s2">&quot;NOAA 19&quot;</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;create descriptor file for audio record</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_name (:obj:`string`): path to audio record</span>
+<span class="sd">        image_name (:obj:`string`): path to image file (.tif)</span>
+<span class="sd">        sat_type (:obj:`string`): name of the satellite</span>
+<span class="sd">        tle_file (:obj:`string`): path to tle file</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_name</span><span class="p">))</span>
 
     <span class="n">dtime</span>            <span class="o">=</span> <span class="n">extract_date</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
     <span class="n">top</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="n">extract_coords</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">dtime</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="n">tle_file</span><span class="p">)</span>
@@ -535,17 +549,14 @@
         <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="n">degree</span>
     <span class="p">}</span>
 
-    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
-        <span class="n">JsonParser</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">JsonParser</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span>
+    <span class="n">tifffile</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="n">JSON</span><span class="o">.</span><span class="n">stringify</span><span class="p">(</span><span class="n">descriptor</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;Descriptor CLI interface&#39;&#39;&#39;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Create descriptor file from SDR&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file_sdr&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to SDR recording file.&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--image_name&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to decoded image.&#39;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Name of output file.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="c1">#parser.add_argument(&#39;-o&#39;, &#39;--output_file&#39;, required=False, help=&#39;Name of output file.&#39;, default=&quot;&quot;)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span> <span class="s1">&#39;--tle&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to tle file.&#39;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="s1">&#39;--sat_type&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Satellite type. </span><span class="se">\&#39;</span><span class="s1">NOAA 19</span><span class="se">\&#39;</span><span class="s1"> by default.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;NOAA 19&quot;</span><span class="p">)</span>
 
@@ -553,20 +564,21 @@
 
     <span class="n">filename</span>    <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">file_sdr</span>
     <span class="n">image_name</span>  <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">image_name</span>
-    <span class="n">output_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span>
+    <span class="c1">#output_file = args.output_file</span>
     <span class="n">sat_type</span>    <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">sat_type</span>
 
     <span class="n">allowed_sats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NOAA 18&#39;</span><span class="p">,</span> <span class="s1">&#39;NOAA 19&#39;</span><span class="p">,</span> <span class="s1">&#39;NOAA 15&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">sat_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_sats</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid satellite type: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sat_type</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;ERROR: Invalid satellite type: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sat_type</span><span class="p">))</span>
 
     <span class="n">tle_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">tle</span>
 
     <span class="k">if</span> <span class="n">tle_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">tle_file</span> <span class="o">=</span> <span class="n">constants</span><span class="o">.</span><span class="n">TLE_NOAA</span>
 
-    <span class="n">create_desc</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">tle_file</span><span class="p">)</span>
+    <span class="c1">#create_desc(filename, image_name, output_file, sat_type, tle_file)</span>
+    <span class="n">save_metadata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">tle_file</span><span class="p">)</span>
 
 <span class="c1"># Example arguments</span>
 <span class="c1"># -f = &quot;../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav&quot;</span>

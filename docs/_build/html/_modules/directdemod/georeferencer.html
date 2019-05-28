@@ -153,17 +153,18 @@
 <span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mimg</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">tifffile</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
-<span class="kn">from</span> <span class="nn">osgeo.gdal</span> <span class="k">import</span> <span class="n">GRA_NearestNeighbour</span>
+<span class="kn">from</span> <span class="nn">osgeo.gdal</span> <span class="k">import</span> <span class="n">GRA_NearestNeighbour</span><span class="p">,</span> <span class="n">GRA_Bilinear</span><span class="p">,</span> <span class="n">GRA_Cubic</span>
 <span class="kn">from</span> <span class="nn">geographiclib.geodesic</span> <span class="k">import</span> <span class="n">Geodesic</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
-<span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">JsonParser</span>
+<span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">JSON</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">This class provides an API for image georeferencing.</span>
@@ -190,7 +191,30 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tle_file</span> <span class="o">=</span> <span class="n">tle_file</span></div>
 
-<div class="viewcode-block" id="Georeferencer.georef"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef">[docs]</a>    <span class="k">def</span> <span class="nf">georef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Georeferencer.georef_tif"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef_tif">[docs]</a>    <span class="k">def</span> <span class="nf">georef_tif</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="o">=</span><span class="n">GRA_NearestNeighbour</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;georeferences the satellite image from tif file using GDAL</span>
+<span class="sd">        Python API</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_name (:obj:`string`): path to tiff file, which contains needed metadata</span>
+<span class="sd">            resampleAlg (:obj:`string`): name of the output file</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">with</span> <span class="n">tifffile</span><span class="o">.</span><span class="n">TiffFile</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">page</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">descriptor</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;ImageDescription&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Couldn&#39;t extract metadata of image &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_name</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">georef</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Georeferencer.georef"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef">[docs]</a>    <span class="k">def</span> <span class="nf">georef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="o">=</span><span class="n">GRA_NearestNeighbour</span><span class="p">):</span>
 
         <span class="sd">&#39;&#39;&#39;georeferences the satellite image from descriptor file using GDAL</span>
 <span class="sd">        Python API</span>
@@ -198,7 +222,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            descriptor (:obj:`dict`): descriptor dictionary</span>
 <span class="sd">            output_file (:obj:`string`): name of the output file</span>
-<span class="sd">            desc (:obj:`bool`, optional): descriptor flag, true if descriptor should be generated</span>
+<span class="sd">            resampleAlg (:obj:`bool`, optional): algorithm for resampling</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="n">file_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;image_name&quot;</span><span class="p">]</span>
@@ -217,16 +241,13 @@
         <span class="n">options</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">WarpOptions</span><span class="p">(</span><span class="n">srcSRS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_RS</span><span class="p">,</span>
                                     <span class="n">dstSRS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_RS</span><span class="p">,</span>
                                     <span class="n">tps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="n">resampleAlg</span><span class="o">=</span><span class="n">GRA_NearestNeighbour</span><span class="p">)</span>
+                                    <span class="n">resampleAlg</span><span class="o">=</span><span class="n">resampleAlg</span><span class="p">)</span>
 
         <span class="n">gdal</span><span class="o">.</span><span class="n">Warp</span><span class="p">(</span><span class="n">destNameOrDestDS</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
                     <span class="n">srcDSOrSrcDSTab</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span>
                     <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
-        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">create_desc</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span></div>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Georeferencer.georef_os"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef_os">[docs]</a>    <span class="k">def</span> <span class="nf">georef_os</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
@@ -291,7 +312,7 @@
 
         <span class="n">name</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
         <span class="n">desc_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_desc.json&quot;</span>
-        <span class="n">JsonParser</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span></div>
+        <span class="n">JSON</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Georeferencer.compute_gcps"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.compute_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">compute_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 
@@ -398,9 +419,9 @@
 
     <span class="sd">&#39;&#39;&#39;create map overlay of borders shape file over raster</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            raster_path (:obj:`string`): path to raster (.tif)</span>
-<span class="sd">            shapefile (:obj:`string`): path to shape file (.shp)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        raster_path (:obj:`string`): path to raster (.tif)</span>
+<span class="sd">        shapefile (:obj:`string`): path to shape file (.shp)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">vector_ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OpenEx</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OF_VECTOR</span><span class="p">)</span>
@@ -411,12 +432,12 @@
 
     <span class="sd">&#39;&#39;&#39;covert tif image to png</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            filename (:obj:`string`): path to image (.tif)</span>
-<span class="sd">            png (:obj:`string`): name of output file (.png)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        filename (:obj:`string`): path to image (.tif)</span>
+<span class="sd">        png (:obj:`string`): name of output file (.png)</span>
 
-<span class="sd">        Throws:</span>
-<span class="sd">            error (:obj:`NotImplementedError`): if passed grayscale False</span>
+<span class="sd">    Throws:</span>
+<span class="sd">        error (:obj:`NotImplementedError`): if passed grayscale False</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">grayscale</span><span class="p">:</span>
@@ -425,6 +446,22 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">;</span>
 
+<span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="sd">&#39;&#39;&#39;sets nodata value of tif &#39;file_name&#39; to &#39;value&#39;, saves to output_file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (:obj:`string`): path to image (.tif)</span>
+<span class="sd">        output_file (:obj:`string`): name of output file (.tif)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">TranslateOptions</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
+                                    <span class="n">noData</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
+                    <span class="n">srcDS</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                    <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="sd">&#39;&#39;&#39;Georeferencer CLI interface&#39;&#39;&#39;</span>
 
@@ -432,13 +469,24 @@
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-m&#39;</span><span class="p">,</span> <span class="s1">&#39;--map&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-r&#39;</span><span class="p">,</span> <span class="s1">&#39;--resample&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
-    <span class="n">descriptor</span> <span class="o">=</span> <span class="n">JsonParser</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">descriptor</span> <span class="o">=</span> <span class="n">JSON</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">resample</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">resample</span>
+    <span class="k">if</span> <span class="n">resample</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">resample</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+        <span class="n">resample</span> <span class="o">=</span> <span class="n">GRA_NearestNeighbour</span>
+    <span class="k">elif</span> <span class="n">resample</span> <span class="o">==</span> <span class="s1">&#39;bilinear&#39;</span><span class="p">:</span>
+        <span class="n">resample</span> <span class="o">=</span> <span class="n">GRA_Bilinear</span>
+    <span class="k">elif</span> <span class="n">resample</span> <span class="o">==</span> <span class="s1">&#39;cubic&#39;</span><span class="p">:</span>
+        <span class="n">resample</span> <span class="o">=</span> <span class="n">GRA_Cubic</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Invalid resample algorithm (nearest, bilinear, cubic): &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">resample</span><span class="p">))</span>
 
     <span class="n">referencer</span> <span class="o">=</span> <span class="n">Georeferencer</span><span class="p">(</span><span class="n">tle_file</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TLE_NOAA</span><span class="p">)</span>
-    <span class="n">referencer</span><span class="o">.</span><span class="n">georef</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>
+    <span class="n">referencer</span><span class="o">.</span><span class="n">georef</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="o">=</span><span class="n">resample</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">overlay</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">)</span>

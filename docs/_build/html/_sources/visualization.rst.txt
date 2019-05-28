@@ -52,7 +52,7 @@ Json encoder
 Json parser
 ------------
 
-.. autoclass:: directdemod.misc.JsonParser
+.. autoclass:: directdemod.misc.JSON
    :members:
 
    .. automethod:: __init__

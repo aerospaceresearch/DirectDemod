@@ -456,7 +456,7 @@ azimuth angle and distance to the point</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef">
-<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from descriptor file using GDAL
 Python API</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -466,7 +466,7 @@ Python API</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – descriptor flag, true if descriptor should be generated</li>
+<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – algorithm for resampling</li>
 </ul>
 </td>
 </tr>
@@ -487,6 +487,25 @@ compiled binaries</p>
 <li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
 <li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – descriptor flag, true if descriptor should be generated</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="directdemod.georeferencer.Georeferencer.georef_tif">
+<code class="descname">georef_tif</code><span class="sig-paren">(</span><em>image_name</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_tif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_tif" title="Permalink to this definition">¶</a></dt>
+<dd><p>georeferences the satellite image from tif file using GDAL
+Python API</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>image_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to tiff file, which contains needed metadata</li>
+<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
 </ul>
 </td>
 </tr>
@@ -601,42 +620,6 @@ bool`: true if installed, false otherwise</td>
 </table>
 </dd></dl>
 
-<dl class="staticmethod">
-<dt id="directdemod.misc.Checker.is_dir">
-<em class="property">static </em><code class="descname">is_dir</code><span class="sig-paren">(</span><em>dirname</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Checker.is_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Checker.is_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if given path is directory</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dirname</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">true directory, else otherwise</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="directdemod.misc.Checker.is_file">
-<em class="property">static </em><code class="descname">is_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Checker.is_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Checker.is_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>check if given path is a file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">true if file, else otherwise</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -704,18 +687,18 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 <div class="section" id="json-parser">
 <h2>Json parser<a class="headerlink" href="#json-parser" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="directdemod.misc.JsonParser">
-<em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">JsonParser</code><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON">
+<em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">JSON</code><a class="reference internal" href="_modules/directdemod/misc.html#JSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper class over json module to add numpy and datetime json serialization</p>
 <dl class="method">
-<dt id="directdemod.misc.JsonParser.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#directdemod.misc.JsonParser.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#directdemod.misc.JSON.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="directdemod.misc.JsonParser.from_file">
-<em class="property">static </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser.from_file" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON.from_file">
+<em class="property">static </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert text from file into json dict</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -732,26 +715,8 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="directdemod.misc.JsonParser.from_string">
-<em class="property">static </em><code class="descname">from_string</code><span class="sig-paren">(</span><em>str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser.from_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser.from_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>convert json string to dict</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – string to convert</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json dictionary</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="directdemod.misc.JsonParser.from_url">
-<em class="property">static </em><code class="descname">from_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser.from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser.from_url" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON.from_url">
+<em class="property">static </em><code class="descname">from_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.from_url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.from_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert text from url into json dict</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -768,8 +733,26 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="directdemod.misc.JsonParser.save">
-<em class="property">static </em><code class="descname">save</code><span class="sig-paren">(</span><em>json_dict</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser.save" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON.parse">
+<em class="property">static </em><code class="descname">parse</code><span class="sig-paren">(</span><em>str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert json string to dict</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – string to convert</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json dictionary</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="directdemod.misc.JSON.save">
+<em class="property">static </em><code class="descname">save</code><span class="sig-paren">(</span><em>json_dict</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>serialize json dict into file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -786,8 +769,8 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 </dd></dl>
 
 <dl class="staticmethod">
-<dt id="directdemod.misc.JsonParser.to_string">
-<em class="property">static </em><code class="descname">to_string</code><span class="sig-paren">(</span><em>json_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JsonParser.to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JsonParser.to_string" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.misc.JSON.stringify">
+<em class="property">static </em><code class="descname">stringify</code><span class="sig-paren">(</span><em>json_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.stringify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.stringify" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert dict to json string</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
