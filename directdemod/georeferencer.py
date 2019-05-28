@@ -19,7 +19,8 @@ from directdemod import constants
 from directdemod.misc import JSON
 
 '''
-This class provides an API for image georeferencing.
+This class provides an API for image georeferencing,
+map overlay, tif to png conversion and others.
 It extracts the information from descriptor file and
 warps the image to defined projection.
 '''
@@ -43,14 +44,14 @@ class Georeferencer:
 
         self.tle_file = tle_file
 
-    def georef_tif(self, image_name, resampleAlg=GRA_NearestNeighbour):
+    def georef_tif(self, image_name, output_file, resampleAlg=GRA_NearestNeighbour):
 
         '''georeferences the satellite image from tif file using GDAL
-        Python API
+        Python API. Descriptor is extracted directly from tif file
 
         Args:
             image_name (:obj:`string`): path to tiff file, which contains needed metadata
-            resampleAlg (:obj:`string`): name of the output file
+            resampleAlg (:obj:`string`): resampling algorithm (nearest, bilinear, cubic)
         '''
 
         descriptor = None
@@ -61,10 +62,7 @@ class Georeferencer:
 
         descriptor = JSON.parse(descriptor)
 
-        if descriptor is None:
-            raise ValueError("ERROR: Couldn't extract metadata of image " + str(image_name))
-
-        self.georef(descriptor, image_name, resampleAlg)
+        self.georef(descriptor, output_file, resampleAlg)
 
     def georef(self, descriptor, output_file, resampleAlg=GRA_NearestNeighbour):
 
@@ -99,17 +97,20 @@ class Georeferencer:
                     srcDSOrSrcDSTab=constants.TEMP_TIFF_FILE,
                     options=options)
 
+        # save descriptor to new tif?
+        # with tifffile.TiffFile(output_file) as t:
+        #   t.imsave(output_file, image, description=JSON.stringify(descriptor))
+
         os.remove(constants.TEMP_TIFF_FILE)
 
-    def georef_os(self, descriptor, output_file, desc=False):
+    def georef_os(self, descriptor, output_file):
 
         '''georeferences the satellite image from descriptor file, using GDAL
-        compiled binaries
+        compiled binaries. Can be used when gdal binaries are available only
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`): descriptor flag, true if descriptor should be generated
         '''
 
         file_name = descriptor["image_name"]
@@ -128,9 +129,6 @@ class Georeferencer:
 
         os.remove(constants.TEMP_TIFF_FILE)
 
-        if desc:
-            self.create_desc(descriptor, output_file)
-
     def to_string_gcps(self, gcps):
 
         '''create string representation of gcp points
@@ -144,10 +142,10 @@ class Georeferencer:
 
         return " ".join([("-gcp " + str(gcp.GCPPixel) + " " + str(gcp.GCPLine) + " " + str(gcp.GCPX) + " " + str(gcp.GCPY)) for gcp in gcps])
 
-
+    # remove method?
     def create_desc(self, descriptor, output_file):
 
-        '''create descriptor file
+        '''create descriptor for `output_file` file
 
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
@@ -289,7 +287,7 @@ def tif_to_png(filename, png, grayscale=True):
         png (:obj:`string`): name of output file (.png)
 
     Throws:
-        error (:obj:`NotImplementedError`): if passed grayscale False
+        :obj:`NotImplementedError`: if passed grayscale False
     '''
 
     if grayscale:
@@ -318,14 +316,12 @@ def main():
     '''Georeferencer CLI interface'''
 
     parser = argparse.ArgumentParser(description="Noaa georeferencer.")
-    parser.add_argument('-f', '--file', required=True)
-    parser.add_argument('-o', '--output_file', required=True)
-    parser.add_argument('-m', '--map', required=False, nargs='?', const=True, type=bool)
+    parser.add_argument('-i', '--image_name', required=True)
+    parser.add_argument('-o', '--output_file', required=False)
+    parser.add_argument('-m', '--map', action='store_true')
     parser.add_argument('-r', '--resample', required=False)
 
     args = parser.parse_args()
-
-    descriptor = JSON.from_file(args.file)
 
     resample = args.resample
     if resample is None or resample == 'nearest':
@@ -338,10 +334,12 @@ def main():
         raise ValueError("ERROR: Invalid resample algorithm (nearest, bilinear, cubic): " + str(resample))
 
     referencer = Georeferencer(tle_file=constants.TLE_NOAA)
-    referencer.georef(descriptor, args.output_file, resampleAlg=resample)
+    output_file = args.output_file if args.output_file is not None else args.image_name
 
-    if args.map is not None:
-        overlay(args.output_file)
+    referencer.georef_tif(args.image_name, output_file, resampleAlg=resample)
+
+    if args.map:
+        overlay(output_file)
 
 if __name__ == "__main__":
     main()

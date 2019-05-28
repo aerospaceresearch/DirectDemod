@@ -439,7 +439,7 @@ azimuth angle and distance to the point</p>
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.create_desc">
 <code class="descname">create_desc</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.create_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.create_desc" title="Permalink to this definition">¶</a></dt>
-<dd><p>create descriptor file</p>
+<dd><p>create descriptor for <cite>output_file</cite> file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -476,9 +476,9 @@ Python API</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef_os">
-<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from descriptor file, using GDAL
-compiled binaries</p>
+compiled binaries. Can be used when gdal binaries are available only</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -486,7 +486,6 @@ compiled binaries</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-<li><strong>desc</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – descriptor flag, true if descriptor should be generated</li>
 </ul>
 </td>
 </tr>
@@ -496,16 +495,16 @@ compiled binaries</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef_tif">
-<code class="descname">georef_tif</code><span class="sig-paren">(</span><em>image_name</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_tif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_tif" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef_tif</code><span class="sig-paren">(</span><em>image_name</em>, <em>output_file</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_tif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_tif" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from tif file using GDAL
-Python API</p>
+Python API. Descriptor is extracted directly from tif file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>image_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to tiff file, which contains needed metadata</li>
-<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
+<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – resampling algorithm (nearest, bilinear, cubic)</li>
 </ul>
 </td>
 </tr>
@@ -539,8 +538,8 @@ Python API</p>
 <dl class="class">
 <dt id="directdemod.misc.Checker">
 <em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">Checker</code><a class="reference internal" href="_modules/directdemod/misc.html#Checker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Checker" title="Permalink to this definition">¶</a></dt>
-<dd><p>The class provides functionality to determine whether all needed
-libraries are installed and functional.</p>
+<dd><p>The class provides functionality to determine whether needed
+libraries are installed and could be imported.</p>
 <dl class="method">
 <dt id="directdemod.misc.Checker.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#directdemod.misc.Checker.__init__" title="Permalink to this definition">¶</a></dt>
@@ -587,8 +586,9 @@ libraries are installed and functional.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">obj:`
-bool`: true if installed, false otherwise</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">true if installed, false otherwise</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -600,7 +600,7 @@ bool`: true if installed, false otherwise</td>
 <dd><p>check if pyorbital and (cartopy or basemap) are installed</p>
 <dl class="docutils">
 <dt>Throws:</dt>
-<dd><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code>: if module is not installed</dd>
+<dd><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code>: if modules are not installed</dd>
 </dl>
 </dd></dl>
 
@@ -628,7 +628,7 @@ bool`: true if installed, false otherwise</td>
 <dl class="class">
 <dt id="directdemod.misc.Encoder">
 <em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">Encoder</code><span class="sig-paren">(</span><em>*</em>, <em>skipkeys=False</em>, <em>ensure_ascii=True</em>, <em>check_circular=True</em>, <em>allow_nan=True</em>, <em>sort_keys=False</em>, <em>indent=None</em>, <em>separators=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Encoder" title="Permalink to this definition">¶</a></dt>
-<dd><p>JSON encoder</p>
+<dd><p>JSON encoder, which handles <cite>np.ndarray</cite> and <cite>datetime</cite> objects</p>
 <dl class="method">
 <dt id="directdemod.misc.Encoder.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>*</em>, <em>skipkeys=False</em>, <em>ensure_ascii=True</em>, <em>check_circular=True</em>, <em>allow_nan=True</em>, <em>sort_keys=False</em>, <em>indent=None</em>, <em>separators=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#directdemod.misc.Encoder.__init__" title="Permalink to this definition">¶</a></dt>
@@ -689,7 +689,8 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 <dl class="class">
 <dt id="directdemod.misc.JSON">
 <em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">JSON</code><a class="reference internal" href="_modules/directdemod/misc.html#JSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper class over json module to add numpy and datetime json serialization</p>
+<dd><p>Wrapper class over json module to add numpy and datetime json serialization.
+Similar to Js JSON module</p>
 <dl class="method">
 <dt id="directdemod.misc.JSON.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#directdemod.misc.JSON.__init__" title="Permalink to this definition">¶</a></dt>
