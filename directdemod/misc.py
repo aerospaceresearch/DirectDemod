@@ -5,7 +5,7 @@ import io
 import os.path
 import json
 import urllib
-#import piexif
+import tifffile
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -374,12 +374,41 @@ def create_desc(file_name, image_name, output_file="", sat_type="NOAA 19", tle_f
     else:
         JSON.save(descriptor, desc_name)
 
+
+def save_metadata(file_name, image_name, sat_type="NOAA 19", tle_file=None):
+
+    '''create descriptor file for audio record
+
+    Args:
+        file_name (:obj:`string`): path to audio record
+        image_name (:obj:`string`): path to image file (.tif)
+        sat_type (:obj:`string`): name of the satellite
+        tle_file (:obj:`string`): path to tle file
+    '''
+
+    name, _ = os.path.splitext(image_name)
+    image = np.array(Image.open(image_name))
+
+    dtime            = extract_date(file_name)
+    top, bot, center = extract_coords(image, sat_type, dtime, tle_file=tle_file)
+    degree           = compute_angle(*bot, *top)
+
+    descriptor = {
+        "image_name": os.path.abspath(image_name),
+        "sat_type": sat_type,
+        "date_time": dtime,
+        "center": list(center),
+        "direction": degree
+    }
+
+    tifffile.imsave(name + '.tif', image, description = JSON.stringify(descriptor))
+
 def main():
     '''Descriptor CLI interface'''
     parser = argparse.ArgumentParser(description="Create descriptor file from SDR")
     parser.add_argument('-f', '--file_sdr', required=True, help='Path to SDR recording file.')
     parser.add_argument('-i', '--image_name', required=True, help='Path to decoded image.')
-    parser.add_argument('-o', '--output_file', required=False, help='Name of output file.', default="")
+    #parser.add_argument('-o', '--output_file', required=False, help='Name of output file.', default="")
     parser.add_argument('-t', '--tle', required=False, help='Path to tle file.')
     parser.add_argument('-s', '--sat_type', required=False, help='Satellite type. \'NOAA 19\' by default.', default="NOAA 19")
 
@@ -387,7 +416,7 @@ def main():
 
     filename    = args.file_sdr
     image_name  = args.image_name
-    output_file = args.output_file
+    #output_file = args.output_file
     sat_type    = args.sat_type
 
     allowed_sats = ['NOAA 18', 'NOAA 19', 'NOAA 15']
@@ -400,7 +429,8 @@ def main():
     if tle_file is None:
         tle_file = constants.TLE_NOAA
 
-    create_desc(filename, image_name, output_file, sat_type, tle_file)
+    #create_desc(filename, image_name, output_file, sat_type, tle_file)
+    save_metadata(filename, image_name, sat_type, tle_file)
 
 # Example arguments
 # -f = "../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav"

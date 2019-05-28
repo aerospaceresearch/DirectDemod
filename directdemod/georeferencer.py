@@ -5,6 +5,7 @@ import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
 import argparse
+import tifffile
 import math
 import os
 
@@ -42,7 +43,30 @@ class Georeferencer:
 
         self.tle_file = tle_file
 
-    def georef(self, descriptor, output_file, resampleAlg=GRA_NearestNeighbour, desc=False):
+    def georef_tif(self, image_name, resampleAlg=GRA_NearestNeighbour):
+
+        '''georeferences the satellite image from tif file using GDAL
+        Python API
+
+        Args:
+            image_name (:obj:`string`): path to tiff file, which contains needed metadata
+            resampleAlg (:obj:`string`): name of the output file
+        '''
+
+        descriptor = None
+
+        with tifffile.TiffFile(image_name) as f:
+            page = f.pages[0]
+            descriptor = page.tags["ImageDescription"].value
+
+        descriptor = JSON.parse(descriptor)
+
+        if descriptor is None:
+            raise ValueError("ERROR: Couldn't extract metadata of image " + str(image_name))
+
+        self.georef(descriptor, image_name, resampleAlg)
+
+    def georef(self, descriptor, output_file, resampleAlg=GRA_NearestNeighbour):
 
         '''georeferences the satellite image from descriptor file using GDAL
         Python API
@@ -50,7 +74,7 @@ class Georeferencer:
         Args:
             descriptor (:obj:`dict`): descriptor dictionary
             output_file (:obj:`string`): name of the output file
-            desc (:obj:`bool`, optional): descriptor flag, true if descriptor should be generated
+            resampleAlg (:obj:`bool`, optional): algorithm for resampling
         '''
 
         file_name = descriptor["image_name"]
@@ -76,9 +100,6 @@ class Georeferencer:
                     options=options)
 
         os.remove(constants.TEMP_TIFF_FILE)
-
-        if desc:
-            self.create_desc(descriptor, output_file)
 
     def georef_os(self, descriptor, output_file, desc=False):
 
