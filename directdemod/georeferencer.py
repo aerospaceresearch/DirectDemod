@@ -265,18 +265,24 @@ class Georeferencer:
         brng = 360 - brng
         return brng
 
-def overlay(raster_path, shapefile=constants.BORDERS):
+def overlay(raster_path, shapefile=constants.BORDERS, grayscale=True):
 
     '''create map overlay of borders shape file over raster
 
     Args:
         raster_path (:obj:`string`): path to raster (.tif)
         shapefile (:obj:`string`): path to shape file (.shp)
+
+    Throws:
+        :obj:`NotImplementedError`: if passed grayscale False
     '''
 
-    vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
-    ds = gdal.Open(raster_path, gdal.GA_Update)
-    gdal.Rasterize(ds, vector_ds, bands=[1], burnValues=[255])
+    if grayscale:
+        vector_ds = gdal.OpenEx(shapefile, gdal.OF_VECTOR)
+        ds = gdal.Open(raster_path, gdal.GA_Update)
+        gdal.Rasterize(ds, vector_ds, bands=[1], burnValues=[255])
+    else:
+        raise NotImplementedError
 
 def tif_to_png(filename, png, grayscale=True):
 

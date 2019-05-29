@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from PIL import Image
+from scipy.ndimage import rotate
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
@@ -394,6 +395,22 @@ def save_metadata(file_name, image_name, sat_type="NOAA 19", tle_file=None):
                             tle_file=tle_file)
 
     tifffile.imsave(name + '.tif', image, description = JSON.stringify(descriptor))
+
+def preprocess(image_name, output_file):
+
+    '''preprocesses the image, crops it and rotates for 180 degrees
+    result is saved in output_file file
+
+    Args:
+        image_name (:obj:`string`): path to image file
+        output_file (:obj:`string`): path to output file
+    '''
+
+    image = Image.open(image_name)
+    w, h = image.size
+    image = image.crop((80, 0, 995, h))
+    image = rotate(image, 180)
+    Image.fromarray(image).save(output_file)
 
 def main():
     '''Descriptor CLI interface'''
