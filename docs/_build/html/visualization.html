@@ -359,8 +359,8 @@ and warps the image to defined projection.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="directdemod.georeferencer.Georeferencer.angleFromCoordinate">
-<code class="descname">angleFromCoordinate</code><span class="sig-paren">(</span><em>long1</em>, <em>lat1</em>, <em>long2</em>, <em>lat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.angleFromCoordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.angleFromCoordinate" title="Permalink to this definition">¶</a></dt>
+<dt id="directdemod.georeferencer.Georeferencer.compute_angle">
+<code class="descname">compute_angle</code><span class="sig-paren">(</span><em>long1</em>, <em>lat1</em>, <em>long2</em>, <em>lat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_angle" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute angle between 2 points, defined by latitude and longitude</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -397,8 +397,9 @@ azimuth angle and distance to the point</p>
 <li><strong>long</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – longitude of start point</li>
 <li><strong>lat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
 <li><strong>angle</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – azimuth between start point and GCP</li>
-<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – h-axis coordinate</li>
+<li><strong>(</strong> (<em>distance</em>) – obj: <cite>float</cite>): distance to point in meters</li>
 <li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – w-axis coordinate</li>
+<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – h-axis coordinate</li>
 </ul>
 </td>
 </tr>
@@ -421,8 +422,8 @@ azimuth angle and distance to the point</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary, which describes the image</li>
-<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>) – image as np.ndarray</li>
+<li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary, which describes the image</li>
+<li><strong>image</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>) – image as np.ndarray</li>
 </ul>
 </td>
 </tr>
@@ -504,6 +505,7 @@ Python API. Descriptor is extracted directly from tif file</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>image_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to tiff file, which contains needed metadata</li>
+<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to output file</li>
 <li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – resampling algorithm (nearest, bilinear, cubic)</li>
 </ul>
 </td>
@@ -723,7 +725,7 @@ Similar to Js JSON module</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to url</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to url</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json dictionary</td>
 </tr>
@@ -735,13 +737,13 @@ Similar to Js JSON module</p>
 
 <dl class="staticmethod">
 <dt id="directdemod.misc.JSON.parse">
-<em class="property">static </em><code class="descname">parse</code><span class="sig-paren">(</span><em>str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.parse" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">parse</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#JSON.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON.parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert json string to dict</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>str</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – string to convert</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – string to convert</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">json dictionary</td>
 </tr>

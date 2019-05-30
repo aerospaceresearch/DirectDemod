@@ -146,63 +146,62 @@
            <div itemprop="articleBody">
             
   <h1>Source code for directdemod.georeferencer</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">image georeferencer</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">dateutil.parser</span> <span class="k">as</span> <span class="nn">dparser</span>
 <span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mimg</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">tifffile</span>
-<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
 <span class="kn">from</span> <span class="nn">osgeo.gdal</span> <span class="k">import</span> <span class="n">GRA_NearestNeighbour</span><span class="p">,</span> <span class="n">GRA_Bilinear</span><span class="p">,</span> <span class="n">GRA_Cubic</span>
 <span class="kn">from</span> <span class="nn">geographiclib.geodesic</span> <span class="k">import</span> <span class="n">Geodesic</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
 <span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">JSON</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This class provides an API for image georeferencing,</span>
 <span class="sd">map overlay, tif to png conversion and others.</span>
 <span class="sd">It extracts the information from descriptor file and</span>
 <span class="sd">warps the image to defined projection.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <div class="viewcode-block" id="Georeferencer"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer">[docs]</a><span class="k">class</span> <span class="nc">Georeferencer</span><span class="p">:</span>
 
-    <span class="sd">&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This class provides an API for image georeferencing.</span>
 <span class="sd">    It extracts the information from descriptor file, translates</span>
 <span class="sd">    and warps the image to defined projection.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Georeferencer.__init__"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;Georeferencer constructor</span>
+        <span class="sd">&quot;&quot;&quot;Georeferencer constructor</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            tle_file (:obj:`string`, optional): file with orbit parameters</span>
 
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tle_file</span> <span class="o">=</span> <span class="n">tle_file</span></div>
 
 <div class="viewcode-block" id="Georeferencer.georef_tif"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef_tif">[docs]</a>    <span class="k">def</span> <span class="nf">georef_tif</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="o">=</span><span class="n">GRA_NearestNeighbour</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;georeferences the satellite image from tif file using GDAL</span>
+        <span class="sd">&quot;&quot;&quot;georeferences the satellite image from tif file using GDAL</span>
 <span class="sd">        Python API. Descriptor is extracted directly from tif file</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            image_name (:obj:`string`): path to tiff file, which contains needed metadata</span>
+<span class="sd">            output_file (:obj:`string`): path to output file</span>
 <span class="sd">            resampleAlg (:obj:`string`): resampling algorithm (nearest, bilinear, cubic)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="n">descriptor</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">with</span> <span class="n">tifffile</span><span class="o">.</span><span class="n">TiffFile</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">page</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -214,14 +213,14 @@
 
 <div class="viewcode-block" id="Georeferencer.georef"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef">[docs]</a>    <span class="k">def</span> <span class="nf">georef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="o">=</span><span class="n">GRA_NearestNeighbour</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;georeferences the satellite image from descriptor file using GDAL</span>
+        <span class="sd">&quot;&quot;&quot;georeferences the satellite image from descriptor file using GDAL</span>
 <span class="sd">        Python API</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            descriptor (:obj:`dict`): descriptor dictionary</span>
 <span class="sd">            output_file (:obj:`string`): name of the output file</span>
 <span class="sd">            resampleAlg (:obj:`bool`, optional): algorithm for resampling</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">file_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;image_name&quot;</span><span class="p">]</span>
         <span class="n">image</span>     <span class="o">=</span> <span class="n">mimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
@@ -233,17 +232,17 @@
                                         <span class="n">GCPs</span><span class="o">=</span><span class="n">gcps</span><span class="p">)</span>
 
         <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span>
-                        <span class="n">srcDS</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
-                        <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+                       <span class="n">srcDS</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span>
+                       <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
         <span class="n">options</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">WarpOptions</span><span class="p">(</span><span class="n">srcSRS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_RS</span><span class="p">,</span>
-                                    <span class="n">dstSRS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_RS</span><span class="p">,</span>
-                                    <span class="n">tps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                    <span class="n">resampleAlg</span><span class="o">=</span><span class="n">resampleAlg</span><span class="p">)</span>
+                                   <span class="n">dstSRS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">DEFAULT_RS</span><span class="p">,</span>
+                                   <span class="n">tps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">resampleAlg</span><span class="o">=</span><span class="n">resampleAlg</span><span class="p">)</span>
 
         <span class="n">gdal</span><span class="o">.</span><span class="n">Warp</span><span class="p">(</span><span class="n">destNameOrDestDS</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
-                    <span class="n">srcDSOrSrcDSTab</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span>
-                    <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+                  <span class="n">srcDSOrSrcDSTab</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span>
+                  <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
         <span class="c1"># save descriptor to new tif?</span>
         <span class="c1"># with tifffile.TiffFile(output_file) as t:</span>
@@ -253,13 +252,13 @@
 
 <div class="viewcode-block" id="Georeferencer.georef_os"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef_os">[docs]</a>    <span class="k">def</span> <span class="nf">georef_os</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;georeferences the satellite image from descriptor file, using GDAL</span>
+        <span class="sd">&quot;&quot;&quot;georeferences the satellite image from descriptor file, using GDAL</span>
 <span class="sd">        compiled binaries. Can be used when gdal binaries are available only</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            descriptor (:obj:`dict`): descriptor dictionary</span>
 <span class="sd">            output_file (:obj:`string`): name of the output file</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">file_name</span> <span class="o">=</span> <span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;image_name&quot;</span><span class="p">]</span>
         <span class="n">image</span>     <span class="o">=</span> <span class="n">mimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
@@ -269,7 +268,9 @@
         <span class="n">translate_flags</span> <span class="o">=</span> <span class="s2">&quot;-of GTiff -a_srs EPSG:4326&quot;</span>
         <span class="n">warp_flags</span> <span class="o">=</span> <span class="s2">&quot;-r near -tps -s_srs EPSG:4326 -t_srs EPSG:4326&quot;</span>
 
-        <span class="n">translate_query</span> <span class="o">=</span> <span class="s1">&#39;gdal_translate &#39;</span> <span class="o">+</span> <span class="n">translate_flags</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_string_gcps</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span> <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+        <span class="n">translate_query</span> <span class="o">=</span> <span class="s1">&#39;gdal_translate &#39;</span> <span class="o">+</span> <span class="n">translate_flags</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_string_gcps</span><span class="p">(</span><span class="n">gcps</span><span class="p">)</span> \
+                          <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span> <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+
         <span class="n">warp_query</span> <span class="o">=</span> <span class="s1">&#39;gdalwarp &#39;</span> <span class="o">+</span> <span class="n">warp_flags</span> <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span> <span class="o">+</span> <span class="s1">&#39; &quot;&#39;</span> <span class="o">+</span> <span class="n">output_file</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
 
         <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">translate_query</span><span class="p">)</span>
@@ -279,26 +280,27 @@
 
 <div class="viewcode-block" id="Georeferencer.to_string_gcps"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.to_string_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">to_string_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gcps</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;create string representation of gcp points</span>
+        <span class="sd">&quot;&quot;&quot;create string representation of gcp points</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            gcps (:obj:`list`): list of gcp points</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`string`: gcp points represented as a string</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s2">&quot;-gcp &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPPixel</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPLine</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPX</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPY</span><span class="p">))</span> <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">gcps</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([(</span><span class="s2">&quot;-gcp &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPPixel</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPLine</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                          <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPX</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">GCPY</span><span class="p">))</span> <span class="k">for</span> <span class="n">gcp</span> <span class="ow">in</span> <span class="n">gcps</span><span class="p">])</span></div>
 
     <span class="c1"># remove method?</span>
 <div class="viewcode-block" id="Georeferencer.create_desc"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.create_desc">[docs]</a>    <span class="k">def</span> <span class="nf">create_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;create descriptor for `output_file` file</span>
+        <span class="sd">&quot;&quot;&quot;create descriptor for `output_file` file</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            descriptor (:obj:`dict`): descriptor dictionary</span>
 <span class="sd">            output_file (:obj:`string`): name of the output file</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">desc</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;image_name&quot;</span><span class="p">:</span> <span class="n">output_file</span><span class="p">,</span>
@@ -314,27 +316,26 @@
 
 <div class="viewcode-block" id="Georeferencer.compute_gcps"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.compute_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">compute_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;compute set of Ground Control Points</span>
+        <span class="sd">&quot;&quot;&quot;compute set of Ground Control Points</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            h (:obj:`dict`): descriptor dictionary, which describes the image</span>
-<span class="sd">            w (:obj:`np.ndarray`): image as np.ndarray</span>
+<span class="sd">            descriptor (:obj:`dict`): descriptor dictionary, which describes the image</span>
+<span class="sd">            image (:obj:`np.ndarray`): image as np.ndarray</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`list`: list of GCPs</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">height</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">width</span>  <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">center_w</span> <span class="o">=</span> <span class="n">width</span><span class="o">/</span><span class="mi">2</span>
-        <span class="n">center_h</span> <span class="o">=</span> <span class="n">height</span><span class="o">/</span><span class="mi">2</span>
 
         <span class="n">gcps</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dtime</span> <span class="o">=</span> <span class="n">dparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;date_time&quot;</span><span class="p">])</span><span class="o">-</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span> <span class="c1"># start capture date in 2s (it is hands-on parameter)</span>
+        <span class="n">dtime</span> <span class="o">=</span> <span class="n">dparser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;date_time&quot;</span><span class="p">])</span><span class="o">-</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="mi">180</span><span class="p">)</span>
         <span class="n">orbiter</span> <span class="o">=</span> <span class="n">Orbital</span><span class="p">(</span><span class="n">descriptor</span><span class="p">[</span><span class="s2">&quot;sat_type&quot;</span><span class="p">],</span> <span class="n">tle_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tle_file</span><span class="p">)</span>
         <span class="n">min_delta</span> <span class="o">=</span> <span class="mi">500</span>
         <span class="n">middle_dist</span> <span class="o">=</span> <span class="mf">3.25</span> <span class="o">*</span> <span class="mi">455</span> <span class="o">/</span> <span class="mf">2.</span> <span class="o">*</span> <span class="mi">1000</span>
-        <span class="n">far_dist</span> <span class="o">=</span> <span class="mf">3.15</span> <span class="o">*</span> <span class="mi">455</span> <span class="o">*</span> <span class="mi">1000</span> <span class="c1"># 3.15 is because of image distortions towards to boudaries</span>
+        <span class="n">far_dist</span> <span class="o">=</span> <span class="mf">3.15</span> <span class="o">*</span> <span class="mi">455</span> <span class="o">*</span> <span class="mi">1000</span>  <span class="c1"># 3.15 is because of image distortions towards to boudaries</span>
         <span class="n">prev_position</span> <span class="o">=</span> <span class="n">orbiter</span><span class="o">.</span><span class="n">get_lonlatalt</span><span class="p">(</span><span class="n">dtime</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">min_delta</span><span class="o">*</span><span class="mi">10</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
@@ -348,16 +349,20 @@
             <span class="n">gcp_time</span> <span class="o">=</span> <span class="n">dtime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="n">min_delta</span><span class="p">)</span>
             <span class="n">position</span> <span class="o">=</span> <span class="n">orbiter</span><span class="o">.</span><span class="n">get_lonlatalt</span><span class="p">(</span><span class="n">gcp_time</span><span class="p">)</span>
 
-            <span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angleFromCoordinate</span><span class="p">(</span><span class="n">prev_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prev_position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_angle</span><span class="p">(</span><span class="n">prev_position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prev_position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">azimuth</span> <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="n">angle</span>
 
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">middle_dist</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">far_dist</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+            <span class="c1"># FIXME: Note +2 degrees is hand constant</span>
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span> <span class="o">+</span> <span class="mi">182</span><span class="p">,</span> <span class="n">middle_dist</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
-            <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span> <span class="o">+</span> <span class="mi">182</span><span class="p">,</span> <span class="n">far_dist</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span> <span class="c1"># FIXME: Note +2 degrees is hand constant</span>
+            <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span> <span class="o">+</span> <span class="mi">182</span><span class="p">,</span> <span class="n">far_dist</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
 
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span><span class="p">,</span> <span class="n">middle_dist</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="o">*</span><span class="n">width</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">middle_dist</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="o">*</span><span class="n">width</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+            <span class="c1"># FIXME: Note +2 degrees is hand constant</span>
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span> <span class="o">+</span> <span class="mi">182</span><span class="p">,</span> <span class="n">middle_dist</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">width</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
             <span class="n">gcps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_gcp</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">azimuth</span> <span class="o">+</span> <span class="mi">182</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">middle_dist</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
 
@@ -367,26 +372,27 @@
 
 <div class="viewcode-block" id="Georeferencer.compute_gcp"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.compute_gcp">[docs]</a>    <span class="k">def</span> <span class="nf">compute_gcp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;compute coordinate of GCP, using longitude and latitude of starting point,</span>
+        <span class="sd">&quot;&quot;&quot;compute coordinate of GCP, using longitude and latitude of starting point,</span>
 <span class="sd">        azimuth angle and distance to the point</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            long (:obj:`float`): longitude of start point</span>
 <span class="sd">            lat (:obj:`float`): latitude of start point</span>
 <span class="sd">            angle (:obj:`float`): azimuth between start point and GCP</span>
-<span class="sd">            h (:obj:`float`): h-axis coordinate</span>
+<span class="sd">            distance (:obj: `float`): distance to point in meters</span>
 <span class="sd">            w (:obj:`float`): w-axis coordinate</span>
+<span class="sd">            h (:obj:`float`): h-axis coordinate</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`gdal.GCP`: instance of GCP object</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">coords</span> <span class="o">=</span> <span class="n">Geodesic</span><span class="o">.</span><span class="n">WGS84</span><span class="o">.</span><span class="n">Direct</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">distance</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GCP</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lon2&#39;</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="s1">&#39;lat2&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Georeferencer.angleFromCoordinate"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.angleFromCoordinate">[docs]</a>    <span class="k">def</span> <span class="nf">angleFromCoordinate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">long1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">long2</span><span class="p">,</span> <span class="n">lat2</span><span class="p">):</span>
+<div class="viewcode-block" id="Georeferencer.compute_angle"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.compute_angle">[docs]</a>    <span class="k">def</span> <span class="nf">compute_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">long1</span><span class="p">,</span> <span class="n">lat1</span><span class="p">,</span> <span class="n">long2</span><span class="p">,</span> <span class="n">lat2</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;compute angle between 2 points, defined by latitude and longitude</span>
+        <span class="sd">&quot;&quot;&quot;compute angle between 2 points, defined by latitude and longitude</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            long1 (:obj:`float`): longitude of start point</span>
@@ -396,72 +402,85 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :obj:`float`: angle between points</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">lat1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
         <span class="n">long1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long1</span><span class="p">)</span>
         <span class="n">lat2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
         <span class="n">long2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long2</span><span class="p">)</span>
 
-        <span class="n">dLon</span> <span class="o">=</span> <span class="p">(</span><span class="n">long2</span> <span class="o">-</span> <span class="n">long1</span><span class="p">)</span>
+        <span class="n">d_lon</span> <span class="o">=</span> <span class="p">(</span><span class="n">long2</span> <span class="o">-</span> <span class="n">long1</span><span class="p">)</span>
 
-        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">dLon</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">dLon</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">d_lon</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">d_lon</span><span class="p">)</span>
         <span class="n">brng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
         <span class="n">brng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">brng</span><span class="p">)</span>
         <span class="n">brng</span> <span class="o">=</span> <span class="p">(</span><span class="n">brng</span> <span class="o">+</span> <span class="mi">360</span><span class="p">)</span> <span class="o">%</span> <span class="mi">360</span>
         <span class="n">brng</span> <span class="o">=</span> <span class="mi">360</span> <span class="o">-</span> <span class="n">brng</span>
         <span class="k">return</span> <span class="n">brng</span></div></div>
 
-<span class="k">def</span> <span class="nf">overlay</span><span class="p">(</span><span class="n">raster_path</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">BORDERS</span><span class="p">):</span>
 
-    <span class="sd">&#39;&#39;&#39;create map overlay of borders shape file over raster</span>
+<span class="k">def</span> <span class="nf">overlay</span><span class="p">(</span><span class="n">raster_path</span><span class="p">,</span> <span class="n">shapefile</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">BORDERS</span><span class="p">,</span> <span class="n">grayscale</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;create map overlay of borders shape file over raster</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        raster_path (:obj:`string`): path to raster (.tif)</span>
 <span class="sd">        shapefile (:obj:`string`): path to shape file (.shp)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">        grayscale (:obj:`bool`): type of image</span>
 
-    <span class="n">vector_ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OpenEx</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OF_VECTOR</span><span class="p">)</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">raster_path</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_Update</span><span class="p">)</span>
-    <span class="n">gdal</span><span class="o">.</span><span class="n">Rasterize</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">vector_ds</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">burnValues</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">])</span>
+<span class="sd">    Throws:</span>
+<span class="sd">        :obj:`NotImplementedError`: if passed grayscale False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">grayscale</span><span class="p">:</span>
+        <span class="n">vector_ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OpenEx</span><span class="p">(</span><span class="n">shapefile</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">OF_VECTOR</span><span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">raster_path</span><span class="p">,</span> <span class="n">gdal</span><span class="o">.</span><span class="n">GA_Update</span><span class="p">)</span>
+        <span class="n">gdal</span><span class="o">.</span><span class="n">Rasterize</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">vector_ds</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">burnValues</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
 
 <span class="k">def</span> <span class="nf">tif_to_png</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">png</span><span class="p">,</span> <span class="n">grayscale</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 
-    <span class="sd">&#39;&#39;&#39;covert tif image to png</span>
+    <span class="sd">&quot;&quot;&quot;covert tif image to png</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filename (:obj:`string`): path to image (.tif)</span>
 <span class="sd">        png (:obj:`string`): name of output file (.png)</span>
+<span class="sd">        grayscale (:obj:`bool`): type of image</span>
 
 <span class="sd">    Throws:</span>
 <span class="sd">        :obj:`NotImplementedError`: if passed grayscale False</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">grayscale</span><span class="p">:</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;LA&quot;</span><span class="p">)</span>
         <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">png</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
-<span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 
-    <span class="sd">&#39;&#39;&#39;sets nodata value of tif &#39;file_name&#39; to &#39;value&#39;, saves to output_file</span>
+<span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;sets no-data value of tif &#39;file_name&#39; to &#39;value&#39;, saves to output_file</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        filename (:obj:`string`): path to image (.tif)</span>
 <span class="sd">        output_file (:obj:`string`): name of output file (.tif)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">        value (:obj:`int`): value to set as no-data value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">options</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">TranslateOptions</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s2">&quot;GTiff&quot;</span><span class="p">,</span>
                                     <span class="n">noData</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
     <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
-                    <span class="n">srcDS</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
-                    <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+                   <span class="n">srcDS</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+                   <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="sd">&#39;&#39;&#39;Georeferencer CLI interface&#39;&#39;&#39;</span>
+    <span class="sd">&quot;&quot;&quot;Georeferencer CLI interface&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Noaa georeferencer.&quot;</span><span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-i&#39;</span><span class="p">,</span> <span class="s1">&#39;--image_name&#39;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -488,6 +507,7 @@
 
     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">map</span><span class="p">:</span>
         <span class="n">overlay</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
+
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">main</span><span class="p">()</span>
