@@ -37,7 +37,10 @@ conda env create -f environment.yml -n env_name
 conda activate env_name
 ```
 
-Add `directdemod` package to your `PYTHONPATH` in `.bashrc`.
+You should add `directdemod` package to your `PYTHONPATH`. 
+<br>
+On Windows edit environment variable `PYTHONPATH` and append path to DirectDemod directory to it.
+On Linux edit `.bashrc`.
 
 ```
 export PYTHONPATH=$PYTHONPATH:/path/to/DirectDemod
@@ -59,7 +62,10 @@ cd DirectDemod/
 pip install -r requirements.txt
 ```
 
-Add `directdemod` package to your `PYTHONPATH` in `.bashrc`.
+You should add `directdemod` package to your `PYTHONPATH`. 
+<br>
+On Windows edit environment variable `PYTHONPATH` and append path to DirectDemod directory to it.
+On Linux edit `.bashrc`.
 
 ```
 export PYTHONPATH=$PYTHONPATH:/path/to/DirectDemod
