@@ -313,7 +313,7 @@ def tif_to_png(filename, png, grayscale=True):
         raise NotImplementedError
 
 
-def set_nodata(filename, output_file, value = 0):
+def set_nodata(filename, output_file, value=0):
 
     """sets no-data value of tif 'file_name' to 'value', saves to output_file
 

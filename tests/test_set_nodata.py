@@ -1,10 +1,11 @@
 import os
-import gdal
 import unittest
 
+from osgeo import gdal
 from PIL import Image
 from shutil import copyfile
 from directdemod.georeferencer import set_nodata
+
 
 class TestSetNoData(unittest.TestCase):
 
@@ -23,7 +24,7 @@ class TestSetNoData(unittest.TestCase):
             os.remove(self.f)
 
     def test_set_nodata(self):
-        set_nodata(self.nodata255, self.f, value = self.nodata)
+        set_nodata(self.nodata255, self.f, value=self.nodata)
 
         img = Image.open(self.nodata0)
         img_new = Image.open(self.f)
