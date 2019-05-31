@@ -9,6 +9,7 @@ Direct Demodulation of Radio-signals
 To run: run 'python main.py IQ.wav'
 
 (using Docker)
+
 ```
 sudo docker build --tag direct_demod .
 sudo docker run --rm -it \
@@ -18,13 +19,72 @@ sudo docker run --rm -it \
 
 ## Install
 
-### Linux
+**Note.** If you install with pip, then to use georeferencer you will have 
+to install `gdal` manually, therefore for using georeferencer, installation 
+with conda is recommended.
 
-You can install DirectDemod on linux, using the `install.sh` script. Steps are given below.
+### Install with `conda`
 
-1. Change the mode of file, to make it executable. `sudo chmod +x ./install`.
+To install package with conda you should install anaconda or miniconda first.
+See installation: https://docs.conda.io/en/latest/miniconda.html.
 
-2. Execute the file using sudo only. `sudo ./install`.
+When conda is installed, clone the repository and create conda environment from `environment.yml` file.
+
+```
+git clone https://github.com/aerospaceresearch/DirectDemod
+cd DirectDemod/
+conda env create -f environment.yml -n env_name
+conda activate env_name
+```
+
+Add `directdemod` package to your `PYTHONPATH` in `.bashrc`.
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/DirectDemod
+```
+
+Update `.bashrc`.
+
+```
+source ~/.bashrc
+```
+
+### Install with pip
+
+To install with pip, fist clone repository, then install requirements with `pip` 
+
+```
+git clone https://github.com/aerospaceresearch/DirectDemod
+cd DirectDemod/
+pip install -r requirements.txt
+```
+
+Add `directdemod` package to your `PYTHONPATH` in `.bashrc`.
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/DirectDemod
+```
+
+Update `.bashrc`.
+
+```
+source ~/.bashrc
+```
+
+For installation of `gdal` please refer to 
+
+- https://mothergeo-py.readthedocs.io/en/latest/development/how-to/gdal-ubuntu-pkg.html.
+
+### Test installation
+
+To test installation, run the following command. You should see message, that 
+tests were passed successfully.
+
+**Note:** in case you haven't installed `gdal` part of the tests will result in errors.
+
+```
+pytest
+```
 
 ## Documentation
 Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io)
