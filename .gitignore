@@ -1,5 +1,4 @@
 *.pyc
-*.png
 !a.png
 log.txt
 *.csv

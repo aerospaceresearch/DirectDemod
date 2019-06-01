@@ -4,6 +4,7 @@ import unittest
 from PIL import Image
 from directdemod.georeferencer import tif_to_png
 
+
 class TestConvert(unittest.TestCase):
 
     @classmethod

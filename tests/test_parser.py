@@ -4,6 +4,7 @@ import unittest
 
 from directdemod.misc import JSON, Encoder
 
+
 class TestParser(unittest.TestCase):
 
     @classmethod

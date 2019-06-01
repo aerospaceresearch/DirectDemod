@@ -5,6 +5,7 @@ from PIL import Image
 from shutil import copyfile
 from directdemod.georeferencer import overlay
 
+
 class TestOverlay(unittest.TestCase):
 
     @classmethod

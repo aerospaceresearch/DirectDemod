@@ -3,6 +3,7 @@ import unittest
 from datetime import datetime
 from directdemod.misc import extract_date, to_datetime
 
+
 class TestExtraction(unittest.TestCase):
 
     @classmethod
