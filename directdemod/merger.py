@@ -15,28 +15,28 @@ projection.
 """
 
 
-def build_vrt(vrt, files, resample):
+def build_vrt(vrt, files, resample_name):
 
     """builds .vrt file which will hold information needed for overlay
 
     Args:
         vrt (:obj:`string`): name of vrt file, which will be created
         files (:obj:`list`): list of file names for merging
-        resample (:obj:`string`): name of resampling method
+        resample_name (:obj:`string`): name of resampling method
     """
 
     options = gdal.BuildVRTOptions(srcNodata=0)
     gdal.BuildVRT(destName=vrt, srcDSOrSrcDSTab=files, options=options)
-    add_pixel_fn(vrt, resample)
+    add_pixel_fn(vrt, resample_name)
 
 
-def add_pixel_fn(filename, resample):
+def add_pixel_fn(filename, resample_name):
 
     """inserts pixel-function into filename
 
     Args:
         filename (:obj:`string`): name of file, into which the function will be inserted
-        resample (:obj:`string`): name of resampling method
+        resample_name (:obj:`string`): name of resampling method
     """
 
     header = """  <VRTRasterBand dataType="Byte" band="1" subClass="VRTDerivedRasterBand">"""
@@ -48,8 +48,7 @@ def add_pixel_fn(filename, resample):
 
     lines = open(filename, 'r').readlines()
     lines[3] = header  # FIX ME: 3 is a hand constant, if created file doesn't start match it, there will be an error
-    r = get_resample(resample)
-    lines.insert(4, contents.format(resample, r))
+    lines.insert(4, contents.format(resample_name, get_resample(resample_name)))
     open(filename, 'w').write("".join(lines))
 
 
