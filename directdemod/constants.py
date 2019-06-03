@@ -28,6 +28,7 @@ COLOR = "black"
 
 ## Georeferencer settings
 TEMP_TIFF_FILE = "_temp.tif"
+TEMP_VRT_FILE = "_vrt.vrt"
 DEFAULT_RS = "EPSG:4326"
 
 TLE_NOAA = "../tle/noaa18_June_14_2018.txt"
