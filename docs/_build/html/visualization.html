@@ -161,23 +161,36 @@
 along with their helper classes, which provide IO operations.</p>
 <div class="section" id="image-merger">
 <h2>Image merger<a class="headerlink" href="#image-merger" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="directdemod.merger.ImageMerger">
-<em class="property">class </em><code class="descclassname">directdemod.merger.</code><code class="descname">ImageMerger</code><span class="sig-paren">(</span><em>tle_file=''</em>, <em>aux_file_name='temp_image_file.png'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class provides an API for merging multiple images.
-It extracts needed information and projects images on mercator
-projection.</p>
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>tle_file=''</em>, <em>aux_file_name='temp_image_file.png'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize the object</p>
+<p>Merger provides functionality, along with CLI interface, for merging several raster images.</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">merger.py</span> <span class="pre">-o</span> <span class="pre">o.tif</span> <span class="pre">-r</span> <span class="pre">average</span> <span class="pre">--files</span> <span class="pre">a.tif</span> <span class="pre">b.tif</span></code></p>
+<p>Console options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-f</span>, <span class="option">--files</span></kbd></td>
+<td>list of files to merge</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-o</span>, <span class="option">--output</span></kbd></td>
+<td>name of output file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-r</span>, <span class="option">--resample</span></kbd></td>
+<td>name of resample algorithm</td></tr>
+</tbody>
+</table>
+<span class="target" id="module-directdemod.merger"></span><p>merger of NOAA satellite images</p>
+<dl class="function">
+<dt id="directdemod.merger.add_pixel_fn">
+<code class="descclassname">directdemod.merger.</code><code class="descname">add_pixel_fn</code><span class="sig-paren">(</span><em>filename</em>, <em>resample_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#add_pixel_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.add_pixel_fn" title="Permalink to this definition">¶</a></dt>
+<dd><p>inserts pixel-function into filename</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>tle_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>, optional) – path to the tle file</li>
-<li><strong>aux_file_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>, optional) – auxiliary file name</li>
+<li><strong>filename</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of file, into which the function will be inserted</li>
+<li><strong>resample_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of resampling method</li>
 </ul>
 </td>
 </tr>
@@ -185,138 +198,66 @@ projection.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.imread">
-<code class="descname">imread</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.imread" title="Permalink to this definition">¶</a></dt>
-<dd><p>read the image from file</p>
+<dl class="function">
+<dt id="directdemod.merger.build_vrt">
+<code class="descclassname">directdemod.merger.</code><code class="descname">build_vrt</code><span class="sig-paren">(</span><em>vrt</em>, <em>files</em>, <em>resample_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#build_vrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.build_vrt" title="Permalink to this definition">¶</a></dt>
+<dd><p>builds .vrt file which will hold information needed for overlay</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – file_name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">image with fixed transparency
-isGray <code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>: true if image is gray, false otherwise</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">image <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.merge">
-<code class="descname">merge</code><span class="sig-paren">(</span><em>jsons</em>, <em>whole=False</em>, <em>resolution=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.merge" title="Permalink to this definition">¶</a></dt>
-<dd><p>merge multiple images from descriptors</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>jsons</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – set of dict objects, which describe images</li>
-<li><strong>whole</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optinal) – flag to generate whole image</li>
-<li><strong>resolution</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – resolution of the output image</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vrt</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of vrt file, which will be created</li>
+<li><strong>files</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – list of file names for merging</li>
+<li><strong>resample_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of resampling method</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">merged image</p>
-</td>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="directdemod.merger.get_resample">
+<code class="descclassname">directdemod.merger.</code><code class="descname">get_resample</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#get_resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.get_resample" title="Permalink to this definition">¶</a></dt>
+<dd><p>retrieves code for resampling method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of resampling method</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PIL.Image</span></code></p>
-</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">code of resample method</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">method <code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.merge_files">
-<code class="descname">merge_files</code><span class="sig-paren">(</span><em>file_descriptors</em>, <em>whole=False</em>, <em>resolution=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.merge_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.merge_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>merge images from image descriptors</p>
+<dl class="function">
+<dt id="directdemod.merger.main">
+<code class="descclassname">directdemod.merger.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLI interface for satellite image merger</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="directdemod.merger.merge">
+<code class="descclassname">directdemod.merger.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>files</em>, <em>output_file</em>, <em>resample='average'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>merges list of files using specific resample method for overlapping parts</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>file_descriptors</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code>) – paths to image descriptors</li>
-<li><strong>whole</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optinal) – flag to generate whole image</li>
-<li><strong>resolution</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – resolution of the output image</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>files</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – list of files to merge</li>
+<li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of output file</li>
+<li><strong>resample</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of resampling method</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">merged image</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PIL.Image</span></code></p>
-</td>
-</tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.merge_noaa">
-<code class="descname">merge_noaa</code><span class="sig-paren">(</span><em>objs</em>, <em>whole=False</em>, <em>resolution=500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.merge_noaa"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.merge_noaa" title="Permalink to this definition">¶</a></dt>
-<dd><p>merge multiple noaa images from image files</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>objs</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code>) – set of objects representing images</li>
-<li><strong>whole</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optinal) – flag to generate whole image</li>
-<li><strong>resolution</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code>, optional) – resolution of the output image</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">merged image</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PIL.Image</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.set_transparent">
-<code class="descname">set_transparent</code><span class="sig-paren">(</span><em>image</em>, <em>isGray</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.set_transparent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.set_transparent" title="Permalink to this definition">¶</a></dt>
-<dd><p>set pixel transparency</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>image</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code>) – image</li>
-<li><strong>isGray</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>) – flag</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">image with fixed transparency</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">image <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.array</span></code></p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="directdemod.merger.ImageMerger.update_extents">
-<code class="descname">update_extents</code><span class="sig-paren">(</span><em>extent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#ImageMerger.update_extents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.ImageMerger.update_extents" title="Permalink to this definition">¶</a></dt>
-<dd><p>update bounds of the projection</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>extent</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code>) – current image bounds</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -324,18 +265,18 @@ isGray <code class="xref py py-obj docutils literal notranslate"><span class="pr
 <h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
 <p>This class provides an API for image georeferencing.
 Sample command to run georeferencer.py:
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-f</span> <span class="pre">../samples/image_noaa19_1_desc.json</span> <span class="pre">-o</span> <span class="pre">../samples/image_noaa19_2.tif.</span></code>
-Console options:</p>
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-m</span> <span class="pre">-i</span> <span class="pre">../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif</span></code></p>
+<p>Console options:</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
 <col class="description" />
 <tbody valign="top">
 <tr><td class="option-group">
-<kbd><span class="option">-f</span></kbd></td>
-<td>path to descriptor file</td></tr>
+<kbd><span class="option">-m</span>, <span class="option">--map</span></kbd></td>
+<td>flag to create map overlay</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">-o</span></kbd></td>
-<td>path to output file</td></tr>
+<kbd><span class="option">-i</span>, <span class="option">--image</span></kbd></td>
+<td>path to image file</td></tr>
 </tbody>
 </table>
 <dl class="class">
@@ -627,6 +568,7 @@ libraries are installed and could be imported.</p>
 </div>
 <div class="section" id="json-encoder">
 <h2>Json encoder<a class="headerlink" href="#json-encoder" title="Permalink to this headline">¶</a></h2>
+<p>Json encoder, which handles encoding numpy array and datetime objects.</p>
 <dl class="class">
 <dt id="directdemod.misc.Encoder">
 <em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">Encoder</code><span class="sig-paren">(</span><em>*</em>, <em>skipkeys=False</em>, <em>ensure_ascii=True</em>, <em>check_circular=True</em>, <em>allow_nan=True</em>, <em>sort_keys=False</em>, <em>indent=None</em>, <em>separators=None</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Encoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Encoder" title="Permalink to this definition">¶</a></dt>

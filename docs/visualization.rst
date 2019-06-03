@@ -12,21 +12,30 @@ along with their helper classes, which provide IO operations.
 Image merger
 ------------
 
-.. autoclass:: directdemod.merger.ImageMerger
-   :members:
+Merger provides functionality, along with CLI interface, for merging several raster images.
 
-   .. automethod:: __init__
+``python merger.py -o o.tif -r average --files a.tif b.tif``
+
+Console options:
+
+-f, --files      list of files to merge
+-o, --output     name of output file
+-r, --resample   name of resample algorithm
+
+.. automodule:: directdemod.merger
+   :members:
 
 Georeferencer
 ---------------
 
 This class provides an API for image georeferencing.
 Sample command to run georeferencer.py:
-``python georeferencer.py -f ../samples/image_noaa19_1_desc.json -o ../samples/image_noaa19_2.tif.``
+``python georeferencer.py -m -i ../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif``
+
 Console options:
 
--f     path to descriptor file
--o     path to output file
+-m, --map       flag to create map overlay
+-i, --image     path to image file
 
 .. autoclass:: directdemod.georeferencer.Georeferencer
    :members:
@@ -43,6 +52,7 @@ Library checker
 
 Json encoder
 ------------
+Json encoder, which handles encoding numpy array and datetime objects.
 
 .. autoclass:: directdemod.misc.Encoder
    :members:
