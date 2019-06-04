@@ -23,7 +23,7 @@ class TestMerge(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        images = [cls.saverage, cls.smax, cls.sfirst, cls. slast]
+        images = [cls.saverage, cls.smax, cls.sfirst, cls.slast]
 
         for image in images:
             if os.path.isfile(image):

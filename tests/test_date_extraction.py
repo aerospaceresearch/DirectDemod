@@ -16,17 +16,17 @@ class TestExtraction(unittest.TestCase):
         cls.d2 = datetime(2019, 5, 21, 15, 25, 38)
         cls.d3 = datetime(2019, 5, 21, 16, 53, 49)
 
-    def test_extract_date(cls):
-        d1 = extract_date(cls.f1)
-        d2 = extract_date(cls.f2)
-        d3 = extract_date(cls.f3)
+    def test_extract_date(self):
+        d1 = extract_date(self.f1)
+        d2 = extract_date(self.f2)
+        d3 = extract_date(self.f3)
 
-        cls.assertEqual(d1, cls.d1)
-        cls.assertEqual(d2, cls.d2)
-        cls.assertEqual(d3, cls.d3)
+        self.assertEqual(d1, self.d1)
+        self.assertEqual(d2, self.d2)
+        self.assertEqual(d3, self.d3)
 
-        cls.assertRaises(ValueError, extract_date, 'SDRSharp')
-        cls.assertRaises(ValueError, extract_date, 'SDRSharp_20190521_165349_137500000Hz_IQ')
+        self.assertRaises(ValueError, extract_date, 'SDRSharp')
+        self.assertRaises(ValueError, extract_date, 'SDRSharp_20190521_165349_137500000Hz_IQ')
 
     def test_to_datetime(self):
         d1 = to_datetime(self.f1[18:24], self.f1[9:17])
