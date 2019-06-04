@@ -64,11 +64,37 @@ def get_resample(name):
     """
 
     methods = {
-        "first": None,
-        "last": None,
-        "min": None,
-        "max": None,
-        "med": None,
+        "first": """
+import numpy as np
+
+def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.ones(in_ar[0].shape)
+    for i in reversed(range(len(in_ar))):
+        mask = in_ar[i] == 0
+        y *= mask
+        y += in_ar[i]
+
+    np.clip(y,0,255, out=out_ar)
+""",
+        "last": """
+import numpy as np
+
+def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.ones(in_ar[0].shape)
+    for i in range(len(in_ar)):
+        mask = in_ar[i] == 0
+        y *= mask
+        y += in_ar[i]
+
+    np.clip(y,0,255, out=out_ar)
+""",
+        "max": """
+import numpy as np
+
+def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.max(in_ar, axis=0)
+    np.clip(y,0,255, out=out_ar)
+""",
         "average": """
 import numpy as np
 

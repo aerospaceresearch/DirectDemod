@@ -13,6 +13,7 @@ Image merger
 ------------
 
 Merger provides functionality, along with CLI interface, for merging several raster images.
+Merger supports several methods for overlapping parts of the images: `average`, `max`, `first`, `last`.
 
 ``python merger.py -o o.tif -r average --files a.tif b.tif``
 

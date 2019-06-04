@@ -212,11 +212,37 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">methods</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="s2">&quot;med&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
+
+<span class="s2">def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.ones(in_ar[0].shape)</span>
+<span class="s2">    for i in reversed(range(len(in_ar))):</span>
+<span class="s2">        mask = in_ar[i] == 0</span>
+<span class="s2">        y *= mask</span>
+<span class="s2">        y += in_ar[i]</span>
+
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
+
+<span class="s2">def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.ones(in_ar[0].shape)</span>
+<span class="s2">    for i in range(len(in_ar)):</span>
+<span class="s2">        mask = in_ar[i] == 0</span>
+<span class="s2">        y *= mask</span>
+<span class="s2">        y += in_ar[i]</span>
+
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
+
+<span class="s2">def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.max(in_ar, axis=0)</span>
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
         <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">import numpy as np</span>
 
