@@ -8,8 +8,8 @@ from directdemod.misc import JSON
 class TestSaveMeta(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.data = {
+    def setUpClass(cls):
+        cls.data = {
             'image_name': 'samples/image_noaa_2.png',
             'sat_type': 'NOAA 19',
             'date_time': '2019-05-21T15:25:38',
@@ -17,7 +17,7 @@ class TestSaveMeta(unittest.TestCase):
             'direction': 203.91859857008012
         }
 
-        self.path = os.path.abspath('tests/data/metadata/example.tif')
+        cls.path = os.path.abspath('tests/data/metadata/example.tif')
 
     def test_save(self):
         with tifffile.TiffFile(self.path) as f:

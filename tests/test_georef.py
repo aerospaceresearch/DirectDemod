@@ -9,18 +9,18 @@ from directdemod.georeferencer import Georeferencer
 class TestGeoref(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.sdr = 'tests/data/georef/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav'
-        self.image = 'tests/data/georef/start.png'
-        self.tle = 'tle/noaa18_June_14_2018.txt'
+    def setUpClass(cls):
+        cls.sdr = 'tests/data/georef/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav'
+        cls.image = 'tests/data/georef/start.png'
+        cls.tle = 'tle/noaa18_June_14_2018.txt'
 
-        self.f  = 'tests/data/georef/start.tif'
-        self.result = 'tests/data/georef/result.tif'
+        cls.f  = 'tests/data/georef/start.tif'
+        cls.result = 'tests/data/georef/result.tif'
 
     @classmethod
-    def tearDownClass(self):
-        if os.path.isfile(self.f):
-            os.remove(self.f)
+    def tearDownClass(cls):
+        if os.path.isfile(cls.f):
+            os.remove(cls.f)
 
     def test_georef_tif(self):
         g = Georeferencer(self.tle)
