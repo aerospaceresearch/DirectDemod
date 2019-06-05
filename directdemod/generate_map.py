@@ -1,5 +1,5 @@
+import os
 import argparse
-import subprocess
 
 from directdemod import constants
 
@@ -28,7 +28,7 @@ def main():
 
     args = parser.parse_args()
 
-    subprocess.call(["gdal2tiles.py", "--profile=" "mercator", "-z", "1-6", "-w", "none", args.raster, args.tms])
+    os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " + args.raster + " " + args.tms)
 
     generate(args.map, args.tms)
 
