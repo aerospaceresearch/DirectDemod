@@ -32,7 +32,11 @@ TEMP_VRT_FILE = "_vrt.vrt"
 DEFAULT_RS = "EPSG:4326"
 
 TLE_NOAA = "../tle/noaa18_June_14_2018.txt"
-BORDERS = "../samples/shapes/borders.shp"  # should be used in directdemod directory
+BORDERS = "../misc/shapes/borders.shp"  # should be used in directdemod directory
+
+## MAP
+MAP_TEMPLATE = "../misc/map.html"
+ZOOM = 6
 
 ###### Do not change these
 
