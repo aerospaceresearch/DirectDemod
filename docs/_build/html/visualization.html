@@ -86,6 +86,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Visualizations routine</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#image-merger">Image merger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#georeferencer">Georeferencer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#map-generation">Map generation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#library-checker">Library checker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-encoder">Json encoder</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#json-parser">Json parser</a></li>
@@ -265,8 +266,8 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 <div class="section" id="georeferencer">
 <h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
 <p>This class provides an API for image georeferencing.
-Sample command to run georeferencer.py:
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-m</span> <span class="pre">-i</span> <span class="pre">../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif</span></code></p>
+Sample command to run georeferencer.py:</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-m</span> <span class="pre">-i</span> <span class="pre">../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif</span></code></p>
 <p>Console options:</p>
 <table class="docutils option-list" frame="void" rules="none">
 <col class="option" />
@@ -477,6 +478,17 @@ Python API. Descriptor is extracted directly from tif file</p>
 </dd></dl>
 
 </div>
+<div class="section" id="map-generation">
+<h2>Map generation<a class="headerlink" href="#map-generation" title="Permalink to this headline">¶</a></h2>
+<p>To generate visualization of raster use <cite>generate_map.py</cite> interface.
+The following command will generate a TMS (Tile Map Service) and 2 visualization files in
+<cite>samples/tms</cite> directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">generate_map.py</span> <span class="pre">--raster</span> <span class="pre">../samples/decoded/raster.tif</span> <span class="pre">--tms</span> <span class="pre">../samples/tms</span></code></p>
+<p>You can run <cite>map.html</cite> by opening in the browser.</p>
+<p>To use <cite>globe.html</cite> go to tms directory and type the following command to start http server on port 8000 (for python3):</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span> <span class="pre">8000</span></code></p>
+<p>Then open browser and go to <cite>http://localhost:8000/globe.html</cite>.</p>
+</div>
 <div class="section" id="library-checker">
 <h2>Library checker<a class="headerlink" href="#library-checker" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -631,6 +643,7 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 </div>
 <div class="section" id="json-parser">
 <h2>Json parser<a class="headerlink" href="#json-parser" title="Permalink to this headline">¶</a></h2>
+<p>JS-style wrapper around json, which uses provided Json encoder.</p>
 <dl class="class">
 <dt id="directdemod.misc.JSON">
 <em class="property">class </em><code class="descclassname">directdemod.misc.</code><code class="descname">JSON</code><a class="reference internal" href="_modules/directdemod/misc.html#JSON"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.JSON" title="Permalink to this definition">¶</a></dt>

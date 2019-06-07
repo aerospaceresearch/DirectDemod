@@ -31,6 +31,7 @@ Georeferencer
 
 This class provides an API for image georeferencing.
 Sample command to run georeferencer.py:
+
 ``python georeferencer.py -m -i ../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif``
 
 Console options:
@@ -42,6 +43,24 @@ Console options:
    :members:
 
    .. automethod:: __init__
+
+
+Map generation
+--------------
+
+To generate visualization of raster use `generate_map.py` interface.
+The following command will generate a TMS (Tile Map Service) and 2 visualization files in
+`samples/tms` directory.
+
+``python generate_map.py --raster ../samples/decoded/raster.tif --tms ../samples/tms``
+
+You can run `map.html` by opening in the browser.
+
+To use `globe.html` go to tms directory and type the following command to start http server on port 8000 (for python3):
+
+``python -m http.server 8000``
+
+Then open browser and go to `http://localhost:8000/globe.html`.
 
 Library checker
 ---------------
@@ -62,6 +81,7 @@ Json encoder, which handles encoding numpy array and datetime objects.
 
 Json parser
 ------------
+JS-style wrapper around json, which uses provided Json encoder.
 
 .. autoclass:: directdemod.misc.JSON
    :members:

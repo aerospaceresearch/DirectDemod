@@ -82,6 +82,7 @@ Json encoder, which handles encoding numpy array and datetime objects.
 Json parser
 ------------
 JS-style wrapper around json, which uses provided Json encoder.
+
 .. autoclass:: directdemod.misc.JSON
    :members:
 
