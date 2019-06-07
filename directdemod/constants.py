@@ -36,7 +36,7 @@ BORDERS = "../misc/shapes/borders.shp"  # should be used in directdemod director
 
 ## MAP
 MAP_TEMPLATE = "../misc/map.html"
-ZOOM = 6
+GLOBE_TEMPLATE = "../misc/globe.html"
 
 ###### Do not change these
 
