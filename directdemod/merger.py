@@ -47,7 +47,7 @@ def add_pixel_fn(filename, resample_name):
     </PixelFunctionCode>"""
 
     lines = open(filename, 'r').readlines()
-    lines[3] = header  # FIX ME: 3 is a hand constant, if created file doesn't start match it, there will be an error
+    lines[3] = header  # FIX ME: 3 is a hand constant, if created file doesn't match it, there will be an error
     lines.insert(4, contents.format(resample_name, get_resample(resample_name)))
     open(filename, 'w').write("".join(lines))
 
