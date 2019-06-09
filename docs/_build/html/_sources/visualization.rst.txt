@@ -6,8 +6,25 @@
 Visualizations routine
 ======================
 
-In this section are presented classes that are related to visualization of satellite imagery,
-along with their helper classes, which provide IO operations.
+The software presents several ways of visualizing NOAA images:
+
+- as simple decoded image
+- as georeferenced raster
+- as an interactive web map with world map in the background
+- plotted on virtual globe
+
+The visualization process is as follows:
+
+1. Decode the signal using one of the `directdemod` decoders.
+2. Preprocess the image using `preprocess` function from `directdemod.georeferencer` package.
+3. Georeference the image (see docs on georeferencer).
+4. Generate map and globe visualizations using `generate_map.py` CLI interface, it will create tiles \
+   and then generate `map.html` and `globe.html` files. You can open the map directly in browser. To \
+   view the virtual globe you have to start a server `python -m http.server 8000` (python3), then go \
+   to `https://localhost:8000/globe.html`.
+
+In the section below, are presented classes that are related to visualization of satellite imagery,
+along with some helper classes, which provide IO operations.
 
 Image merger
 ------------
@@ -30,7 +47,12 @@ Georeferencer
 ---------------
 
 This class provides an API for image georeferencing.
-Sample command to run georeferencer.py:
+Sample command to run georeferencer.py, first generate tif raster with metadata, then georeference it
+using `georeferencer.py` interface. The first command will extract the capture date from the name of wav file,
+and then will compute the coordinates of the satellite based on this date. Computed data will be stored in new
+file in '.tif' format. This file could be then used for georeferencing.
+
+``python misc.py -f ../samples/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav -i ../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.png``
 
 ``python georeferencer.py -m -i ../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif``
 

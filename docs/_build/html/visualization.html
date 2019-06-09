@@ -158,8 +158,22 @@
             
   <div class="section" id="visualizations-routine">
 <h1>Visualizations routine<a class="headerlink" href="#visualizations-routine" title="Permalink to this headline">¶</a></h1>
-<p>In this section are presented classes that are related to visualization of satellite imagery,
-along with their helper classes, which provide IO operations.</p>
+<p>The software presents several ways of visualizing NOAA images:</p>
+<ul class="simple">
+<li>as simple decoded image</li>
+<li>as georeferenced raster</li>
+<li>as an interactive web map with world map in the background</li>
+<li>plotted on virtual globe</li>
+</ul>
+<p>The visualization process is as follows:</p>
+<ol class="arabic simple">
+<li>Decode the signal using one of the <cite>directdemod</cite> decoders.</li>
+<li>Preprocess the image using <cite>preprocess</cite> function from <cite>directdemod.georeferencer</cite> package.</li>
+<li>Georeference the image (see docs on georeferencer).</li>
+<li>Generate map and globe visualizations using <cite>generate_map.py</cite> CLI interface, it will create tiles and then generate <cite>map.html</cite> and <cite>globe.html</cite> files. You can open the map directly in browser. To view the virtual globe you have to start a server <cite>python -m http.server 8000</cite> (python3), then go to <cite>https://localhost:8000/globe.html</cite>.</li>
+</ol>
+<p>In the section below, are presented classes that are related to visualization of satellite imagery,
+along with some helper classes, which provide IO operations.</p>
 <div class="section" id="image-merger">
 <h2>Image merger<a class="headerlink" href="#image-merger" title="Permalink to this headline">¶</a></h2>
 <p>Merger provides functionality, along with CLI interface, for merging several raster images.
@@ -266,7 +280,11 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 <div class="section" id="georeferencer">
 <h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
 <p>This class provides an API for image georeferencing.
-Sample command to run georeferencer.py:</p>
+Sample command to run georeferencer.py, first generate tif raster with metadata, then georeference it
+using <cite>georeferencer.py</cite> interface. The first command will extract the capture date from the name of wav file,
+and then will compute the coordinates of the satellite based on this date. Computed data will be stored in new
+file in ‘.tif’ format. This file could be then used for georeferencing.</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">misc.py</span> <span class="pre">-f</span> <span class="pre">../samples/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav</span> <span class="pre">-i</span> <span class="pre">../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.png</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">georeferencer.py</span> <span class="pre">-m</span> <span class="pre">-i</span> <span class="pre">../samples/decoded/SDRSharp_20190521_170204Z_137500000Hz.tif</span></code></p>
 <p>Console options:</p>
 <table class="docutils option-list" frame="void" rules="none">
