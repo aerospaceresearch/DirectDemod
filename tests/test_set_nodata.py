@@ -4,6 +4,7 @@ import unittest
 from osgeo import gdal
 from PIL import Image
 from shutil import copyfile
+from directdemod import constants
 from directdemod.georeferencer import set_nodata
 
 
@@ -12,9 +13,9 @@ class TestSetNoData(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.nodata = 0
-        cls.nodata255 = os.path.abspath('tests/data/no_data/nodata255.tif')
-        cls.nodata0   = os.path.abspath('tests/data/no_data/nodata0.tif')
-        cls.f         = os.path.abspath('tests/data/no_data/_sample.tif')
+        cls.nodata255 = constants.MODULE_PATH + '/tests/data/no_data/nodata255.tif'
+        cls.nodata0   = constants.MODULE_PATH + '/tests/data/no_data/nodata0.tif'
+        cls.f         = constants.MODULE_PATH + '/tests/data/no_data/_sample.tif'
 
         copyfile(cls.nodata255, cls.f)
 

@@ -199,6 +199,7 @@ for fileIndex in range(len(freqs)):
             csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
             mapImageFileNameRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map_rot.png"
             mapImageFileNameNRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.png"
+            mapImageFileNameTif = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.tif"
             if not outs[fileIndex] is None:
                 audFileName = outs[fileIndex] + ".wav"
                 imgFileName = outs[fileIndex] + ".png"
@@ -263,7 +264,7 @@ for fileIndex in range(len(freqs)):
                     if '--tle' in [i[0] for i in optlist]:
                         tleFileName = [i[1] for i in optlist if i[0] == '--tle'][0]
 
-                    if not satName is None and not timeRec is None:
+                    if satName is not None and not timeRec is None:
                         from directdemod.misc import save_metadata, preprocess
                         from directdemod.georeferencer import Georeferencer, overlay
 
@@ -286,7 +287,7 @@ for fileIndex in range(len(freqs)):
             # calculate sync is -sync flag is set
             if calculateSync and noaaObj.useful == 1:
                 syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
-                sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB",]).write
+                sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB"]).write
                 entryDict['filesCreated'].append(csvFileName)
 
             if noaaObj.useful == 0:

@@ -1,8 +1,8 @@
-import os
 import tifffile
 import unittest
 
 from directdemod.misc import JSON
+from directdemod import constants
 
 
 class TestSaveMeta(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestSaveMeta(unittest.TestCase):
             'direction': 203.91859857008012
         }
 
-        cls.path = os.path.abspath('tests/data/metadata/example.tif')
+        cls.path = constants.MODULE_PATH + '/tests/data/metadata/example.tif'
 
     def test_save(self):
         with tifffile.TiffFile(self.path) as f:

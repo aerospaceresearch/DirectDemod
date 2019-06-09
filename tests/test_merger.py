@@ -3,23 +3,25 @@ import unittest
 
 from PIL import Image
 from directdemod.merger import merge
+from directdemod import constants
 
 
 class TestMerge(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.average = 'tests/data/merge/average.tif'
-        cls.max = 'tests/data/merge/max.tif'
-        cls.first = 'tests/data/merge/first.tif'
-        cls.last = 'tests/data/merge/last.tif'
+        cls.average = constants.MODULE_PATH + '/tests/data/merge/average.tif'
+        cls.max = constants.MODULE_PATH + '/tests/data/merge/max.tif'
+        cls.first = constants.MODULE_PATH + '/tests/data/merge/first.tif'
+        cls.last = constants.MODULE_PATH + '/tests/data/merge/last.tif'
 
-        cls.files = ['tests/data/merge/image1.tif', 'tests/data/merge/image2.tif']
+        cls.files = [constants.MODULE_PATH + '/tests/data/merge/image1.tif',
+                     constants.MODULE_PATH + '/tests/data/merge/image2.tif']
 
-        cls.saverage = 'tests/data/merge/saverage.tif'
-        cls.smax = 'tests/data/merge/smax.tif'
-        cls.sfirst = 'tests/data/merge/sfirst.tif'
-        cls.slast = 'tests/data/merge/slast.tif'
+        cls.saverage = constants.MODULE_PATH + '/tests/data/merge/saverage.tif'
+        cls.smax = constants.MODULE_PATH + '/tests/data/merge/smax.tif'
+        cls.sfirst = constants.MODULE_PATH + '/tests/data/merge/sfirst.tif'
+        cls.slast = constants.MODULE_PATH + '/tests/data/merge/slast.tif'
 
     @classmethod
     def tearDownClass(cls):

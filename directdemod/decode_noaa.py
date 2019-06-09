@@ -155,7 +155,7 @@ class decode_noaa:
             orb = Orbital(satellite, tle_file=tleFile)
 
         im = self.getImageA
-        im = im[:,85:995]
+        im = im[:, 85:995]
         oim = im[:]
 
         tdelta = int(im.shape[0]/16)

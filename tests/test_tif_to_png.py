@@ -2,6 +2,7 @@ import os
 import unittest
 
 from PIL import Image
+from directdemod import constants
 from directdemod.georeferencer import tif_to_png
 
 
@@ -9,9 +10,9 @@ class TestConvert(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tif = os.path.abspath('tests/data/tif_to_png/sample.tif')
-        cls.png = os.path.abspath('tests/data/tif_to_png/sample.png')
-        cls.f = os.path.abspath('tests/data/tif_to_png/_sample.png')
+        cls.tif = constants.MODULE_PATH + '/tests/data/tif_to_png/sample.tif'
+        cls.png = constants.MODULE_PATH + '/tests/data/tif_to_png/sample.png'
+        cls.f = constants.MODULE_PATH + '/tests/data/tif_to_png/_sample.png'
 
     @classmethod
     def tearDownClass(cls):
