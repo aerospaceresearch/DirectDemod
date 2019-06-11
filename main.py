@@ -264,6 +264,14 @@ for fileIndex in range(len(freqs)):
                     if '--tle' in [i[0] for i in optlist]:
                         tleFileName = [i[1] for i in optlist if i[0] == '--tle'][0]
 
+
+                    """
+                    if not satName is None and not timeRec is None:
+                        imageMatrix = noaaObj.getMapImage(timeRec, mapImageFileNameRot, mapImageFileNameNRot, satName, tleFileName)
+                        entryDict['filesCreated'].append(mapImageFileNameRot)
+                        entryDict['filesCreated'].append(mapImageFileNameNRot)
+                    """
+
                     if satName is not None and not timeRec is None:
                         from directdemod.misc import save_metadata, preprocess
                         from directdemod.georeferencer import Georeferencer, overlay
