@@ -2,21 +2,22 @@ import os
 import unittest
 
 from PIL import Image
+from directdemod import constants
 from directdemod.georeferencer import tif_to_png
 
 
 class TestConvert(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.tif = os.path.abspath('tests/data/tif_to_png/sample.tif')
-        self.png = os.path.abspath('tests/data/tif_to_png/sample.png')
-        self.f = os.path.abspath('tests/data/tif_to_png/_sample.png')
+    def setUpClass(cls):
+        cls.tif = constants.MODULE_PATH + '/tests/data/tif_to_png/sample.tif'
+        cls.png = constants.MODULE_PATH + '/tests/data/tif_to_png/sample.png'
+        cls.f = constants.MODULE_PATH + '/tests/data/tif_to_png/_sample.png'
 
     @classmethod
-    def tearDownClass(self):
-        if os.path.isfile(self.f):
-            os.remove(self.f)
+    def tearDownClass(cls):
+        if os.path.isfile(cls.f):
+            os.remove(cls.f)
 
     def test_tif_to_png(self):
         tif_to_png(self.tif, self.f)

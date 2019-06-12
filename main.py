@@ -5,18 +5,20 @@ noaa commandline interface
 
 from directdemod import source, chunker, comm, constants, filters, demod_fm, sink, demod_am, decode_noaa, log, decode_afsk1200, decode_funcube, decode_meteorm2
 import numpy as np
+import os
 import sys, getopt, logging, json
 from time import gmtime, strftime
 from datetime import datetime
 
 # enable logging to console
-log.log('log.txt', console = True)
+log.log('log.txt', console=True)
 
 # variables to store command line arguments
 optlist, args = [], []
 
+
 # function to display usage statement and exit
-def usage(err = ""):
+def usage(err=""):
     if len(err) > 0:
         print("ERROR :",err)
 
@@ -197,6 +199,7 @@ for fileIndex in range(len(freqs)):
             csvFileName = fileName.split(".")[0] + "_f" + str(fileIndex+1) + ".csv"
             mapImageFileNameRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map_rot.png"
             mapImageFileNameNRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.png"
+            mapImageFileNameTif = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.tif"
             if not outs[fileIndex] is None:
                 audFileName = outs[fileIndex] + ".wav"
                 imgFileName = outs[fileIndex] + ".png"
@@ -204,6 +207,7 @@ for fileIndex in range(len(freqs)):
                 colorimgFileName = outs[fileIndex] + "_color.png"
                 mapImageFileNameRot = outs[fileIndex] + "_map_rot.png"
                 mapImageFileNameNRot = outs[fileIndex] + "_map.png"
+                mapImageFileNameTif = outs[fileIndex] + "_map.tif"
 
             # create noaa object
             noaaObj = decode_noaa.decode_noaa(sigsrc, freqOffset, bandwidths[fileIndex])
@@ -260,15 +264,38 @@ for fileIndex in range(len(freqs)):
                     if '--tle' in [i[0] for i in optlist]:
                         tleFileName = [i[1] for i in optlist if i[0] == '--tle'][0]
 
+
+                    """
                     if not satName is None and not timeRec is None:
                         imageMatrix = noaaObj.getMapImage(timeRec, mapImageFileNameRot, mapImageFileNameNRot, satName, tleFileName)
                         entryDict['filesCreated'].append(mapImageFileNameRot)
                         entryDict['filesCreated'].append(mapImageFileNameNRot)
+                    """
+
+                    if satName is not None and not timeRec is None:
+                        from directdemod.misc import save_metadata, preprocess
+                        from directdemod.georeferencer import Georeferencer, overlay
+
+                        preprocess(imgFileName, constants.TEMP_TIFF_FILE)
+                        save_metadata(file_name=fileName,
+                                      image_name=constants.TEMP_TIFF_FILE,
+                                      sat_type=satName,
+                                      tle_file=tleFileName)
+
+                        referencer = Georeferencer(tle_file=tleFileName)
+                        referencer.georef_tif(constants.TEMP_TIFF_FILE, mapImageFileNameTif)
+
+                        overlay(mapImageFileNameTif)
+
+                        entryDict['filesCreated'].append(mapImageFileNameTif)
+
+                        if os.path.isfile(constants.TEMP_TIFF_FILE):
+                            os.remove(constants.TEMP_TIFF_FILE)
 
             # calculate sync is -sync flag is set
             if calculateSync and noaaObj.useful == 1:
                 syncs = noaaObj.getAccurateSync(useNormCorrelate = True) # change to False to use scipy's correlate
-                sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB",]).write
+                sink.csv(csvFileName, syncs, titles = ["syncA", "diffSyncA", "qualityA", "TimeSyncA", "syncB", "diffSyncB", "qualityB", "TimeSyncB"]).write
                 entryDict['filesCreated'].append(csvFileName)
 
             if noaaObj.useful == 0:

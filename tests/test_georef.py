@@ -2,6 +2,7 @@ import os
 import unittest
 
 from PIL import Image
+from directdemod import constants
 from directdemod.misc import save_metadata
 from directdemod.georeferencer import Georeferencer
 
@@ -9,18 +10,18 @@ from directdemod.georeferencer import Georeferencer
 class TestGeoref(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.sdr = 'tests/data/georef/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav'
-        self.image = 'tests/data/georef/start.png'
-        self.tle = 'tle/noaa18_June_14_2018.txt'
+    def setUpClass(cls):
+        cls.sdr = constants.MODULE_PATH + '/tests/data/georef/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav'
+        cls.image = constants.MODULE_PATH + '/tests/data/georef/start.png'
+        cls.tle = constants.MODULE_PATH + '/tle/noaa18_June_14_2018.txt'
 
-        self.f  = 'tests/data/georef/start.tif'
-        self.result = 'tests/data/georef/result.tif'
+        cls.f  = constants.MODULE_PATH + '/tests/data/georef/start.tif'
+        cls.result = constants.MODULE_PATH + '/tests/data/georef/result.tif'
 
     @classmethod
-    def tearDownClass(self):
-        if os.path.isfile(self.f):
-            os.remove(self.f)
+    def tearDownClass(cls):
+        if os.path.isfile(cls.f):
+            os.remove(cls.f)
 
     def test_georef_tif(self):
         g = Georeferencer(self.tle)

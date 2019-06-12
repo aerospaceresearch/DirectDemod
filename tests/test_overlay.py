@@ -3,24 +3,25 @@ import unittest
 
 from PIL import Image
 from shutil import copyfile
+from directdemod import constants
 from directdemod.georeferencer import overlay
 
 
 class TestOverlay(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.borders   = 'tests/data/overlay/shapes/borders.shp'
-        self.with_over = 'tests/data/overlay/with_overlay.tif'
-        self.no_over   = 'tests/data/overlay/no_overlay.tif'
-        self.f         = 'tests/data/overlay/_sample.tif'
+    def setUpClass(cls):
+        cls.borders   = constants.MODULE_PATH + '/tests/data/overlay/shapes/borders.shp'
+        cls.with_over = constants.MODULE_PATH + '/tests/data/overlay/with_overlay.tif'
+        cls.no_over   = constants.MODULE_PATH + '/tests/data/overlay/no_overlay.tif'
+        cls.f         = constants.MODULE_PATH + '/tests/data/overlay/_sample.tif'
 
-        copyfile(self.no_over, self.f)
+        copyfile(cls.no_over, cls.f)
 
     @classmethod
-    def tearDownClass(self):
-        if os.path.isfile(self.f):
-            os.remove(self.f)
+    def tearDownClass(cls):
+        if os.path.isfile(cls.f):
+            os.remove(cls.f)
 
     def test_overlay(self):
         overlay(self.f, shapefile=self.borders)

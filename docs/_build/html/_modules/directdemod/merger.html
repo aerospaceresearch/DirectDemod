@@ -146,234 +146,169 @@
            <div itemprop="articleBody">
             
   <h1>Source code for directdemod.merger</h1><div class="highlight"><pre>
-<span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">image merger</span>
-<span class="sd">&#39;&#39;&#39;</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mimg</span>
-<span class="kn">import</span> <span class="nn">cartopy</span>
-<span class="kn">import</span> <span class="nn">cartopy.crs</span> <span class="k">as</span> <span class="nn">ccrs</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">merger of NOAA satellite images</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">json</span>
 
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
-<span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
-<span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
-<span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">Checker</span><span class="p">,</span> <span class="n">compute_alt</span><span class="p">,</span> <span class="n">to_datetime</span><span class="p">,</span> <span class="n">extract_date</span><span class="p">,</span> <span class="n">extract_coords</span><span class="p">,</span> <span class="n">compute_angle</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">ndimage</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This class provides an API for merging multiple images.</span>
 <span class="sd">It extracts needed information and projects images on mercator</span>
 <span class="sd">projection.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ImageMerger"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger">[docs]</a><span class="k">class</span> <span class="nc">ImageMerger</span><span class="p">:</span>
 
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    This class provides an API for merging multiple images.</span>
-<span class="sd">    It extracts needed information and projects images on mercator</span>
-<span class="sd">    projection.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<div class="viewcode-block" id="build_vrt"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.build_vrt">[docs]</a><span class="k">def</span> <span class="nf">build_vrt</span><span class="p">(</span><span class="n">vrt</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">):</span>
 
-<div class="viewcode-block" id="ImageMerger.__init__"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tle_file</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">aux_file_name</span><span class="o">=</span><span class="s2">&quot;temp_image_file.png&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;builds .vrt file which will hold information needed for overlay</span>
 
-        <span class="sd">&#39;&#39;&#39;Initialize the object</span>
+<span class="sd">    Args:</span>
+<span class="sd">        vrt (:obj:`string`): name of vrt file, which will be created</span>
+<span class="sd">        files (:obj:`list`): list of file names for merging</span>
+<span class="sd">        resample_name (:obj:`string`): name of resampling method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            tle_file (:obj:`string`, optional): path to the tle file</span>
-<span class="sd">            aux_file_name (:obj:`string`, optional): auxiliary file name</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+    <span class="n">options</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">BuildVRTOptions</span><span class="p">(</span><span class="n">srcNodata</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">gdal</span><span class="o">.</span><span class="n">BuildVRT</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">vrt</span><span class="p">,</span> <span class="n">srcDSOrSrcDSTab</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">add_pixel_fn</span><span class="p">(</span><span class="n">vrt</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">)</span></div>
 
-        <span class="n">Checker</span><span class="o">.</span><span class="n">check_libs</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_basemap</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">is_cartopy</span> <span class="o">=</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_cartopy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tle_file</span>   <span class="o">=</span> <span class="n">tle_file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span> <span class="o">=</span> <span class="n">aux_file_name</span></div>
+<div class="viewcode-block" id="add_pixel_fn"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.add_pixel_fn">[docs]</a><span class="k">def</span> <span class="nf">add_pixel_fn</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">):</span>
 
-<div class="viewcode-block" id="ImageMerger.merge_files"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge_files">[docs]</a>    <span class="k">def</span> <span class="nf">merge_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;inserts pixel-function into filename</span>
 
-        <span class="sd">&#39;&#39;&#39;merge images from image descriptors</span>
+<span class="sd">    Args:</span>
+<span class="sd">        filename (:obj:`string`): name of file, into which the function will be inserted</span>
+<span class="sd">        resample_name (:obj:`string`): name of resampling method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            file_descriptors (:obj:`list`): paths to image descriptors</span>
-<span class="sd">            whole (:obj:`bool`, optinal): flag to generate whole image</span>
-<span class="sd">            resolution (:obj:`int`, optional): resolution of the output image</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;  &lt;VRTRasterBand dataType=&quot;Byte&quot; band=&quot;1&quot; subClass=&quot;VRTDerivedRasterBand&quot;&gt;&quot;&quot;&quot;</span>
+    <span class="n">contents</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;PixelFunctionType&gt;</span><span class="si">{0}</span><span class="s2">&lt;/PixelFunctionType&gt;</span>
+<span class="s2">    &lt;PixelFunctionLanguage&gt;Python&lt;/PixelFunctionLanguage&gt;</span>
+<span class="s2">    &lt;PixelFunctionCode&gt;&lt;![CDATA[</span><span class="si">{1}</span><span class="s2">]]&gt;</span>
+<span class="s2">    &lt;/PixelFunctionCode&gt;&quot;&quot;&quot;</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`PIL.Image`: merged image</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span>  <span class="c1"># FIX ME: 3 is a hand constant, if created file doesn&#39;t start match it, there will be an error</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">contents</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resample_name</span><span class="p">,</span> <span class="n">get_resample</span><span class="p">(</span><span class="n">resample_name</span><span class="p">)))</span>
+    <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span></div>
 
-        <span class="k">if</span> <span class="n">file_descriptors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Passed descriptors are null.&quot;</span><span class="p">)</span>
 
-        <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">file_descriptors</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">f</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div>
+<div class="viewcode-block" id="get_resample"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.get_resample">[docs]</a><span class="k">def</span> <span class="nf">get_resample</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
 
-<div class="viewcode-block" id="ImageMerger.merge"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsons</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;retrieves code for resampling method</span>
 
-        <span class="sd">&#39;&#39;&#39;merge multiple images from descriptors</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name (:obj:`string`): name of resampling method</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            jsons (:obj:`dict`): set of dict objects, which describe images</span>
-<span class="sd">            whole (:obj:`bool`, optinal): flag to generate whole image</span>
-<span class="sd">            resolution (:obj:`int`, optional): resolution of the output image</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        method :obj:`string`: code of resample method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`PIL.Image`: merged image</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
 
-        <span class="k">if</span> <span class="n">jsons</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Passed objects are null.&quot;</span><span class="p">)</span>
+<span class="s2">def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.ones(in_ar[0].shape)</span>
+<span class="s2">    for i in reversed(range(len(in_ar))):</span>
+<span class="s2">        mask = in_ar[i] == 0</span>
+<span class="s2">        y *= mask</span>
+<span class="s2">        y += in_ar[i]</span>
 
-        <span class="n">projection</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
 
-        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">axes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="n">ccrs</span><span class="o">.</span><span class="n">PlateCarree</span><span class="p">())</span>
-        <span class="n">axes</span><span class="o">.</span><span class="n">coastlines</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="s1">&#39;50m&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">COLOR</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-        <span class="n">axes</span><span class="o">.</span><span class="n">add_feature</span><span class="p">(</span><span class="n">cartopy</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">BORDERS</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">COLOR</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
-        <span class="n">axes</span><span class="o">.</span><span class="n">set_extent</span><span class="p">([</span><span class="o">-</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="mi">90</span><span class="p">])</span>
+<span class="s2">def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.ones(in_ar[0].shape)</span>
+<span class="s2">    for i in range(len(in_ar)):</span>
+<span class="s2">        mask = in_ar[i] == 0</span>
+<span class="s2">        y *= mask</span>
+<span class="s2">        y += in_ar[i]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">left_ex</span>  <span class="o">=</span> <span class="mi">180</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_ex</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bot_ex</span>   <span class="o">=</span> <span class="mi">90</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">top_ex</span>   <span class="o">=</span> <span class="o">-</span><span class="mi">90</span>
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
 
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">jsons</span><span class="p">:</span>
-            <span class="n">image</span><span class="p">,</span> <span class="n">isGray</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s2">&quot;image_name&quot;</span><span class="p">])</span>
-            <span class="n">center</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;center&quot;</span><span class="p">]</span>
-            <span class="n">degree</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;direction&quot;</span><span class="p">]</span>
+<span class="s2">def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    y = np.max(in_ar, axis=0)</span>
+<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">import numpy as np</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_cartopy</span><span class="p">:</span>
-                <span class="n">img</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_transparent</span><span class="p">(</span><span class="n">ndimage</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="mi">255</span><span class="p">),</span> <span class="n">isGray</span><span class="p">)</span>
-                <span class="n">dx</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">4000</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mf">0.81</span> <span class="c1"># in meters</span>
-                <span class="n">dy</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">4000</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="mf">0.81</span> <span class="c1"># in meters</span>
-                <span class="n">left_bot</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_m</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">dx</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="n">dy</span><span class="p">)</span>
-                <span class="n">right_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_m</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
-                <span class="n">img_extent</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_bot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">right_top</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">left_bot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right_top</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">update_extents</span><span class="p">(</span><span class="n">img_extent</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">isGray</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Gray&#39;</span><span class="p">)</span>
-                    <span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">img_extent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">img_extent</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_basemap</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Basemap mapping not implemented.&quot;</span><span class="p">)</span>
+<span class="s2">def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="s2">    div = np.zeros(in_ar[0].shape)</span>
+<span class="s2">    for i in range(len(in_ar)):</span>
+<span class="s2">        div += (in_ar[i] != 0)</span>
+<span class="s2">    div[div == 0] = 1</span>
+<span class="s2">    </span>
+<span class="s2">    y = np.sum(in_ar, axis = 0, dtype = &#39;uint16&#39;)</span>
+<span class="s2">    y = y / div</span>
+<span class="s2">    </span>
+<span class="s2">    np.clip(y,0,255, out = out_ar)</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="p">}</span>
 
-        <span class="k">if</span> <span class="n">whole</span><span class="p">:</span>
-            <span class="n">projection</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">axes</span><span class="o">.</span><span class="n">set_extent</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">left_ex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_ex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bot_ex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_ex</span><span class="p">])</span>
-            <span class="n">projection</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">resolution</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Unrecognized resampling method (see documentation): &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
-        <span class="n">merged</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">aux_file_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">merged</span></div>
+    <span class="k">return</span> <span class="n">methods</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ImageMerger.merge_noaa"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.merge_noaa">[docs]</a>    <span class="k">def</span> <span class="nf">merge_noaa</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objs</span><span class="p">,</span> <span class="n">whole</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">resolution</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">RESOLUTION</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;merge multiple noaa images from image files</span>
+<div class="viewcode-block" id="merge"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.merge">[docs]</a><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">):</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            objs (:obj:`tuple`): set of objects representing images</span>
-<span class="sd">            whole (:obj:`bool`, optinal): flag to generate whole image</span>
-<span class="sd">            resolution (:obj:`int`, optional): resolution of the output image</span>
+    <span class="sd">&quot;&quot;&quot;merges list of files using specific resample method for overlapping parts</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`PIL.Image`: merged image</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        files (:obj:`string`): list of files to merge</span>
+<span class="sd">        output_file (:obj:`string`): name of output file</span>
+<span class="sd">        resample (:obj:`string`): name of resampling method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">objs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Passed objects are null.&quot;</span><span class="p">)</span>
+    <span class="n">build_vrt</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">resample</span><span class="p">)</span>
 
-        <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="k">continue</span>
+    <span class="n">gdal</span><span class="o">.</span><span class="n">SetConfigOption</span><span class="p">(</span><span class="s1">&#39;GDAL_VRT_ENABLE_PYTHON&#39;</span><span class="p">,</span> <span class="s1">&#39;YES&#39;</span><span class="p">)</span>
 
-            <span class="n">file_name</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">sat_type</span>  <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">image</span>     <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
+                   <span class="n">srcDS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">)</span>
 
-            <span class="n">dtime</span>            <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_date</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-            <span class="n">top</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_coords</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sat_type</span><span class="p">,</span> <span class="n">dtime</span><span class="p">)</span>
-            <span class="n">degree</span>           <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_angle</span><span class="p">(</span><span class="o">*</span><span class="n">bot</span><span class="p">,</span> <span class="o">*</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">gdal</span><span class="o">.</span><span class="n">SetConfigOption</span><span class="p">(</span><span class="s1">&#39;GDAL_VRT_ENABLE_PYTHON&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-            <span class="n">descriptor</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;image_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
-                <span class="s2">&quot;sat_type&quot;</span><span class="p">:</span> <span class="n">sat_type</span><span class="p">,</span>
-                <span class="s2">&quot;date_time&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;center&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">center</span><span class="p">),</span>
-                <span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="n">degree</span>
-            <span class="p">}</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">)</span></div>
 
-            <span class="n">descriptors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">whole</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;CLI interface for satellite image merger&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ImageMerger.imread"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.imread">[docs]</a>    <span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Merger option parser&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;--files&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List of files to merge&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of output file&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--resample&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resample algorithm&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
 
-        <span class="sd">&#39;&#39;&#39;read the image from file</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            file_name (:obj:`string`): file_name</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">files</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: No input files passed.&quot;</span><span class="p">)</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            image :obj:`np.ndarray`: image with fixed transparency</span>
-<span class="sd">            isGray :obj:`bool`: true if image is gray, false otherwise</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Merger takes at least 2 files, but 1 was given: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-        <span class="n">image</span> <span class="o">=</span> <span class="n">mimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span></div>
+    <span class="n">merge</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">resample</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ImageMerger.set_transparent"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.set_transparent">[docs]</a>    <span class="k">def</span> <span class="nf">set_transparent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">isGray</span><span class="p">):</span>
 
-        <span class="sd">&#39;&#39;&#39;set pixel transparency</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            image (:obj:`np.array`): image</span>
-<span class="sd">            isGray (:obj:`bool`): flag</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            image :obj:`np.array`: image with fixed transparency</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="c1"># Unoptimized version</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">isGray</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">image</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">pixel</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">250</span> <span class="ow">and</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">250</span> <span class="ow">and</span> <span class="n">pixel</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">250</span><span class="p">:</span>
-                        <span class="n">pixel</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">return</span> <span class="n">image</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">4</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
-                    <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="n">val</span><span class="o">/</span><span class="mi">255</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)])</span>
-            <span class="k">return</span> <span class="n">array</span></div>
-
-<div class="viewcode-block" id="ImageMerger.update_extents"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.ImageMerger.update_extents">[docs]</a>    <span class="k">def</span> <span class="nf">update_extents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
-
-        <span class="sd">&#39;&#39;&#39;update bounds of the projection</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            extent (:obj:`tuple`): current image bounds</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">left_ex</span>  <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">left_ex</span><span class="p">,</span>  <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_ex</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">right_ex</span><span class="p">,</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bot_ex</span>   <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bot_ex</span><span class="p">,</span>   <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">top_ex</span>   <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_ex</span><span class="p">,</span>   <span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span></div>
-
-    <span class="k">def</span> <span class="nf">add_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
-        <span class="c1"># source: https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters</span>
-        <span class="n">new_latitude</span>  <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">dy</span> <span class="o">/</span> <span class="mf">6371000.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
-        <span class="n">new_longitude</span> <span class="o">=</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">dx</span> <span class="o">/</span> <span class="mf">6371000.0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">new_latitude</span><span class="p">,</span> <span class="n">new_longitude</span><span class="p">)</span></div>
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">ImageMerger</span><span class="p">()</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
            </div>

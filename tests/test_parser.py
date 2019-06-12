@@ -3,21 +3,22 @@ import json
 import unittest
 
 from directdemod.misc import JSON, Encoder
+from directdemod import constants
 
 
 class TestParser(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.path = os.path.abspath('tests/data/parser/parser.json')
-        self.dict = json.load(open(self.path, 'r'))
-        self.string = json.dumps(json.load(open(self.path, 'r')), cls=Encoder)
-        self.ofile = os.path.abspath('tests/data/parser/_sample.json')
+    def setUpClass(cls):
+        cls.path = constants.MODULE_PATH + '/tests/data/parser/parser.json'
+        cls.dict = json.load(open(cls.path, 'r'))
+        cls.string = json.dumps(json.load(open(cls.path, 'r')), cls=Encoder)
+        cls.ofile = constants.MODULE_PATH + '/tests/data/parser/_sample.json'
 
     @classmethod
-    def tearDownClass(self):
-        if os.path.isfile(self.ofile):
-            os.remove(self.ofile)
+    def tearDownClass(cls):
+        if os.path.isfile(cls.ofile):
+            os.remove(cls.ofile)
 
     def test_parse(self):
         d = JSON.parse(self.string)

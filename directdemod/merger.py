@@ -1,228 +1,163 @@
-'''
-image merger
-'''
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mimg
-import cartopy
-import cartopy.crs as ccrs
+"""
+merger of NOAA satellite images
+"""
+
+import argparse
 import os
-import json
 
-from datetime import datetime, timedelta
-from pyorbital.orbital import Orbital
-from PIL import Image
+from osgeo import gdal
 from directdemod import constants
-from directdemod.misc import Checker, compute_alt, to_datetime, extract_date, extract_coords, compute_angle
-from scipy import ndimage
 
-'''
+"""
 This class provides an API for merging multiple images.
 It extracts needed information and projects images on mercator
 projection.
-'''
+"""
 
-class ImageMerger:
 
-    '''
-    This class provides an API for merging multiple images.
-    It extracts needed information and projects images on mercator
-    projection.
-    '''
+def build_vrt(vrt, files, resample_name):
 
-    def __init__(self, tle_file='', aux_file_name="temp_image_file.png"):
+    """builds .vrt file which will hold information needed for overlay
 
-        '''Initialize the object
+    Args:
+        vrt (:obj:`string`): name of vrt file, which will be created
+        files (:obj:`list`): list of file names for merging
+        resample_name (:obj:`string`): name of resampling method
+    """
 
-        Args:
-            tle_file (:obj:`string`, optional): path to the tle file
-            aux_file_name (:obj:`string`, optional): auxiliary file name
-        '''
+    options = gdal.BuildVRTOptions(srcNodata=0)
+    gdal.BuildVRT(destName=vrt, srcDSOrSrcDSTab=files, options=options)
+    add_pixel_fn(vrt, resample_name)
 
-        Checker.check_libs()
 
-        self.is_basemap = False
-        self.is_cartopy = Checker.check_cartopy()
-        self.tle_file   = tle_file
-        self.aux_file_name = aux_file_name
+def add_pixel_fn(filename, resample_name):
 
-    def merge_files(self, file_descriptors, whole=False, resolution=constants.RESOLUTION):
+    """inserts pixel-function into filename
 
-        '''merge images from image descriptors
+    Args:
+        filename (:obj:`string`): name of file, into which the function will be inserted
+        resample_name (:obj:`string`): name of resampling method
+    """
 
-        Args:
-            file_descriptors (:obj:`list`): paths to image descriptors
-            whole (:obj:`bool`, optinal): flag to generate whole image
-            resolution (:obj:`int`, optional): resolution of the output image
+    header = """  <VRTRasterBand dataType="Byte" band="1" subClass="VRTDerivedRasterBand">"""
+    contents = """
+    <PixelFunctionType>{0}</PixelFunctionType>
+    <PixelFunctionLanguage>Python</PixelFunctionLanguage>
+    <PixelFunctionCode><![CDATA[{1}]]>
+    </PixelFunctionCode>"""
 
-        Returns:
-            :obj:`PIL.Image`: merged image
-        '''
+    lines = open(filename, 'r').readlines()
+    lines[3] = header  # FIX ME: 3 is a hand constant, if created file doesn't match it, there will be an error
+    lines.insert(4, contents.format(resample_name, get_resample(resample_name)))
+    open(filename, 'w').write("".join(lines))
 
-        if file_descriptors is None:
-            raise ValueError("ERROR: Passed descriptors are null.")
 
-        descriptors = [json.load(open(f)) for f in file_descriptors if os.path.isfile(f)]
-        return self.merge(descriptors, whole, resolution)
+def get_resample(name):
 
-    def merge(self, jsons, whole=False, resolution=constants.RESOLUTION):
+    """retrieves code for resampling method
 
-        '''merge multiple images from descriptors
+    Args:
+        name (:obj:`string`): name of resampling method
 
-        Args:
-            jsons (:obj:`dict`): set of dict objects, which describe images
-            whole (:obj:`bool`, optinal): flag to generate whole image
-            resolution (:obj:`int`, optional): resolution of the output image
+    Returns:
+        method :obj:`string`: code of resample method
+    """
 
-        Returns:
-            :obj:`PIL.Image`: merged image
-        '''
+    methods = {
+        "first": """
+import numpy as np
 
-        if jsons is None:
-            raise ValueError("ERROR: Passed objects are null.")
+def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.ones(in_ar[0].shape)
+    for i in reversed(range(len(in_ar))):
+        mask = in_ar[i] == 0
+        y *= mask
+        y += in_ar[i]
 
-        projection = plt.figure()
+    np.clip(y,0,255, out=out_ar)
+""",
+        "last": """
+import numpy as np
 
-        axes = plt.axes(projection=ccrs.PlateCarree())
-        axes.coastlines(resolution='50m', color=constants.COLOR, linewidth=0.2)
-        axes.add_feature(cartopy.feature.BORDERS, linestyle='-', edgecolor=constants.COLOR, linewidth=0.2)
-        axes.set_extent([-180, 180, -90, 90])
+def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.ones(in_ar[0].shape)
+    for i in range(len(in_ar)):
+        mask = in_ar[i] == 0
+        y *= mask
+        y += in_ar[i]
 
-        self.left_ex  = 180
-        self.right_ex = -180
-        self.bot_ex   = 90
-        self.top_ex   = -90
+    np.clip(y,0,255, out=out_ar)
+""",
+        "max": """
+import numpy as np
 
-        for obj in jsons:
-            image, isGray = self.imread(obj["image_name"])
-            center = obj["center"]
-            degree = obj["direction"]
+def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    y = np.max(in_ar, axis=0)
+    np.clip(y,0,255, out=out_ar)
+""",
+        "average": """
+import numpy as np
 
-            if self.is_cartopy:
-                img = self.set_transparent(ndimage.rotate(image, degree, cval=255), isGray)
-                dx = img.shape[0]*4000/2*0.81 # in meters
-                dy = img.shape[1]*4000/2*0.81 # in meters
-                left_bot  = self.add_m(center, -1*dx, -1*dy)
-                right_top = self.add_m(center, dx, dy)
-                img_extent = (left_bot[1], right_top[1], left_bot[0], right_top[0])
-                self.update_extents(img_extent)
-                if isGray:
-                    print('Gray')
-                    axes.imshow(img, origin='upper', extent=img_extent, cmap='gray')
-                else:
-                    axes.imshow(img, origin='upper', extent=img_extent)
-            elif self.is_basemap:
-                raise NotImplementedError("Basemap mapping not implemented.")
+def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
+    div = np.zeros(in_ar[0].shape)
+    for i in range(len(in_ar)):
+        div += (in_ar[i] != 0)
+    div[div == 0] = 1
+    
+    y = np.sum(in_ar, axis = 0, dtype = 'uint16')
+    y = y / div
+    
+    np.clip(y,0,255, out = out_ar)
+"""
+    }
 
-        if whole:
-            projection.savefig(self.aux_file_name, dpi=resolution, bbox_inches='tight')
-        else:
-            axes.set_extent([self.left_ex, self.right_ex, self.bot_ex, self.top_ex])
-            projection.savefig(self.aux_file_name, dpi=resolution, bbox_inches='tight')
+    if name not in methods:
+        raise ValueError("ERROR: Unrecognized resampling method (see documentation): '{}'.".format(name))
 
-        merged = Image.open(self.aux_file_name)
-        os.remove(self.aux_file_name)
-        return merged
+    return methods[name]
 
-    def merge_noaa(self, objs, whole=False, resolution=constants.RESOLUTION):
 
-        '''merge multiple noaa images from image files
+def merge(files, output_file, resample="average"):
 
-        Args:
-            objs (:obj:`tuple`): set of objects representing images
-            whole (:obj:`bool`, optinal): flag to generate whole image
-            resolution (:obj:`int`, optional): resolution of the output image
+    """merges list of files using specific resample method for overlapping parts
 
-        Returns:
-            :obj:`PIL.Image`: merged image
-        '''
+    Args:
+        files (:obj:`string`): list of files to merge
+        output_file (:obj:`string`): name of output file
+        resample (:obj:`string`): name of resampling method
+    """
 
-        if objs is None:
-            raise ValueError("ERROR: Passed objects are null.")
+    build_vrt(constants.TEMP_VRT_FILE, files, resample)
 
-        descriptors = []
-        for obj in objs:
-            if not os.path.isfile(obj[0]):
-                continue
+    gdal.SetConfigOption('GDAL_VRT_ENABLE_PYTHON', 'YES')
 
-            file_name = obj[0]
-            sat_type  = obj[1]
-            image     = plt.imread(file_name)
+    gdal.Translate(destName=output_file,
+                   srcDS=constants.TEMP_VRT_FILE)
 
-            dtime            = self.extract_date(file_name)
-            top, bot, center = self.extract_coords(image, sat_type, dtime)
-            degree           = self.compute_angle(*bot, *top)
+    gdal.SetConfigOption('GDAL_VRT_ENABLE_PYTHON', None)
 
-            descriptor = {
-                "image_name": file_name,
-                "sat_type": sat_type,
-                "date_time": "",
-                "center": list(center),
-                "direction": degree
-            }
+    if os.path.isfile(constants.TEMP_VRT_FILE):
+        os.remove(constants.TEMP_VRT_FILE)
 
-            descriptors.append(descriptor)
 
-        return self.merge(descriptors, whole, resolution)
+def main():
+    """CLI interface for satellite image merger"""
 
-    def imread(self, file_name):
+    parser = argparse.ArgumentParser(description="Merger option parser")
+    parser.add_argument("-f", "--files", required=True, help="List of files to merge", nargs="+")
+    parser.add_argument("-o", "--output", required=True, help="Name of output file")
+    parser.add_argument("-r", "--resample", required=False, help="Resample algorithm", default="average")
 
-        '''read the image from file
+    args = parser.parse_args()
 
-        Args:
-            file_name (:obj:`string`): file_name
+    if args.files is None:
+        raise ValueError("ERROR: No input files passed.")
 
-        Returns:
-            image :obj:`np.ndarray`: image with fixed transparency
-            isGray :obj:`bool`: true if image is gray, false otherwise
-        '''
+    if len(args.files) == 1:
+        raise ValueError("ERROR: Merger takes at least 2 files, but 1 was given: {0}".format(args.files[0]))
 
-        image = mimg.imread(file_name)
-        return (image, len(image.shape) == 2)
+    merge(args.files, output_file=args.output, resample=args.resample)
 
-    def set_transparent(self, image, isGray):
 
-        '''set pixel transparency
-
-        Args:
-            image (:obj:`np.array`): image
-            isGray (:obj:`bool`): flag
-
-        Returns:
-            image :obj:`np.array`: image with fixed transparency
-        '''
-        # Unoptimized version
-        if not isGray:
-            for row in image:
-                for pixel in row:
-                    if pixel[0] > 250 and pixel[1] > 250 and pixel[2] > 250:
-                        pixel[3] = 0
-            return image
-        else:
-            array = np.zeros((image.shape[0], image.shape[1], 4))
-            for i, row in enumerate(image):
-                for index, val in enumerate(row):
-                    array[i][index] = np.array([val/255, val/255, val/255, (0 if val == 0 else 1)])
-            return array
-
-    def update_extents(self, extent):
-
-        '''update bounds of the projection
-
-        Args:
-            extent (:obj:`tuple`): current image bounds
-        '''
-
-        self.left_ex  = min(self.left_ex,  extent[0])
-        self.right_ex = max(self.right_ex, extent[1])
-        self.bot_ex   = min(self.bot_ex,   extent[2])
-        self.top_ex   = max(self.top_ex,   extent[3])
-
-    def add_m(self, center, dx, dy):
-        # source: https://stackoverflow.com/questions/7477003/calculating-new-longitude-latitude-from-old-n-meters
-        new_latitude  = center[0] + (dy / 6371000.0) * (180 / np.pi)
-        new_longitude = center[1] + (dx / 6371000.0) * (180 / np.pi) / np.cos(center[0] * np.pi/180)
-        return (new_latitude, new_longitude)
-
-if __name__ == "__main__":
-    m = ImageMerger()
+if __name__ == '__main__':
+    main()

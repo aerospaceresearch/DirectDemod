@@ -7,14 +7,14 @@ from directdemod.misc import extract_date, to_datetime
 class TestExtraction(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.f1 = 'SDRSharp_20180615_140752Z_137120000Hz_IQ'
-        self.f2 = 'SDRSharp_20190521_152538Z_137500000Hz_IQ'
-        self.f3 = 'SDRSharp_20190521_165349Z_137500000Hz_IQ'
+    def setUpClass(cls):
+        cls.f1 = 'SDRSharp_20180615_140752Z_137120000Hz_IQ'
+        cls.f2 = 'SDRSharp_20190521_152538Z_137500000Hz_IQ'
+        cls.f3 = 'SDRSharp_20190521_165349Z_137500000Hz_IQ'
 
-        self.d1 = datetime(2018, 6, 15, 14,  7, 52)
-        self.d2 = datetime(2019, 5, 21, 15, 25, 38)
-        self.d3 = datetime(2019, 5, 21, 16, 53, 49)
+        cls.d1 = datetime(2018, 6, 15, 14, 7, 52)
+        cls.d2 = datetime(2019, 5, 21, 15, 25, 38)
+        cls.d3 = datetime(2019, 5, 21, 16, 53, 49)
 
     def test_extract_date(self):
         d1 = extract_date(self.f1)
