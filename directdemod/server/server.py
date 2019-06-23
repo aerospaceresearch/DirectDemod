@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/index.html')
 @app.route('/')
 def index():
-    return "Start page."
+    return "Starting page."
 
 
 @app.route('/map.html')

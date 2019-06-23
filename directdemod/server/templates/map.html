@@ -1,6 +1,6 @@
 <!DOCTYPE html>
     <html lang="en">
-        // reworked from http://www.klokan.cz/projects/gdal2tiles
+        <!-- reworked from http://www.klokan.cz/projects/gdal2tiles -->
 
         <head>
             <meta charset="utf-8">
@@ -11,23 +11,64 @@
             <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
             <script src="{{ url_for('static', filename='scripts/leaflet.js') }}"></script>
 
+            <!-- JQuery -->
+            <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+                    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+                    crossorigin="anonymous">
+            </script>
+            <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+                    integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+                    crossorigin="anonymous">
+            </script>
+            <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
             <!-- CSS -->
             <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         </head>
         <body>
 
+        <div id="slider-time"></div>
         <div id="map"></div>
 
         <script>
 
         var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
         var layer = L.tileLayer('tms/{z}/{x}/{y}.png', {tms: true, opacity: 0.7, attribution: ""});
+
+        var layers = [layer]
+        var current = layers[0]
+
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
             zoom: 3,
             minZoom: 1,
             maxZoom: 6,
-            layers: [osm, layer]
+            layers: [osm, current]
+        });
+
+        function refreshTime(event, ui) {
+            var value = ui.value - 1;
+            console.log(value);
+            if (value >= 0 && value < layers.length) {
+                if (layers[value] === current) {
+                   return;
+                } else {
+                   map.removeLayer(current);
+                   current = layers[value];
+                   map.addLayer(current);
+                }
+            }
+        }
+
+        $("#slider-time").slider({
+            orientation: "horizontal",
+            range: "min",
+            max: layers.length,
+            min: 1,
+            step: 1,
+            value: 1,
+            slide: refreshTime,
+            change: refreshTime
         });
 
         </script>
