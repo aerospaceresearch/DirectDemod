@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+
+    <!-- WebGLEarth -->
+    <script src="{{ url_for('static', filename='scripts/api.js') }}"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script>
+      function initialize() {
+        var earth = new WE.map('earth_div');
+        WE.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(earth);
+        WE.tileLayer('tms/{z}/{x}/{y}.png', {
+            tms: true,
+            opacity: 0.7
+        }).addTo(earth);
+      }
+    </script>
+  </head>
+  <body onload="initialize()">
+    <div id="earth_div"></div>
+  </body>
+</html>
