@@ -10,6 +10,7 @@ import os
 
 from PIL import Image
 from osgeo import gdal
+from shutil import copyfile
 from osgeo.gdal import GRA_NearestNeighbour, GRA_Bilinear, GRA_Cubic
 from geographiclib.geodesic import Geodesic
 from datetime import timedelta
@@ -313,7 +314,13 @@ def tif_to_png(filename, png, grayscale=True):
         raise NotImplementedError
 
 
-def set_nodata(filename, output_file, value=0):
+def set_nodata(filename, value=0):
+    _set_nodata(filename, constants.TEMP_TIFF_FILE, value=value)
+    copyfile(constants.TEMP_TIFF_FILE, filename)
+    os.remove(constants.TEMP_TIFF_FILE)
+
+
+def _set_nodata(filename, output_file, value=0):
 
     """sets no-data value of tif 'file_name' to 'value', saves to output_file
 
