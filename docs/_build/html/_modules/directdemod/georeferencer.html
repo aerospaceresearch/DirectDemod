@@ -158,6 +158,7 @@
 
 <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
 <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">copyfile</span>
 <span class="kn">from</span> <span class="nn">osgeo.gdal</span> <span class="k">import</span> <span class="n">GRA_NearestNeighbour</span><span class="p">,</span> <span class="n">GRA_Bilinear</span><span class="p">,</span> <span class="n">GRA_Cubic</span>
 <span class="kn">from</span> <span class="nn">geographiclib.geodesic</span> <span class="k">import</span> <span class="n">Geodesic</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
@@ -459,6 +460,12 @@
         <span class="n">img</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">png</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="n">_set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">copyfile</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
