@@ -27,17 +27,25 @@
         </head>
         <body>
 
+        <div id="counter" style="display: none;">{{ counter - 1 }}</div>
         <div id="slider-time"></div>
         <div id="map"></div>
 
         <script>
 
         var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
-        var layer = L.tileLayer('tms/{z}/{x}/{y}.png', {tms: true, opacity: 0.7, attribution: ""});
 
-        var layers = [layer]
+        var layers = []
+        console.log($("#counter").text());
+        var counter = parseInt($('#counter').text(), 10)
+        console.log(counter);
+        for (let i = 1; i <= counter; i++) {
+            console.log('tms/tms' + i + '/{z}/{x}/{y}.png');
+            layers.push(L.tileLayer('tms/tms' + i + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7, attribution: ""}))
+        }
+
         var current = layers[0]
-
+        console.log(layers);
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
             zoom: 3,
@@ -48,7 +56,6 @@
 
         function refreshTime(event, ui) {
             var value = ui.value - 1;
-            console.log(value);
             if (value >= 0 && value < layers.length) {
                 if (layers[value] === current) {
                    return;

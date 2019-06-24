@@ -35,14 +35,13 @@
 
         function refreshTime(event, ui) {
             var value = ui.value - 1;
-            console.log(value);
             if (value >= 0 && value < layers.length) {
                 if (layers[value] === current) {
                    return;
                 } else {
-                   map.removeLayer(current);
+                   current.removeFrom(earth)
                    current = layers[value];
-                   map.addLayer(current);
+                   current.addTo(earth)
                 }
             }
         }
