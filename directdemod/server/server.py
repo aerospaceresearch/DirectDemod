@@ -99,12 +99,11 @@ def process(dir_path, tms_path, images):
     if len(georeferenced) > 1:
         print("Multi tms.")
         merge(georeferenced, output_file=merged_file)
-        set_nodata(merged_file, value=255)
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " + merged_file + " " + tms_path)
     elif len(georeferenced) == 1:
         print("Tms for single file.")
         copyfile(georeferenced[0], merged_file)
-        set_nodata(merged_file, value=255)
+        set_nodata(merged_file, value=0)
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " + merged_file + " " + tms_path)
     else:
         global counter

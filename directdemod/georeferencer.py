@@ -316,6 +316,7 @@ def tif_to_png(filename, png, grayscale=True):
 
 def set_nodata(filename, value=0):
     _set_nodata(filename, constants.TEMP_TIFF_FILE, value=value)
+    os.remove(filename)
     copyfile(constants.TEMP_TIFF_FILE, filename)
     os.remove(constants.TEMP_TIFF_FILE)
 
