@@ -27,25 +27,26 @@
         </head>
         <body>
 
-        <div id="counter" style="display: none;">{{ counter - 1 }}</div>
+        <div id="json-data" style="display: none;">{{ conf }}</div>
         <div id="slider-time"></div>
         <div id="map"></div>
 
-        <script>
+        <script type="text/javascript">
 
         var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
 
-        var layers = []
-        console.log($("#counter").text());
-        var counter = parseInt($('#counter').text(), 10)
-        console.log(counter);
+        var data = JSON.parse($("#json-data").text());
+
+        var layers = [];
+
+        var counter = parseInt(data["counter"] - 1, 10);
+
         for (let i = 1; i <= counter; i++) {
-            console.log('tms/tms' + i + '/{z}/{x}/{y}.png');
-            layers.push(L.tileLayer('tms/tms' + i + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7, attribution: ""}))
+            layers.push(L.tileLayer('tms/tms' + data["" + i] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}))
         }
 
-        var current = layers[0]
-        console.log(layers);
+        var current = layers[0];
+
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
             zoom: 3,
