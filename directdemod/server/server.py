@@ -116,6 +116,7 @@ def process(dir_path, tms_path, images):
             referencer.georef_tif(georeferenced[index], georeferenced[index])
         except Exception as e:
             print(e)
+            # FIXME: add logging
             continue
 
     merged_file = dir_path + "/merged.tif"

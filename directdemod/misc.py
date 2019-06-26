@@ -1,10 +1,8 @@
 """
 tools for data extraction and json manipulations
 """
-import io
 import os.path
 import json
-import urllib.request
 import tifffile
 import argparse
 import numpy as np
@@ -14,98 +12,6 @@ from scipy.ndimage import rotate
 from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
-
-"""
-The class provides functionality to determine whether all needed
-libraries are installed and functional.
-"""
-
-
-class Checker:
-
-    """
-    The class provides functionality to determine whether needed
-    libraries are installed and could be imported.
-    """
-
-    @staticmethod
-    def check_libs():
-
-        """check if pyorbital and (cartopy or basemap) are installed
-
-        Throws:
-            :obj:`ModuleNotFoundError`: if modules are not installed
-        """
-
-        if not Checker.check_pyorbital():
-            raise ModuleNotFoundError("Pyorbital must be installed.")
-
-        if not Checker.check_cartopy() and not Checker.check_basemap():
-            raise ModuleNotFoundError("Cartopy or Basemap must be installed.")
-
-    @staticmethod
-    def check_pyorbital():
-
-        """check if pyorbital is installed
-
-        Returns:
-            :obj:`bool`: true if installed, false otherwise
-        """
-
-        try:
-            import pyorbital
-            from pyorbital import tlefile
-            from pyorbital.orbital import Orbital
-            return True
-        except ModuleNotFoundError:
-            return False
-
-    @staticmethod
-    def check_cartopy():
-
-        """check if cartopy is installed
-
-        Returns:
-            :obj:`bool`: true if installed, false otherwise
-        """
-
-        try:
-            import cartopy
-            import cartopy.crs
-            import cartopy.feature
-            return True
-        except ModuleNotFoundError:
-            return False
-
-    @staticmethod
-    def check_basemap():
-
-        """check if basemap is installed
-
-        Returns:
-            :obj:`bool`: true if installed, false otherwise
-        """
-
-        try:
-            import mpl_toolkits.basemap
-            from mpl_toolkits.basemap import Basemap
-            return True
-        except ModuleNotFoundError:
-            return False
-
-    @staticmethod
-    def check_gdal():
-        """check if basemap is installed
-
-        Returns:
-            :obj:`bool`: true if installed, false otherwise
-        """
-
-        try:
-            from osgeo import gdal
-            return True
-        except ModuleNotFoundError:
-            return False
 
 
 """
@@ -136,87 +42,6 @@ class Encoder(json.JSONEncoder):
         if isinstance(obj, datetime):
             return obj.isoformat()
         return super.default(self, obj)
-
-
-class JSON:
-
-    """
-    Wrapper class over json module to add numpy and datetime json serialization.
-    Similar to Js JSON module
-    """
-
-    @staticmethod
-    def stringify(json_dict):
-
-        """convert dict to json string
-
-        Args:
-            json_dict (:obj:`dict`): object to convert
-
-        Returns:
-            :obj:`string`: json string
-        """
-
-        return json.dumps(json_dict, cls=Encoder)
-
-    @staticmethod
-    def parse(string):
-
-        """convert json string to dict
-
-        Args:
-            string (:obj:`string`): string to convert
-
-        Returns:
-            :obj:`dict`: json dictionary
-        """
-
-        return json.loads(string)
-
-    @staticmethod
-    def from_file(filename):
-
-        """convert text from file into json dict
-
-        Args:
-            filename (:obj:`string`): path to file
-
-        Returns:
-            :obj:`dict`: json dictionary
-        """
-
-        if isinstance(filename, io.IOBase):
-            return json.load(filename)
-
-        with open(filename, 'r') as f:
-            return json.load(f)
-
-    @staticmethod
-    def from_url(url):
-
-        """convert text from url into json dict
-
-        Args:
-            url (:obj:`string`): path to url
-
-        Returns:
-            :obj:`dict`: json dictionary
-        """
-
-        return json.load(urllib.request.urlopen(url))
-
-    @staticmethod
-    def save(json_dict, output_file):
-
-        """serialize json dict into file
-
-        Args:
-            json_dict (:obj:`dict`): dictionary
-            output_file (:obj:`string`): path to file
-        """
-
-        with open(output_file, 'w') as out:
-            json.dump(json_dict, out, cls=Encoder)
 
 
 def to_datetime(image_time, image_date):
@@ -402,7 +227,7 @@ def save_metadata(file_name, image_name, sat_type="NOAA 19", tle_file=None):
                              sat_type=sat_type,
                              tle_file=tle_file)
 
-    tifffile.imsave(name + '.tif', image, description=JSON.stringify(descriptor))
+    tifffile.imsave(name + '.tif', image, description=json.dumps(descriptor, cls=Encoder))
 
 
 def preprocess(image_name, output_file):

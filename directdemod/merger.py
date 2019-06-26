@@ -32,7 +32,7 @@ def build_vrt(vrt, files, resample_name):
 
 def add_pixel_fn(filename, resample_name):
 
-    """inserts pixel-function into filename
+    """inserts pixel-function into vrt file named 'filename'
 
     Args:
         filename (:obj:`string`): name of file, into which the function will be inserted

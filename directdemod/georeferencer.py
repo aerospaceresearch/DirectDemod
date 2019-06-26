@@ -5,6 +5,7 @@ import dateutil.parser as dparser
 import matplotlib.image as mimg
 import numpy as np
 import argparse
+import json
 import tifffile
 import os
 
@@ -16,7 +17,7 @@ from geographiclib.geodesic import Geodesic
 from datetime import timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
-from directdemod.misc import JSON
+from directdemod.misc import Encoder
 
 """
 This class provides an API for image georeferencing,
@@ -60,7 +61,7 @@ class Georeferencer:
             page = f.pages[0]
             descriptor = page.tags["ImageDescription"].value
 
-        descriptor = JSON.parse(descriptor)
+        descriptor = json.loads(descriptor)
 
         self.georef(descriptor, output_file, resampleAlg)
 
@@ -165,7 +166,7 @@ class Georeferencer:
 
         name, extension = os.path.splitext(output_file)
         desc_name = name + "_desc.json"
-        JSON.save(desc, desc_name)
+        json.dump(desc, open(desc_name, 'w'), cls=Encoder)
 
     def compute_gcps(self, descriptor, image):
 
