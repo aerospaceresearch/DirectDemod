@@ -34,8 +34,7 @@ def upload_page():
         for key in request.files.keys():
             f = request.files[key]
             if bool(pattern.match(f.filename)):
-                print("Saved: " + dir_path + "/" + f.filename)
-                f.save(dir_path + "/" + f.filename)
+                f.save(dir_path + "/" + request.form["sat_type"] + "_" + f.filename)
 
     return render_template('upload.html', conf=json.dumps(conf))
 
@@ -102,15 +101,17 @@ def process(dir_path, tms_path, images):
     from directdemod.merger import merge
     from directdemod.constants import TLE_NOAA
 
+    sat_types = list(map(lambda f: f[0:7], images))
     images = list(map(lambda f: dir_path + "/" + f, images))
     georeferenced = list(map(lambda f: os.path.splitext(f)[0] + "_geo.tif", images))
     referencer = Georeferencer(tle_file=TLE_NOAA)
+
     for index, val in enumerate(images):
         try:
             preprocess(val, georeferenced[index])
             save_metadata(file_name=val,
                           image_name=georeferenced[index],
-                          sat_type="NOAA 19",
+                          sat_type=sat_types[index],  # extracting NOAA satellite
                           tle_file=TLE_NOAA)
             referencer.georef_tif(georeferenced[index], georeferenced[index])
         except Exception as e:
