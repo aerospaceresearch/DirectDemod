@@ -149,10 +149,8 @@
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">tools for data extraction and json manipulations</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">urllib.request</span>
 <span class="kn">import</span> <span class="nn">tifffile</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -162,98 +160,6 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
-
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">The class provides functionality to determine whether all needed</span>
-<span class="sd">libraries are installed and functional.</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-
-<div class="viewcode-block" id="Checker"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker">[docs]</a><span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The class provides functionality to determine whether needed</span>
-<span class="sd">    libraries are installed and could be imported.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="Checker.check_libs"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_libs">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_libs</span><span class="p">():</span>
-
-        <span class="sd">&quot;&quot;&quot;check if pyorbital and (cartopy or basemap) are installed</span>
-
-<span class="sd">        Throws:</span>
-<span class="sd">            :obj:`ModuleNotFoundError`: if modules are not installed</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_pyorbital</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Pyorbital must be installed.&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_cartopy</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Checker</span><span class="o">.</span><span class="n">check_basemap</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="n">ModuleNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cartopy or Basemap must be installed.&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Checker.check_pyorbital"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_pyorbital">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_pyorbital</span><span class="p">():</span>
-
-        <span class="sd">&quot;&quot;&quot;check if pyorbital is installed</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">pyorbital</span>
-            <span class="kn">from</span> <span class="nn">pyorbital</span> <span class="k">import</span> <span class="n">tlefile</span>
-            <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Checker.check_cartopy"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_cartopy">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_cartopy</span><span class="p">():</span>
-
-        <span class="sd">&quot;&quot;&quot;check if cartopy is installed</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">cartopy</span>
-            <span class="kn">import</span> <span class="nn">cartopy.crs</span>
-            <span class="kn">import</span> <span class="nn">cartopy.feature</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Checker.check_basemap"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_basemap">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_basemap</span><span class="p">():</span>
-
-        <span class="sd">&quot;&quot;&quot;check if basemap is installed</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">mpl_toolkits.basemap</span>
-            <span class="kn">from</span> <span class="nn">mpl_toolkits.basemap</span> <span class="k">import</span> <span class="n">Basemap</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Checker.check_gdal"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.Checker.check_gdal">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">check_gdal</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot;check if basemap is installed</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`bool`: true if installed, false otherwise</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="n">ModuleNotFoundError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -284,87 +190,6 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">super</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div></div>
-
-
-<div class="viewcode-block" id="JSON"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON">[docs]</a><span class="k">class</span> <span class="nc">JSON</span><span class="p">:</span>
-
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Wrapper class over json module to add numpy and datetime json serialization.</span>
-<span class="sd">    Similar to Js JSON module</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="JSON.stringify"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.stringify">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">stringify</span><span class="p">(</span><span class="n">json_dict</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;convert dict to json string</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            json_dict (:obj:`dict`): object to convert</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`string`: json string</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="JSON.parse"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.parse">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;convert json string to dict</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            string (:obj:`string`): string to convert</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`dict`: json dictionary</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="JSON.from_file"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.from_file">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;convert text from file into json dict</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filename (:obj:`string`): path to file</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`dict`: json dictionary</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">IOBase</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="JSON.from_url"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.from_url">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_url</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;convert text from url into json dict</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            url (:obj:`string`): path to url</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            :obj:`dict`: json dictionary</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">))</span></div>
-
-<div class="viewcode-block" id="JSON.save"><a class="viewcode-back" href="../../visualization.html#directdemod.misc.JSON.save">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>
-
-        <span class="sd">&quot;&quot;&quot;serialize json dict into file</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            json_dict (:obj:`dict`): dictionary</span>
-<span class="sd">            output_file (:obj:`string`): path to file</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
-            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">to_datetime</span><span class="p">(</span><span class="n">image_time</span><span class="p">,</span> <span class="n">image_date</span><span class="p">):</span>
@@ -550,7 +375,7 @@
                              <span class="n">sat_type</span><span class="o">=</span><span class="n">sat_type</span><span class="p">,</span>
                              <span class="n">tle_file</span><span class="o">=</span><span class="n">tle_file</span><span class="p">)</span>
 
-    <span class="n">tifffile</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">JSON</span><span class="o">.</span><span class="n">stringify</span><span class="p">(</span><span class="n">descriptor</span><span class="p">))</span>
+    <span class="n">tifffile</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.tif&#39;</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">image_name</span><span class="p">,</span> <span class="n">output_file</span><span class="p">):</span>

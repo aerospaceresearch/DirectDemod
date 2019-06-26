@@ -84,28 +84,11 @@ To use `globe.html` go to tms directory and type the following command to start 
 
 Then open browser and go to `http://localhost:8000/globe.html`.
 
-Library checker
----------------
-
-.. autoclass:: directdemod.misc.Checker
-   :members:
-
-   .. automethod:: __init__
-
 Json encoder
 ------------
 Json encoder, which handles encoding numpy array and datetime objects.
 
 .. autoclass:: directdemod.misc.Encoder
-   :members:
-
-   .. automethod:: __init__
-
-Json parser
-------------
-JS-style wrapper around json, which uses provided Json encoder.
-
-.. autoclass:: directdemod.misc.JSON
    :members:
 
    .. automethod:: __init__

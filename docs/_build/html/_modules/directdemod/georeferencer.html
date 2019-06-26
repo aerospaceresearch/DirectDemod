@@ -153,6 +153,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="k">as</span> <span class="nn">mimg</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">tifffile</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -164,7 +165,7 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">pyorbital.orbital</span> <span class="k">import</span> <span class="n">Orbital</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
-<span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">JSON</span>
+<span class="kn">from</span> <span class="nn">directdemod.misc</span> <span class="k">import</span> <span class="n">Encoder</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This class provides an API for image georeferencing,</span>
@@ -208,7 +209,7 @@
             <span class="n">page</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">descriptor</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="s2">&quot;ImageDescription&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">descriptor</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">georef</span><span class="p">(</span><span class="n">descriptor</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resampleAlg</span><span class="p">)</span></div>
 
@@ -313,7 +314,7 @@
 
         <span class="n">name</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span>
         <span class="n">desc_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_desc.json&quot;</span>
-        <span class="n">JSON</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="n">desc_name</span><span class="p">)</span></div>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">desc_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Encoder</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Georeferencer.compute_gcps"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.compute_gcps">[docs]</a>    <span class="k">def</span> <span class="nf">compute_gcps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">image</span><span class="p">):</span>
 
@@ -464,6 +465,7 @@
 
 <span class="k">def</span> <span class="nf">set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="n">_set_nodata</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">copyfile</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">)</span>
 

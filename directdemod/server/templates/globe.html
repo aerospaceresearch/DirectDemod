@@ -38,7 +38,7 @@
 
         var index = layers[0], current = WE.tileLayer('tms/tms' + index + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
         current.addTo(earth);
-        
+
         function refreshTime(event, ui) {
             var value = ui.value - 1;
             if (value >= 0 && value < layers.length) {
