@@ -54,7 +54,8 @@
             }
         }
 
-        $("#slider-time").slider({
+        $("#slider-time").slider('float', {
+            labels: layers,
             orientation: "horizontal",
             range: "min",
             max: layers.length,

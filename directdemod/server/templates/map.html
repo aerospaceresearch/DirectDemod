@@ -29,6 +29,7 @@
 
         <div id="json-data" style="display: none;">{{ conf }}</div>
         <div id="slider-time"></div>
+        <span id="slider-caption"></span>
         <div id="map"></div>
 
         <script type="text/javascript">
@@ -37,15 +38,17 @@
 
         var data = JSON.parse($("#json-data").text());
 
-        var layers = [];
+        var layers = [], labels = [];
 
         var counter = parseInt(data["counter"] - 1, 10);
 
         for (let i = 1; i <= counter; i++) {
-            layers.push(L.tileLayer('tms/tms' + data["" + i] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}))
+            labels.push(data["" + i]);
+            layers.push(L.tileLayer('tms/tms' + data["" + i] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
         }
 
         var current = layers[0];
+        $("#slider-caption").text(labels[0]);
 
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
@@ -64,6 +67,7 @@
                    map.removeLayer(current);
                    current = layers[value];
                    map.addLayer(current);
+                   $("#slider-caption").text(labels[value]);
                 }
             }
         }
