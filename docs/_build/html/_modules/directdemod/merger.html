@@ -147,24 +147,20 @@
             
   <h1>Source code for directdemod.merger</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">merger of NOAA satellite images</span>
+<span class="sd">This module provides an API for merging multiple images.</span>
+<span class="sd">It extracts needed information and projects images on mercator</span>
+<span class="sd">projection.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="k">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">osgeo</span> <span class="k">import</span> <span class="n">gdal</span>
 <span class="kn">from</span> <span class="nn">directdemod</span> <span class="k">import</span> <span class="n">constants</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This class provides an API for merging multiple images.</span>
-<span class="sd">It extracts needed information and projects images on mercator</span>
-<span class="sd">projection.</span>
-<span class="sd">&quot;&quot;&quot;</span>
 
-
-<div class="viewcode-block" id="build_vrt"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.build_vrt">[docs]</a><span class="k">def</span> <span class="nf">build_vrt</span><span class="p">(</span><span class="n">vrt</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">):</span>
-
+<div class="viewcode-block" id="build_vrt"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.build_vrt">[docs]</a><span class="k">def</span> <span class="nf">build_vrt</span><span class="p">(</span><span class="n">vrt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">resample_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;builds .vrt file which will hold information needed for overlay</span>
 
 <span class="sd">    Args:</span>
@@ -178,8 +174,7 @@
     <span class="n">add_pixel_fn</span><span class="p">(</span><span class="n">vrt</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="add_pixel_fn"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.add_pixel_fn">[docs]</a><span class="k">def</span> <span class="nf">add_pixel_fn</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">):</span>
-
+<div class="viewcode-block" id="add_pixel_fn"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.add_pixel_fn">[docs]</a><span class="k">def</span> <span class="nf">add_pixel_fn</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resample_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;inserts pixel-function into vrt file named &#39;filename&#39;</span>
 
 <span class="sd">    Args:</span>
@@ -195,13 +190,13 @@
 <span class="s2">    &lt;/PixelFunctionCode&gt;&quot;&quot;&quot;</span>
 
     <span class="n">lines</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
-    <span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span>  <span class="c1"># FIX ME: 3 is a hand constant, if created file doesn&#39;t match it, there will be an error</span>
-    <span class="n">lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">contents</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resample_name</span><span class="p">,</span> <span class="n">get_resample</span><span class="p">(</span><span class="n">resample_name</span><span class="p">)))</span>
+    <span class="n">lines</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span>  <span class="c1"># FIX ME: 3 is a hand constant</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">contents</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">resample_name</span><span class="p">,</span>
+                                    <span class="n">get_resample</span><span class="p">(</span><span class="n">resample_name</span><span class="p">)))</span>
     <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="get_resample"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.get_resample">[docs]</a><span class="k">def</span> <span class="nf">get_resample</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-
+<div class="viewcode-block" id="get_resample"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.get_resample">[docs]</a><span class="k">def</span> <span class="nf">get_resample</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;retrieves code for resampling method</span>
 
 <span class="sd">    Args:</span>
@@ -212,65 +207,69 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">methods</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">import numpy as np</span>
+        <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">import numpy as np</span>
 
-<span class="s2">def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
-<span class="s2">    y = np.ones(in_ar[0].shape)</span>
-<span class="s2">    for i in reversed(range(len(in_ar))):</span>
-<span class="s2">        mask = in_ar[i] == 0</span>
-<span class="s2">        y *= mask</span>
-<span class="s2">        y += in_ar[i]</span>
+<span class="sd">def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="sd">    y = np.ones(in_ar[0].shape)</span>
+<span class="sd">    for i in reversed(range(len(in_ar))):</span>
+<span class="sd">        mask = in_ar[i] == 0</span>
+<span class="sd">        y *= mask</span>
+<span class="sd">        y += in_ar[i]</span>
 
-<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;last&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">import numpy as np</span>
+<span class="sd">    np.clip(y,0,255, out=out_ar)</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">import numpy as np</span>
 
-<span class="s2">def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
-<span class="s2">    y = np.ones(in_ar[0].shape)</span>
-<span class="s2">    for i in range(len(in_ar)):</span>
-<span class="s2">        mask = in_ar[i] == 0</span>
-<span class="s2">        y *= mask</span>
-<span class="s2">        y += in_ar[i]</span>
+<span class="sd">def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="sd">    y = np.ones(in_ar[0].shape)</span>
+<span class="sd">    for i in range(len(in_ar)):</span>
+<span class="sd">        mask = in_ar[i] == 0</span>
+<span class="sd">        y *= mask</span>
+<span class="sd">        y += in_ar[i]</span>
 
-<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">import numpy as np</span>
+<span class="sd">    np.clip(y,0,255, out=out_ar)</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">import numpy as np</span>
 
-<span class="s2">def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
-<span class="s2">    y = np.max(in_ar, axis=0)</span>
-<span class="s2">    np.clip(y,0,255, out=out_ar)</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;average&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">import numpy as np</span>
+<span class="sd">def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="sd">    y = np.max(in_ar, axis=0)</span>
+<span class="sd">    np.clip(y,0,255, out=out_ar)</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">import numpy as np</span>
 
-<span class="s2">def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
-<span class="s2">    div = np.zeros(in_ar[0].shape)</span>
-<span class="s2">    for i in range(len(in_ar)):</span>
-<span class="s2">        div += (in_ar[i] != 0)</span>
-<span class="s2">    div[div == 0] = 1</span>
-<span class="s2">    </span>
-<span class="s2">    y = np.sum(in_ar, axis = 0, dtype = &#39;uint16&#39;)</span>
-<span class="s2">    y = y / div</span>
-<span class="s2">    </span>
-<span class="s2">    np.clip(y,0,255, out = out_ar)</span>
-<span class="s2">&quot;&quot;&quot;</span>
-    <span class="p">}</span>
+<span class="sd">def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):</span>
+<span class="sd">    div = np.zeros(in_ar[0].shape)</span>
+<span class="sd">    for i in range(len(in_ar)):</span>
+<span class="sd">        div += (in_ar[i] != 0)</span>
+<span class="sd">    div[div == 0] = 1</span>
+<span class="sd">    </span>
+<span class="sd">    y = np.sum(in_ar, axis = 0, dtype = &#39;uint16&#39;)</span>
+<span class="sd">    y = y / div</span>
+<span class="sd">    </span>
+<span class="sd">    np.clip(y,0,255, out = out_ar)</span>
+<span class="sd">&quot;&quot;&quot;</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Unrecognized resampling method (see documentation): &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;ERROR: Unrecognized resampling method (see documentation): &#39;</span><span class="si">{}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span>
+            <span class="nb">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">methods</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="merge"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.merge">[docs]</a><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">):</span>
-
+<div class="viewcode-block" id="merge"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.merge">[docs]</a><span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="n">files</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">resample</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;average&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;merges list of files using specific resample method for overlapping parts</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        files (:obj:`string`): list of files to merge</span>
+<span class="sd">        files (:obj:`list[string]`): list of files to merge</span>
 <span class="sd">        output_file (:obj:`string`): name of output file</span>
 <span class="sd">        resample (:obj:`string`): name of resampling method</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -279,8 +278,7 @@
 
     <span class="n">gdal</span><span class="o">.</span><span class="n">SetConfigOption</span><span class="p">(</span><span class="s1">&#39;GDAL_VRT_ENABLE_PYTHON&#39;</span><span class="p">,</span> <span class="s1">&#39;YES&#39;</span><span class="p">)</span>
 
-    <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span>
-                   <span class="n">srcDS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">)</span>
+    <span class="n">gdal</span><span class="o">.</span><span class="n">Translate</span><span class="p">(</span><span class="n">destName</span><span class="o">=</span><span class="n">output_file</span><span class="p">,</span> <span class="n">srcDS</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">)</span>
 
     <span class="n">gdal</span><span class="o">.</span><span class="n">SetConfigOption</span><span class="p">(</span><span class="s1">&#39;GDAL_VRT_ENABLE_PYTHON&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
@@ -288,13 +286,24 @@
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_VRT_FILE</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../visualization.html#directdemod.merger.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;CLI interface for satellite image merger&quot;&quot;&quot;</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Merger option parser&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;--files&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List of files to merge&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--output&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of output file&quot;</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;--resample&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resample algorithm&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-f&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--files&quot;</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;List of files to merge&quot;</span><span class="p">,</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name of output file&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-r&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;--resample&quot;</span><span class="p">,</span>
+                        <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Resample algorithm&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;average&quot;</span><span class="p">)</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 
@@ -302,7 +311,9 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: No input files passed.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ERROR: Merger takes at least 2 files, but 1 was given: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;ERROR: Merger takes at least 2 files, but 1 was given: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span>
+            <span class="nb">format</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="n">merge</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">files</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">resample</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">resample</span><span class="p">)</span></div>
 

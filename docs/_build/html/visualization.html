@@ -193,10 +193,12 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 <td>name of resample algorithm</td></tr>
 </tbody>
 </table>
-<span class="target" id="module-directdemod.merger"></span><p>merger of NOAA satellite images</p>
+<span class="target" id="module-directdemod.merger"></span><p>This module provides an API for merging multiple images.
+It extracts needed information and projects images on mercator
+projection.</p>
 <dl class="function">
 <dt id="directdemod.merger.add_pixel_fn">
-<code class="descclassname">directdemod.merger.</code><code class="descname">add_pixel_fn</code><span class="sig-paren">(</span><em>filename</em>, <em>resample_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#add_pixel_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.add_pixel_fn" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">directdemod.merger.</code><code class="descname">add_pixel_fn</code><span class="sig-paren">(</span><em>filename: str</em>, <em>resample_name: str</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/merger.html#add_pixel_fn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.add_pixel_fn" title="Permalink to this definition">¶</a></dt>
 <dd><p>inserts pixel-function into vrt file named ‘filename’</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -214,7 +216,7 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 
 <dl class="function">
 <dt id="directdemod.merger.build_vrt">
-<code class="descclassname">directdemod.merger.</code><code class="descname">build_vrt</code><span class="sig-paren">(</span><em>vrt</em>, <em>files</em>, <em>resample_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#build_vrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.build_vrt" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">directdemod.merger.</code><code class="descname">build_vrt</code><span class="sig-paren">(</span><em>vrt: str, files: List[str], resample_name: str</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/merger.html#build_vrt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.build_vrt" title="Permalink to this definition">¶</a></dt>
 <dd><p>builds .vrt file which will hold information needed for overlay</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -233,7 +235,7 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 
 <dl class="function">
 <dt id="directdemod.merger.get_resample">
-<code class="descclassname">directdemod.merger.</code><code class="descname">get_resample</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#get_resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.get_resample" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">directdemod.merger.</code><code class="descname">get_resample</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/directdemod/merger.html#get_resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.get_resample" title="Permalink to this definition">¶</a></dt>
 <dd><p>retrieves code for resampling method</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -251,20 +253,20 @@ Merger supports several methods for overlapping parts of the images: <cite>avera
 
 <dl class="function">
 <dt id="directdemod.merger.main">
-<code class="descclassname">directdemod.merger.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">directdemod.merger.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/merger.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>CLI interface for satellite image merger</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="directdemod.merger.merge">
-<code class="descclassname">directdemod.merger.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>files</em>, <em>output_file</em>, <em>resample='average'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/merger.html#merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.merge" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">directdemod.merger.</code><code class="descname">merge</code><span class="sig-paren">(</span><em>files: List[str], output_file: str, resample: str = 'average'</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/merger.html#merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.merger.merge" title="Permalink to this definition">¶</a></dt>
 <dd><p>merges list of files using specific resample method for overlapping parts</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>files</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – list of files to merge</li>
+<li><strong>files</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">list[string]</span></code>) – list of files to merge</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of output file</li>
 <li><strong>resample</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of resampling method</li>
 </ul>
@@ -299,13 +301,13 @@ file in ‘.tif’ format. This file could be then used for georeferencing.</p>
 </table>
 <dl class="class">
 <dt id="directdemod.georeferencer.Georeferencer">
-<em class="property">class </em><code class="descclassname">directdemod.georeferencer.</code><code class="descname">Georeferencer</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">directdemod.georeferencer.</code><code class="descname">Georeferencer</code><span class="sig-paren">(</span><em>tle_file: str = ''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class provides an API for image georeferencing.
 It extracts the information from descriptor file, translates
 and warps the image to defined projection.</p>
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>tle_file=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>tle_file: str = ''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Georeferencer constructor</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -317,9 +319,9 @@ and warps the image to defined projection.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="directdemod.georeferencer.Georeferencer.compute_angle">
-<code class="descname">compute_angle</code><span class="sig-paren">(</span><em>long1</em>, <em>lat1</em>, <em>long2</em>, <em>lat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_angle" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">compute_angle</code><span class="sig-paren">(</span><em>long1: float</em>, <em>lat1: float</em>, <em>long2: float</em>, <em>lat2: float</em><span class="sig-paren">)</span> &#x2192; float<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_angle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_angle" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute angle between 2 points, defined by latitude and longitude</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -343,9 +345,9 @@ and warps the image to defined projection.</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="directdemod.georeferencer.Georeferencer.compute_gcp">
-<code class="descname">compute_gcp</code><span class="sig-paren">(</span><em>long</em>, <em>lat</em>, <em>angle</em>, <em>distance</em>, <em>w</em>, <em>h</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcp" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">compute_gcp</code><span class="sig-paren">(</span><em>long: float</em>, <em>lat: float</em>, <em>angle: float</em>, <em>distance: float</em>, <em>width: float</em>, <em>height: float</em><span class="sig-paren">)</span> &#x2192; osgeo.gdal.GCP<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcp" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute coordinate of GCP, using longitude and latitude of starting point,
 azimuth angle and distance to the point</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -357,8 +359,8 @@ azimuth angle and distance to the point</p>
 <li><strong>lat</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – latitude of start point</li>
 <li><strong>angle</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – azimuth between start point and GCP</li>
 <li><strong>(</strong> (<em>distance</em>) – obj: <cite>float</cite>): distance to point in meters</li>
-<li><strong>w</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – w-axis coordinate</li>
-<li><strong>h</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – h-axis coordinate</li>
+<li><strong>width</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – w-axis coordinate</li>
+<li><strong>height</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code>) – height-axis coordinate</li>
 </ul>
 </td>
 </tr>
@@ -374,7 +376,7 @@ azimuth angle and distance to the point</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.compute_gcps">
-<code class="descname">compute_gcps</code><span class="sig-paren">(</span><em>descriptor</em>, <em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcps" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compute_gcps</code><span class="sig-paren">(</span><em>descriptor: dict</em>, <em>image: numpy.ndarray</em><span class="sig-paren">)</span> &#x2192; List[osgeo.gdal.GCP]<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.compute_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.compute_gcps" title="Permalink to this definition">¶</a></dt>
 <dd><p>compute set of Ground Control Points</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -396,9 +398,9 @@ azimuth angle and distance to the point</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="directdemod.georeferencer.Georeferencer.create_desc">
-<code class="descname">create_desc</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.create_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.create_desc" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">create_desc</code><span class="sig-paren">(</span><em>descriptor: dict</em>, <em>output_file: str</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.create_desc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.create_desc" title="Permalink to this definition">¶</a></dt>
 <dd><p>create descriptor for <cite>output_file</cite> file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -416,7 +418,7 @@ azimuth angle and distance to the point</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef">
-<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef</code><span class="sig-paren">(</span><em>descriptor: dict</em>, <em>output_file: str</em>, <em>resample_alg=0</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from descriptor file using GDAL
 Python API</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -426,7 +428,7 @@ Python API</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>descriptor</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code>) – descriptor dictionary</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – name of the output file</li>
-<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code>, optional) – algorithm for resampling</li>
+<li><strong>resample_alg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">gdalconst</span></code>, optional) – algorithm for resampling</li>
 </ul>
 </td>
 </tr>
@@ -436,7 +438,7 @@ Python API</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef_os">
-<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor</em>, <em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef_os</code><span class="sig-paren">(</span><em>descriptor: dict</em>, <em>output_file: str</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_os"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_os" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from descriptor file, using GDAL
 compiled binaries. Can be used when gdal binaries are available only</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -455,7 +457,7 @@ compiled binaries. Can be used when gdal binaries are available only</p>
 
 <dl class="method">
 <dt id="directdemod.georeferencer.Georeferencer.georef_tif">
-<code class="descname">georef_tif</code><span class="sig-paren">(</span><em>image_name</em>, <em>output_file</em>, <em>resampleAlg=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_tif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_tif" title="Permalink to this definition">¶</a></dt>
+<code class="descname">georef_tif</code><span class="sig-paren">(</span><em>image_name: str</em>, <em>output_file: str</em>, <em>resample_alg=0</em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.georef_tif"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.georef_tif" title="Permalink to this definition">¶</a></dt>
 <dd><p>georeferences the satellite image from tif file using GDAL
 Python API. Descriptor is extracted directly from tif file</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -465,7 +467,7 @@ Python API. Descriptor is extracted directly from tif file</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>image_name</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to tiff file, which contains needed metadata</li>
 <li><strong>output_file</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – path to output file</li>
-<li><strong>resampleAlg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">string</span></code>) – resampling algorithm (nearest, bilinear, cubic)</li>
+<li><strong>resample_alg</strong> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">gdalconst</span></code>) – resampling algorithm (nearest, bilinear, cubic)</li>
 </ul>
 </td>
 </tr>
@@ -473,9 +475,9 @@ Python API. Descriptor is extracted directly from tif file</p>
 </table>
 </dd></dl>
 
-<dl class="method">
+<dl class="staticmethod">
 <dt id="directdemod.georeferencer.Georeferencer.to_string_gcps">
-<code class="descname">to_string_gcps</code><span class="sig-paren">(</span><em>gcps</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.to_string_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.to_string_gcps" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">to_string_gcps</code><span class="sig-paren">(</span><em>gcps: List[osgeo.gdal.GCP]</em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/directdemod/georeferencer.html#Georeferencer.to_string_gcps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.georeferencer.Georeferencer.to_string_gcps" title="Permalink to this definition">¶</a></dt>
 <dd><p>create string representation of gcp points</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -548,7 +550,7 @@ version of the object or raise a <code class="docutils literal notranslate"><spa
 
 <dl class="method">
 <dt id="directdemod.misc.Encoder.default">
-<code class="descname">default</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/directdemod/misc.html#Encoder.default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Encoder.default" title="Permalink to this definition">¶</a></dt>
+<code class="descname">default</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span> &#x2192; Any<a class="reference internal" href="_modules/directdemod/misc.html#Encoder.default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#directdemod.misc.Encoder.default" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encode the object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
