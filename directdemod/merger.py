@@ -1,22 +1,18 @@
 """
-merger of NOAA satellite images
+This module provides an API for merging multiple images.
+It extracts needed information and projects images on mercator
+projection.
 """
 
 import argparse
 import os
 
+from typing import List
 from osgeo import gdal
 from directdemod import constants
 
-"""
-This class provides an API for merging multiple images.
-It extracts needed information and projects images on mercator
-projection.
-"""
 
-
-def build_vrt(vrt, files, resample_name):
-
+def build_vrt(vrt: str, files: List[str], resample_name: str) -> None:
     """builds .vrt file which will hold information needed for overlay
 
     Args:
@@ -30,8 +26,7 @@ def build_vrt(vrt, files, resample_name):
     add_pixel_fn(vrt, resample_name)
 
 
-def add_pixel_fn(filename, resample_name):
-
+def add_pixel_fn(filename: str, resample_name: str) -> None:
     """inserts pixel-function into vrt file named 'filename'
 
     Args:
@@ -47,13 +42,13 @@ def add_pixel_fn(filename, resample_name):
     </PixelFunctionCode>"""
 
     lines = open(filename, 'r').readlines()
-    lines[3] = header  # FIX ME: 3 is a hand constant, if created file doesn't match it, there will be an error
-    lines.insert(4, contents.format(resample_name, get_resample(resample_name)))
+    lines[3] = header  # FIX ME: 3 is a hand constant
+    lines.insert(4, contents.format(resample_name,
+                                    get_resample(resample_name)))
     open(filename, 'w').write("".join(lines))
 
 
-def get_resample(name):
-
+def get_resample(name: str) -> str:
     """retrieves code for resampling method
 
     Args:
@@ -64,7 +59,8 @@ def get_resample(name):
     """
 
     methods = {
-        "first": """
+        "first":
+        """
 import numpy as np
 
 def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
@@ -76,7 +72,8 @@ def first(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, bu
 
     np.clip(y,0,255, out=out_ar)
 """,
-        "last": """
+        "last":
+        """
 import numpy as np
 
 def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
@@ -88,14 +85,16 @@ def last(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf
 
     np.clip(y,0,255, out=out_ar)
 """,
-        "max": """
+        "max":
+        """
 import numpy as np
 
 def max(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
     y = np.max(in_ar, axis=0)
     np.clip(y,0,255, out=out_ar)
 """,
-        "average": """
+        "average":
+        """
 import numpy as np
 
 def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, buf_radius, gt, **kwargs):
@@ -108,21 +107,21 @@ def average(in_ar, out_ar, xoff, yoff, xsize, ysize, raster_xsize,raster_ysize, 
     y = y / div
     
     np.clip(y,0,255, out = out_ar)
-"""
-    }
+"""}
 
     if name not in methods:
-        raise ValueError("ERROR: Unrecognized resampling method (see documentation): '{}'.".format(name))
+        raise ValueError(
+            "ERROR: Unrecognized resampling method (see documentation): '{}'.".
+            format(name))
 
     return methods[name]
 
 
-def merge(files, output_file, resample="average"):
-
+def merge(files: List[str], output_file: str, resample: str = "average") -> None:
     """merges list of files using specific resample method for overlapping parts
 
     Args:
-        files (:obj:`string`): list of files to merge
+        files (:obj:`list[string]`): list of files to merge
         output_file (:obj:`string`): name of output file
         resample (:obj:`string`): name of resampling method
     """
@@ -131,8 +130,7 @@ def merge(files, output_file, resample="average"):
 
     gdal.SetConfigOption('GDAL_VRT_ENABLE_PYTHON', 'YES')
 
-    gdal.Translate(destName=output_file,
-                   srcDS=constants.TEMP_VRT_FILE)
+    gdal.Translate(destName=output_file, srcDS=constants.TEMP_VRT_FILE)
 
     gdal.SetConfigOption('GDAL_VRT_ENABLE_PYTHON', None)
 
@@ -140,13 +138,24 @@ def merge(files, output_file, resample="average"):
         os.remove(constants.TEMP_VRT_FILE)
 
 
-def main():
+def main() -> None:
     """CLI interface for satellite image merger"""
 
     parser = argparse.ArgumentParser(description="Merger option parser")
-    parser.add_argument("-f", "--files", required=True, help="List of files to merge", nargs="+")
-    parser.add_argument("-o", "--output", required=True, help="Name of output file")
-    parser.add_argument("-r", "--resample", required=False, help="Resample algorithm", default="average")
+    parser.add_argument("-f",
+                        "--files",
+                        required=True,
+                        help="List of files to merge",
+                        nargs="+")
+    parser.add_argument("-o",
+                        "--output",
+                        required=True,
+                        help="Name of output file")
+    parser.add_argument("-r",
+                        "--resample",
+                        required=False,
+                        help="Resample algorithm",
+                        default="average")
 
     args = parser.parse_args()
 
@@ -154,7 +163,9 @@ def main():
         raise ValueError("ERROR: No input files passed.")
 
     if len(args.files) == 1:
-        raise ValueError("ERROR: Merger takes at least 2 files, but 1 was given: {0}".format(args.files[0]))
+        raise ValueError(
+            "ERROR: Merger takes at least 2 files, but 1 was given: {0}".
+            format(args.files[0]))
 
     merge(args.files, output_file=args.output, resample=args.resample)
 

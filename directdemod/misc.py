@@ -1,33 +1,30 @@
 """
-tools for data extraction and json manipulations
+Tools for data extraction and json manipulations.
+These classes provide API for the input/output operations
+with json files.
 """
 import os.path
 import json
-import tifffile
 import argparse
+
+from typing import Any
+from datetime import datetime, timedelta
+
 import numpy as np
+import tifffile
 
 from PIL import Image
 from scipy.ndimage import rotate
-from datetime import datetime, timedelta
 from pyorbital.orbital import Orbital
 from directdemod import constants
 
 
-"""
-These classes provide API for the input/output operations
-with json files.
-"""
-
-
 class Encoder(json.JSONEncoder):
-
     """
     JSON encoder, which handles `np.ndarray` and `datetime` objects
     """
 
-    def default(self, obj):
-
+    def default(self, obj) -> Any:
         """Encode the object
 
         Args:
@@ -41,11 +38,10 @@ class Encoder(json.JSONEncoder):
             return obj.tolist()
         if isinstance(obj, datetime):
             return obj.isoformat()
-        return super.default(self, obj)
+        return super(Encoder, self).default(obj)
 
 
-def to_datetime(image_time, image_date):
-
+def to_datetime(image_time: str, image_date: str) -> datetime:
     """builds datetime object
 
     Args:
@@ -63,10 +59,10 @@ def to_datetime(image_time, image_date):
         raise ValueError('ERROR: Invalid length of input dates.')
 
     try:
-        year   = int(image_date[0:4])
-        month  = int(image_date[4:6])
-        day    = int(image_date[6:8])
-        hour   = int(image_time[0:2])
+        year = int(image_date[0:4])
+        month = int(image_date[4:6])
+        day = int(image_date[6:8])
+        hour = int(image_time[0:2])
         minute = int(image_time[2:4])
         second = int(image_time[4:6])
 
@@ -76,8 +72,8 @@ def to_datetime(image_time, image_date):
         raise
 
 
-def compute_alt(orbiter, dtime, image, step):
-
+def compute_alt(orbiter: Orbital, dtime: datetime, image: np.ndarray,
+                step: float) -> tuple:
     """compute coordinates of the satellite, shifts the position for step pixels
 
     Args:
@@ -90,11 +86,11 @@ def compute_alt(orbiter, dtime, image, step):
         :obj:`tuple`: coordinates of satellite at certain point of time
     """
 
-    return orbiter.get_lonlatalt(dtime + timedelta(seconds=int(image.shape[0]/4) + step))[:2][::-1]
+    return orbiter.get_lonlatalt(dtime + timedelta(
+        seconds=int(image.shape[0] / 4) + step))[:2][::-1]
 
 
-def extract_date(filename):
-
+def extract_date(filename: str) -> datetime:
     """extracts date from filename
 
     Args:
@@ -115,13 +111,16 @@ def extract_date(filename):
             image_date = parts[index - 1]
 
     if image_date is None or image_time is None:
-        raise ValueError("ERROR: Invalid file name format \'" + str(filename) + "\'.")
+        raise ValueError("ERROR: Invalid file name format \'" + str(filename) +
+                         "\'.")
 
     return to_datetime(image_time, image_date)
 
 
-def extract_coords(image, satellite, dtime, tle_file=None):
-
+def extract_coords(image: np.ndarray,
+                   satellite: str,
+                   dtime: datetime,
+                   tle_file: str = None) -> tuple:
     """extracts coordinates of the image bounds
 
     Args:
@@ -134,19 +133,20 @@ def extract_coords(image, satellite, dtime, tle_file=None):
         :obj:`tuple`: extracted coordinates
     """
 
-    orbiter = Orbital(satellite) if tle_file is None else Orbital(satellite, tle_file=tle_file)
-    delta = int(image.shape[0]/16)
+    orbiter = Orbital(satellite) if tle_file is None else Orbital(
+        satellite, tle_file=tle_file)
+    delta = int(image.shape[0] / 16)
     delta = max(delta, 10)
 
-    top_coord    = compute_alt(orbiter, dtime, image, -delta)
-    bot_coord    = compute_alt(orbiter, dtime, image,  delta)
+    top_coord = compute_alt(orbiter, dtime, image, -delta)
+    bot_coord = compute_alt(orbiter, dtime, image, delta)
     center_coord = compute_alt(orbiter, dtime, image, 0)
 
     return top_coord, bot_coord, center_coord
 
 
-def compute_angle(lat1, long1, lat2, long2):
-
+def compute_angle(lat1: float, long1: float, lat2: float,
+                  long2: float) -> float:
     """compute angle between 2 points, defined by latitude and longitude
 
     Args:
@@ -159,7 +159,8 @@ def compute_angle(lat1, long1, lat2, long2):
         :obj:`float`: angle between points
     """
 
-    # source: https://stackoverflow.com/questions/3932502/calculate-angle-between-two-latitude-longitude-points
+    # source: https://stackoverflow.com/questions/3932502/
+    # calculate-angle-between-two-latitude-longitude-points
     lat1 = np.radians(lat1)
     long1 = np.radians(long1)
     lat2 = np.radians(lat2)
@@ -167,17 +168,20 @@ def compute_angle(lat1, long1, lat2, long2):
 
     d_lon = (long2 - long1)
 
-    y = np.sin(d_lon) * np.cos(lat2)
-    x = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(d_lon)
-    brng = np.arctan2(y, x)
+    sincos = np.sin(d_lon) * np.cos(lat2)
+    cosdiff = np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(
+        lat2) * np.cos(d_lon)
+    brng = np.arctan2(sincos, cosdiff)
     brng = np.degrees(brng)
     brng = (brng + 360) % 360
     brng = 360 - brng
     return brng
 
 
-def create_desc(file_name, image_name, sat_type="NOAA 19", tle_file=None):
-
+def create_desc(file_name: str,
+                image_name: str,
+                sat_type: str = "NOAA 19",
+                tle_file: str = None) -> dict:
     """create descriptor file for audio record
 
     Args:
@@ -192,9 +196,12 @@ def create_desc(file_name, image_name, sat_type="NOAA 19", tle_file=None):
 
     image = np.array(Image.open(image_name))
 
-    dtime            = extract_date(file_name)
-    top, bot, center = extract_coords(image, sat_type, dtime, tle_file=tle_file)
-    degree           = compute_angle(*bot, *top)
+    dtime = extract_date(file_name)
+    top, bot, center = extract_coords(image,
+                                      sat_type,
+                                      dtime,
+                                      tle_file=tle_file)
+    degree = compute_angle(*bot, *top)
 
     descriptor = {
         "image_name": os.path.abspath(image_name),
@@ -207,8 +214,10 @@ def create_desc(file_name, image_name, sat_type="NOAA 19", tle_file=None):
     return descriptor
 
 
-def save_metadata(file_name, image_name, sat_type="NOAA 19", tle_file=None):
-
+def save_metadata(file_name: str,
+                  image_name: str,
+                  sat_type: str = "NOAA 19",
+                  tle_file: str = None) -> None:
     """creates descriptor from file_name and embeds it into the image in
     tif format. If the image provided is not tif, then creates new image
 
@@ -227,11 +236,12 @@ def save_metadata(file_name, image_name, sat_type="NOAA 19", tle_file=None):
                              sat_type=sat_type,
                              tle_file=tle_file)
 
-    tifffile.imsave(name + '.tif', image, description=json.dumps(descriptor, cls=Encoder))
+    tifffile.imsave(name + '.tif',
+                    image,
+                    description=json.dumps(descriptor, cls=Encoder))
 
 
-def preprocess(image_name, output_file):
-
+def preprocess(image_name: str, output_file: str) -> None:
     """preprocesses the image, crops it and rotates for 180 degrees
     result is saved in output_file file
 
@@ -241,25 +251,39 @@ def preprocess(image_name, output_file):
     """
 
     image = Image.open(image_name)
-    w, h = image.size
-    image = image.crop((80, 0, 995, h))
+    _, height = image.size
+    image = image.crop((80, 0, 995, height))
     image = rotate(image, 180)
     Image.fromarray(image).save(output_file)
 
 
-def main():
+def main() -> None:
     """Descriptor CLI interface"""
-    parser = argparse.ArgumentParser(description="Embed data from SDR into tif image")
-    parser.add_argument('-f', '--file_sdr', required=True, help='Path to SDR recording file.')
-    parser.add_argument('-i', '--image_name', required=True, help='Path to decoded image.')
-    parser.add_argument('-t', '--tle', required=False, help='Path to tle file.')
-    parser.add_argument('-s', '--sat_type', required=False, help='Satellite type. \'NOAA 19\' by default.', default="NOAA 19")
+    parser = argparse.ArgumentParser(
+        description="Embed data from SDR into tif image")
+    parser.add_argument('-f',
+                        '--file_sdr',
+                        required=True,
+                        help='Path to SDR recording file.')
+    parser.add_argument('-i',
+                        '--image_name',
+                        required=True,
+                        help='Path to decoded image.')
+    parser.add_argument('-t',
+                        '--tle',
+                        required=False,
+                        help='Path to tle file.')
+    parser.add_argument('-s',
+                        '--sat_type',
+                        required=False,
+                        help='Satellite type. \'NOAA 19\' by default.',
+                        default="NOAA 19")
 
     args = parser.parse_args()
 
-    filename    = args.file_sdr
-    image_name  = args.image_name
-    sat_type    = args.sat_type
+    filename = args.file_sdr
+    image_name = args.image_name
+    sat_type = args.sat_type
 
     allowed_sats = {'NOAA 18', 'NOAA 19', 'NOAA 15'}
 
@@ -276,10 +300,10 @@ def main():
 
     save_metadata(filename, image_name, sat_type, tle_file)
 
+
 # Example arguments
 # -f = "../samples/SDRSharp_20190521_152538Z_137500000Hz_IQ.wav"
 # -i = "../samples/image_noaa_2.png"
-
 
 if __name__ == "__main__":
     main()
