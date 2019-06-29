@@ -21,53 +21,23 @@
     <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-    <script>
+  </head>
+  <script>
       function initialize() {
         var earth = new WE.map('earth_div');
         var osm = WE.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(earth);
 
         var data = JSON.parse($("#json-data").text());
 
-        var layers = [];
-
         var counter = parseInt(data["counter"] - 1, 10);
 
-        for (let i = 1; i <= counter; i++) {
-          layers.push(data["" + i]);
-        }
+        var layer = WE.tileLayer('tms/tms' + data["" + counter] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
 
-        var index = layers[0], current = WE.tileLayer('tms/tms' + index + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
-        current.addTo(earth);
-
-        function refreshTime(event, ui) {
-            var value = ui.value - 1;
-            if (value >= 0 && value < layers.length) {
-                if (layers[value] === index) {
-                   return;
-                } else {
-                   current.removeFrom(earth);
-                   current = WE.tileLayer('tms/tms' + layers[value] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
-                   current.addTo(earth);
-                   index = value;
-                }
-            }
-        }
-
-        $("#slider-time").slider({
-            orientation: "horizontal",
-            range: "min",
-            max: layers.length,
-            min: 1,
-            step: 1,
-            value: 1,
-            change: refreshTime
-        });
+        layer.addTo(earth);
       }
     </script>
-  </head>
   <body onload="initialize()">
-    <div id="json-data" style="display: none;">{{ conf }}</div>
-    <div id="slider-time"></div>
+  <div id="json-data" style="display: none;">{{ conf }}</div>
     <div id="earth_div"></div>
   </body>
 </html>

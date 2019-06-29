@@ -23,7 +23,7 @@ body, table, tr, td, th, div, h1, h2, input {
 
 #slider-time {
     position: absolute;
-    top: 20px;
+    bottom: 50px;
     left: 40%;
     width: 20%;
     z-index:3;
@@ -43,7 +43,7 @@ body, table, tr, td, th, div, h1, h2, input {
 #slider-caption {
     position: absolute;
     color: white;
-    top: 40px;
+    bottom: 20px;
     left: 37.5%;
     width: 25%;
     text-align: center;

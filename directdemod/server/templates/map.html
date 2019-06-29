@@ -1,7 +1,5 @@
 <!DOCTYPE html>
     <html lang="en">
-        <!-- reworked from http://www.klokan.cz/projects/gdal2tiles -->
-
         <head>
             <meta charset="utf-8">
             <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
@@ -58,6 +56,12 @@
             layers: [osm, current]
         });
 
+        function format(date) {
+            parts = date.split("_");
+            if (parts.length != 4) return date;
+            return parts[0] + " " + parts[1] + "  -  " + parts[2] + " " + parts[3];
+        }
+
         function refreshTime(event, ui) {
             var value = ui.value - 1;
             if (value >= 0 && value < layers.length) {
@@ -67,7 +71,7 @@
                    map.removeLayer(current);
                    current = layers[value];
                    map.addLayer(current);
-                   $("#slider-caption").text(labels[value]);
+                   $("#slider-caption").text(format(labels[value]));
                 }
             }
         }
