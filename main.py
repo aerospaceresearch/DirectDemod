@@ -4,9 +4,9 @@ noaa commandline interface
 '''
 
 from directdemod import source, chunker, comm, constants, filters, demod_fm, sink, demod_am, decode_noaa, log, decode_afsk1200, decode_funcube, decode_meteorm2
-import numpy as np
 import os
 import sys, getopt, logging, json
+from shutil import copyfile
 from time import gmtime, strftime
 from datetime import datetime
 
@@ -200,6 +200,7 @@ for fileIndex in range(len(freqs)):
             mapImageFileNameRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map_rot.png"
             mapImageFileNameNRot = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.png"
             mapImageFileNameTif = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_map.tif"
+            overlayImageFileNameTif = fileName.split(".")[0] + "_f" + str(fileIndex+1) + "_overlay.tif"
             if not outs[fileIndex] is None:
                 audFileName = outs[fileIndex] + ".wav"
                 imgFileName = outs[fileIndex] + ".png"
@@ -208,6 +209,8 @@ for fileIndex in range(len(freqs)):
                 mapImageFileNameRot = outs[fileIndex] + "_map_rot.png"
                 mapImageFileNameNRot = outs[fileIndex] + "_map.png"
                 mapImageFileNameTif = outs[fileIndex] + "_map.tif"
+                overlayImageFileNameTif = outs[fileIndex] + "_overlay.tif"
+
 
             # create noaa object
             noaaObj = decode_noaa.decode_noaa(sigsrc, freqOffset, bandwidths[fileIndex])
@@ -285,9 +288,12 @@ for fileIndex in range(len(freqs)):
                         referencer = Georeferencer(tle_file=tleFileName)
                         referencer.georef_tif(constants.TEMP_TIFF_FILE, mapImageFileNameTif)
 
-                        overlay(mapImageFileNameTif)
+                        copyfile(mapImageFileNameTif, overlayImageFileNameTif)
+
+                        overlay(overlayImageFileNameTif)
 
                         entryDict['filesCreated'].append(mapImageFileNameTif)
+                        entryDict['filesCreated'].append(overlayImageFileNameTif)
 
                         if os.path.isfile(constants.TEMP_TIFF_FILE):
                             os.remove(constants.TEMP_TIFF_FILE)
