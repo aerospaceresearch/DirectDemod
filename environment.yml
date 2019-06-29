@@ -14,3 +14,5 @@ dependencies:
     - Pillow==6.0.0
     - python_dateutil==2.8.0
     - pytest
+    - apscheduler
+    - flask
