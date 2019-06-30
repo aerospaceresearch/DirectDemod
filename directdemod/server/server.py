@@ -180,6 +180,8 @@ def process(dir_path: str, tms_path: str, images: List[str]) -> None:
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " +
                   merged_file + " " + tms_path)
 
+    save_conf()
+
 
 def save_conf() -> None:
     """saves configuration file"""

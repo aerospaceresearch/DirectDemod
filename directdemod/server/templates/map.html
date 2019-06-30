@@ -41,8 +41,8 @@
         var counter = parseInt(data["counter"] - 1, 10);
 
         for (let i = 1; i <= counter; i++) {
-            labels.push(data["" + i]);
-            layers.push(L.tileLayer('tms/tms' + data["" + i] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
+            labels.push(data["" + (counter - i + 1)]);
+            layers.push(L.tileLayer('tms/tms' + data["" + (counter - i + 1)] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
         }
 
         var current = layers[0];
