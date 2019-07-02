@@ -264,7 +264,7 @@ def main() -> None:
     parser.add_argument('-f',
                         '--file_sdr',
                         required=True,
-                        help='Path to SDR recording file.')
+                        help='Path to recorded SDR file.')
     parser.add_argument('-i',
                         '--image_name',
                         required=True,

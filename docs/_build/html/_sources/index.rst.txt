@@ -18,6 +18,7 @@ Some tutorials on how to use the modules and write your own scripts or to extend
    gettingstarted.rst
    modules.rst
    visualization.rst
+   tutorials.rst
 
 
 Indices and tables

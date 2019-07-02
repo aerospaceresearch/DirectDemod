@@ -1,6 +1,6 @@
 """
 This module provides an API for merging multiple images.
-It extracts needed information and projects images on mercator
+It extracts needed information and projects images onto mercator
 projection.
 """
 
