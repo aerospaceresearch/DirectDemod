@@ -20,7 +20,7 @@ conf = json.load(open(CONF_PATH, 'r'))
 RATE = int(conf["update_rate"])
 
 start_date = time.time()
-PATTERN = re.compile("SDRSharp_[0-9]{8}_[0-9]{6}Z_[0-9]{9}Hz_IQ.png$")
+PATTERN = re.compile("SDRSharp_[0-9]{8}_[0-9]{6}Z_[0-9]{9}Hz(_IQ)?.(tif|tiff)$")
 
 
 def get_interval(start_time: float, rate: int) -> str:
@@ -144,38 +144,17 @@ def process(dir_path: str, tms_path: str, images: List[str]) -> None:
         images (:obj:list[str]): list of images paths
     """
 
-    from directdemod.misc import save_metadata, preprocess
-    from directdemod.georeferencer import Georeferencer, set_nodata
+    from directdemod.georeferencer import set_nodata
     from directdemod.merger import merge
-    from directdemod.constants import TLE_NOAA
 
-    sat_types = list(map(lambda f: f[0:7], images))
     images = list(map(lambda f: dir_path + "/" + f, images))
-    georeferenced = list(
-        map(lambda f: os.path.splitext(f)[0] + "_geo.tif", images))
-    referencer = Georeferencer(tle_file=TLE_NOAA)
-
-    for index, val in enumerate(images):
-        try:
-            preprocess(val, georeferenced[index])
-            save_metadata(
-                file_name=val,
-                image_name=georeferenced[index],
-                sat_type=sat_types[index],  # extracting NOAA satellite
-                tle_file=TLE_NOAA)
-            referencer.georef_tif(georeferenced[index], georeferenced[index])
-        except Exception as exp:
-            print(exp)
-            # FIXME: add logging
-            continue
-
     merged_file = dir_path + "/merged.tif"
-    if len(georeferenced) > 1:
-        merge(georeferenced, output_file=merged_file)
+    if len(images) > 1:
+        merge(images, output_file=merged_file)
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " +
                   merged_file + " " + tms_path)
-    elif len(georeferenced) == 1:
-        copyfile(georeferenced[0], merged_file)
+    elif len(images) == 1:
+        copyfile(images[0], merged_file)
         set_nodata(merged_file, value=0)
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " +
                   merged_file + " " + tms_path)
