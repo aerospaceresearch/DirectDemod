@@ -252,7 +252,7 @@ def preprocess(image_name: str, output_file: str) -> None:
 
     image = Image.open(image_name)
     _, height = image.size
-    image = image.crop((80, 0, 995, height))
+    image = image.crop((85, 0, 995, height))
     image = rotate(image, 180)
     Image.fromarray(image).save(output_file)
 
