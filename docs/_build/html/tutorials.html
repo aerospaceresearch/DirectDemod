@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorials &mdash; DirectDemod  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Visualizations routine" href="visualization.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> DirectDemod
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">DirectDemod: Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">DirectDemod: Modules documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualizations routine</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-extraction-misc-py">Data extraction (misc.py)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#georeferencer">Georeferencer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#map-overlay">Map Overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#merger">Merger</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#map-generation-tutorial">Map generation tutorial</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DirectDemod</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Tutorials</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/tutorials.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<p>This section presents several usage examples of directdemod package.
+Each usage example is accompanied with thorough explanation and
+an appropriate data, which is stored in <cite>tutorial/data/</cite> folder.</p>
+<div class="section" id="data-extraction-misc-py">
+<h2>Data extraction (misc.py)<a class="headerlink" href="#data-extraction-misc-py" title="Permalink to this headline">¶</a></h2>
+<p><cite>misc.py</cite> script is used to perform data extraction of satellite parameters. When running, <cite>misc.py</cite>
+will extract data from SDR file, create copy of provided image with .tif extension and embed
+extracted data as json into it. CLI interface receives following console options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-f</span>, <span class="option">--file_sdr</span></kbd></td>
+<td>path to recorded SDR file</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-i</span>, <span class="option">--image_name</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>path to decoded and preprocessed image</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-t</span>, <span class="option">--tle</span></kbd></td>
+<td>path to tle file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-s</span>, <span class="option">--sat_type</span></kbd></td>
+<td>satellite type</td></tr>
+</tbody>
+</table>
+<p>Tle and satellite type parameters are optional.
+The <cite>tutorial/data/metadata</cite> directory contains sample files - sdr file and the decoded image.
+Sample command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">misc</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">metadata</span><span class="o">/</span><span class="n">SDRSharp_20190521_170204Z_137500000Hz_IQ</span><span class="o">.</span><span class="n">wav</span> \
+<span class="o">-</span><span class="n">i</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">metadata</span><span class="o">/</span><span class="n">image</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>Created <cite>image.tif</cite> file will contain the satellite data (orbit parameters, satellite type etc. )
+in json format along with the image itself; it will be ready for performing georeferencing.</p>
+</div>
+<div class="section" id="georeferencer">
+<h2>Georeferencer<a class="headerlink" href="#georeferencer" title="Permalink to this headline">¶</a></h2>
+<p>Georeferencer class is intended to provide methods for georeferencing NOAA images.
+It provides CLI interface for running the program from command line. CLI interface takes following
+options (map, resample and output_file are optional):</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-i</span>, <span class="option">--image_name</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>path to image file</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-o</span>, <span class="option">--output_file</span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>name of output file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-m</span>, <span class="option">--map</span></kbd></td>
+<td>flag to create map overlay</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-r</span>, <span class="option">--resample</span></kbd></td>
+<td>resample algorithm</td></tr>
+</tbody>
+</table>
+<p>Georeferencer assumes that the image passed via <cite>–image_name</cite> option contains a descriptor file
+embedded within it. If the file doesn’t contain it, the processing will result in an error.</p>
+<p>As an example usage let’s say we have a decoded and preprocessed NOAA image <cite>start.png</cite> and the file
+it was extracted from <cite>SDRSharp_20190521_170204Z_137500000Hz_IQ.wav</cite>. To receive a georeferenced image
+we need to do the following:</p>
+<ol class="arabic simple">
+<li>Extract the information from <cite>.wav</cite> file name and save it to <cite>start.tif</cite> file.</li>
+<li>Georeference tif file.</li>
+</ol>
+<p>To extract data <cite>misc.py</cite> command is used (see misc.py docs).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">misc</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">f</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">georef</span><span class="o">/</span><span class="n">SDRSharp_20190521_170204Z_137500000Hz_IQ</span><span class="o">.</span><span class="n">wav</span> \
+<span class="o">-</span><span class="n">i</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">georef</span><span class="o">/</span><span class="n">start</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>To georeference the file we use <cite>georeferencer.py</cite> file. <cite>start.tif</cite> will contain georeferenced image.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">georeferencer</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">georef</span><span class="o">/</span><span class="n">start</span><span class="o">.</span><span class="n">tif</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="map-overlay">
+<h2>Map Overlay<a class="headerlink" href="#map-overlay" title="Permalink to this headline">¶</a></h2>
+<p>Map overlay can be created using <cite>–map</cite> option of the georeferencer. After the georeferencing is done
+map borders shapefile will be overlayed on top of it.</p>
+<p>To create an overlay over image use the following command.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">georeferencer</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="o">-</span><span class="n">i</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">overlay</span><span class="o">/</span><span class="n">no_overlay</span><span class="o">.</span><span class="n">tif</span> \
+<span class="o">-</span><span class="n">o</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">overlay</span><span class="o">/</span><span class="n">with_overlay</span><span class="o">.</span><span class="n">tif</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="merger">
+<h2>Merger<a class="headerlink" href="#merger" title="Permalink to this headline">¶</a></h2>
+<p>Merge is used to combine several georeferenced images into one single raster, taking care
+of overlapping regions. Merger CLI interface has following console options:</p>
+<table class="docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-f</span>, <span class="option">--files</span></kbd></td>
+<td>list of input files</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-o</span>, <span class="option">--output</span></kbd></td>
+<td>name of output file</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">-r</span>, <span class="option">--resample</span></kbd></td>
+<td>resample algorithm</td></tr>
+</tbody>
+</table>
+<p>Resample option receives one of the four merging method names:</p>
+<ol class="arabic simple">
+<li>first</li>
+<li>last</li>
+<li>average</li>
+<li>max</li>
+</ol>
+<p>The <cite>tutorial/data/merge</cite> directory contains several example usage files. <cite>image1.tif</cite> and
+<cite>image2.tif</cite> are sample files for merging. Use following command to merge them (resample average):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">merger</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">o</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">merge</span><span class="o">/</span><span class="n">merged</span><span class="o">.</span><span class="n">tif</span> <span class="o">-</span><span class="n">r</span> <span class="n">average</span> \
+<span class="o">--</span><span class="n">files</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">merge</span><span class="o">/</span><span class="n">image1</span><span class="o">.</span><span class="n">tif</span> <span class="n">tutorial</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">merge</span><span class="o">/</span><span class="n">image2</span><span class="o">.</span><span class="n">tif</span>
+</pre></div>
+</div>
+<p>The <cite>tutorial/data/merge/merged.tif</cite> file will be created after running the above command.
+You can compare it with other merging methods (<cite>average.tif</cite>, <cite>max.tif</cite>, <cite>first.tif</cite>, <cite>last.tif</cite>).</p>
+</div>
+<div class="section" id="map-generation-tutorial">
+<h2>Map generation tutorial<a class="headerlink" href="#map-generation-tutorial" title="Permalink to this headline">¶</a></h2>
+<p>To generate visualization of raster use <cite>generate_map.py</cite> interface.
+The following command will generate a TMS (Tile Map Service) and 2 visualization files in
+<cite>samples/tms</cite> directory.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">directdemod</span><span class="o">/</span><span class="n">generate_map</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">raster</span> <span class="n">samples</span><span class="o">/</span><span class="n">decoded</span><span class="o">/</span><span class="n">raster</span><span class="o">.</span><span class="n">tif</span> <span class="o">--</span><span class="n">tms</span> <span class="n">samples</span><span class="o">/</span><span class="n">tms</span>
+</pre></div>
+</div>
+<p>You can run <cite>map.html</cite> by opening it directly in the browser.
+To run <cite>globe.html</cite> go to tms directory and start the http server on port 8000 (python3):</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span> <span class="pre">8000</span></code></p>
+<p>Then open browser and go to <cite>http://localhost:8000/globe.html</cite>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="visualization.html" class="btn btn-neutral float-left" title="Visualizations routine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Vinay C K (7andahalf)
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

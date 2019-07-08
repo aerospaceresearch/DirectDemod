@@ -5,7 +5,7 @@ from osgeo import gdal
 from PIL import Image
 from shutil import copyfile
 from directdemod import constants
-from directdemod.georeferencer import set_nodata
+from directdemod.georeferencer import _set_nodata
 
 
 class TestSetNoData(unittest.TestCase):
@@ -14,8 +14,8 @@ class TestSetNoData(unittest.TestCase):
     def setUpClass(cls):
         cls.nodata = 0
         cls.nodata255 = constants.MODULE_PATH + '/tests/data/no_data/nodata255.tif'
-        cls.nodata0   = constants.MODULE_PATH + '/tests/data/no_data/nodata0.tif'
-        cls.f         = constants.MODULE_PATH + '/tests/data/no_data/_sample.tif'
+        cls.nodata0 = constants.MODULE_PATH + '/tests/data/no_data/nodata0.tif'
+        cls.f = constants.MODULE_PATH + '/tests/data/no_data/_sample.tif'
 
         copyfile(cls.nodata255, cls.f)
 
@@ -25,7 +25,7 @@ class TestSetNoData(unittest.TestCase):
             os.remove(cls.f)
 
     def test_set_nodata(self):
-        set_nodata(self.nodata255, self.f, value=self.nodata)
+        _set_nodata(self.nodata255, self.f, value=self.nodata)
 
         img = Image.open(self.nodata0)
         img_new = Image.open(self.f)

@@ -1,7 +1,7 @@
 import tifffile
 import unittest
+import json
 
-from directdemod.misc import JSON
 from directdemod import constants
 
 
@@ -24,6 +24,6 @@ class TestSaveMeta(unittest.TestCase):
             page = f.pages[0]
             descriptor = page.tags["ImageDescription"].value
 
-        descriptor = JSON.parse(descriptor)
+        descriptor = json.loads(descriptor)
 
         self.assertEqual(self.data, descriptor)

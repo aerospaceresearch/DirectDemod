@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+            <title>Web map</title>
+
+            <!-- Leaflet -->
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}" />
+            <script src="{{ url_for('static', filename='scripts/leaflet.js') }}"></script>
+
+            <!-- JQuery -->
+            <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+                    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+                    crossorigin="anonymous">
+            </script>
+            <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+                    integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+                    crossorigin="anonymous">
+            </script>
+            <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+            <!-- CSS -->
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        </head>
+        <body>
+
+        <div id="json-data" style="display: none;">{{ conf }}</div>
+        <div id="slider-time"></div>
+        <span id="slider-caption"></span>
+        <div id="map"></div>
+
+        <script type="text/javascript">
+
+        var osm = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'});
+
+        var data = JSON.parse($("#json-data").text());
+
+        var layers = [], labels = [];
+
+        var counter = parseInt(data["counter"] - 1, 10);
+
+        for (let i = 1; i <= counter; i++) {
+            labels.push(data["" + (counter - i + 1)]);
+            layers.push(L.tileLayer('tms/tms' + data["" + (counter - i + 1)] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
+        }
+
+        var current = layers[0];
+        $("#slider-caption").text(labels[0]);
+
+        var map = L.map('map', {
+            center: [51.507, 0.1278], // London coordinates
+            zoom: 3,
+            minZoom: 1,
+            maxZoom: 6,
+            layers: [osm, current]
+        });
+
+        function format(date) {
+            parts = date.split("_");
+            if (parts.length != 4) return date;
+            return parts[0] + " " + parts[1] + "  -  " + parts[2] + " " + parts[3];
+        }
+
+        function refreshTime(event, ui) {
+            var value = ui.value - 1;
+            if (value >= 0 && value < layers.length) {
+                if (layers[value] === current) {
+                   return;
+                } else {
+                   map.removeLayer(current);
+                   current = layers[value];
+                   map.addLayer(current);
+                   $("#slider-caption").text(format(labels[value]));
+                }
+            }
+        }
+
+        $("#slider-time").slider({
+            orientation: "horizontal",
+            range: "min",
+            max: layers.length,
+            min: 1,
+            step: 1,
+            value: 1,
+            slide: refreshTime,
+            change: refreshTime
+        });
+
+        </script>
+        </body>
+</html>
+
