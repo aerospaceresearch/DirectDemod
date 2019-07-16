@@ -10,6 +10,7 @@ import atexit
 
 from typing import List
 from shutil import copyfile
+from osgeo import gdal
 from flask import Flask, render_template, send_file, abort, request
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -56,7 +57,13 @@ def upload_page():
             os.mkdir(dir_path)
 
         for f in files:
-            f.save(dir_path + "/" + f.filename)
+            path = dir_path + "/" + f.filename
+            f.save(path)
+            if not valid(path):
+                os.remove(path)
+
+        if os.path.isdir(dir_path) and len(os.listdir(dir_path)) == 0:
+            os.rmdir(dir_path)
 
     return render_template('upload.html', conf=json.dumps(conf))
 
@@ -87,6 +94,11 @@ def get_tms(file: str):
     if not os.path.isfile(file_name):
         abort(404)
     return send_file(file_name)
+
+
+def valid(path: str) -> bool:
+    data = gdal.Open(path)
+    return data is not None
 
 
 def update() -> None:
