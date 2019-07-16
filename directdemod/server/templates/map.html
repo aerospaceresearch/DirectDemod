@@ -46,7 +46,7 @@
         }
 
         var current = layers[0];
-        $("#slider-caption").text(labels[0]);
+        $("#slider-caption").text(format(labels[0]));
 
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
@@ -57,13 +57,13 @@
         });
 
         function format(date) {
-            parts = date.split("_");
+            let parts = date.split("_");
             if (parts.length != 4) return date;
             return parts[0] + " " + parts[1] + "  -  " + parts[2] + " " + parts[3];
         }
 
         function refreshTime(event, ui) {
-            var value = ui.value - 1;
+            let value = ui.value - 1;
             if (value >= 0 && value < layers.length) {
                 if (layers[value] === current) {
                    return;

@@ -45,14 +45,18 @@ def upload_page():
     if request.method == 'POST':
         dir_path = APP.root_path + "/images/img" + get_interval(
             start_date, RATE)
-        if not os.path.isdir(dir_path):
-            os.mkdir(dir_path)
 
+        files = []
         for key in request.files.keys():
             file = request.files[key]
             if bool(PATTERN.match(file.filename)):
-                file.save(dir_path + "/" + request.form["sat_type"] + "_" +
-                          file.filename)
+                files.append(file)
+
+        if not os.path.isdir(dir_path) and len(files) > 0:
+            os.mkdir(dir_path)
+
+        for f in files:
+            f.save(dir_path + "/" + f.filename)
 
     return render_template('upload.html', conf=json.dumps(conf))
 
