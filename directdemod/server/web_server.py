@@ -9,19 +9,20 @@ import time
 import atexit
 
 from typing import List
-from shutil import copyfile
+from shutil import copyfile, move
 from osgeo import gdal
 from flask import Flask, render_template, send_file, abort, request
 from apscheduler.schedulers.background import BackgroundScheduler
 
 APP = Flask(__name__)
 
+FTP_DIR = APP.root_path + "/ftp"
 CONF_PATH = APP.root_path + "/conf.json"
 conf = json.load(open(CONF_PATH, 'r'))
 RATE = int(conf["update_rate"])
 
 start_date = time.time()
-PATTERN = re.compile("SDRSharp_[0-9]{8}_[0-9]{6}Z_[0-9]{9}Hz(_IQ)?.(tif|tiff)$")
+PATTERN = re.compile("[AB]_SDRSharp_[0-9]{8}_[0-9]{6}Z_[0-9]{9}Hz(_IQ)?\\.(tif|tiff)$")
 
 
 def get_interval(start_time: float, rate: int) -> str:
@@ -82,15 +83,29 @@ def globe_page():
     return render_template('globe.html', conf=json.dumps(conf))
 
 
-@APP.route('/tms/<path:file>', methods=['GET'])
-def get_tms(file: str):
+@APP.route('/tmsA/<path:file>', methods=['GET'])
+def get_tms_a(file: str):
     """gets file from tms directory
 
     Args:
         file (:obj:`string`): name of file from tms directory
     """
 
-    file_name = APP.root_path + "/tms/" + file
+    file_name = APP.root_path + "/tmsA/" + file
+    if not os.path.isfile(file_name):
+        abort(404)
+    return send_file(file_name)
+
+
+@APP.route('/tmsB/<path:file>', methods=['GET'])
+def get_tms_b(file: str):
+    """gets file from tms directory
+
+    Args:
+        file (:obj:`string`): name of file from tms directory
+    """
+
+    file_name = APP.root_path + "/tmsB/" + file
     if not os.path.isfile(file_name):
         abort(404)
     return send_file(file_name)
@@ -99,6 +114,11 @@ def get_tms(file: str):
 def valid(path: str) -> bool:
     data = gdal.Open(path)
     return data is not None
+
+
+def move_files(ftp_dir: str, dir_path: str) -> None:
+    for f in os.listdir(ftp_dir):
+        move(f, dir_path)
 
 
 def update() -> None:
@@ -110,21 +130,29 @@ def update() -> None:
     global start_date
     interval = get_interval(start_date, RATE)
     dir_path = APP.root_path + "/images/img" + interval
+    move_files(FTP_DIR, dir_path)
 
     if not os.path.isdir(dir_path) or not os.listdir(dir_path):
         start_date += RATE
         return
 
-    images = os.listdir(dir_path)
-    tms_path = APP.root_path + "/tms/tms" + interval
-    process(dir_path, tms_path, images)
+    images_a = [im for im in os.listdir(dir_path) if im.startswith("A_")]
+    images_b = [im for im in os.listdir(dir_path) if im.startswith("B_")]
+
+    tms_path_a = APP.root_path + "/tmsA/tms" + interval
+    tms_path_b = APP.root_path + "/tmsB/tms" + interval
+
+    process(dir_path, tms_path_a, "a", images_a)
+    process(dir_path, tms_path_b, "b", images_b)
+
     start_date += RATE
-    move_unprocessed_files(dir_path, images)
+    # move_unprocessed_files(dir_path, images)
 
     conf[conf["counter"]] = interval
     conf["counter"] += 1
 
 
+#  FIXME: delete?
 def move_unprocessed_files(dir_path: str, images: List[str]) -> None:
     """moves all unprocessed files to the next time interval
 
@@ -150,13 +178,14 @@ def move_unprocessed_files(dir_path: str, images: List[str]) -> None:
             os.rename(dir_path + "/" + file, new_dir_path + "/" + file)
 
 
-def process(dir_path: str, tms_path: str, images: List[str]) -> None:
+def process(dir_path: str, tms_path: str, image_part: str, images: List[str]) -> None:
     """processes all images from `images` array, merges them and creates tms
     which is store in `tms_path`
 
     Args:
         dir_path (:obj:`str`): path to images directory
         tms_path (:obj:`str`): path to tms directory
+        image_part (:obj:`str`): name of image part ("A" or "B")
         images (:obj:list[str]): list of images paths
     """
 
@@ -164,7 +193,7 @@ def process(dir_path: str, tms_path: str, images: List[str]) -> None:
     from directdemod.merger import merge
 
     images = list(map(lambda f: dir_path + "/" + f, images))
-    merged_file = dir_path + "/merged.tif"
+    merged_file = dir_path + "/" + image_part + "_merged.tif"
     if len(images) > 1:
         merge(images, output_file=merged_file)
         os.system("gdal2tiles.py --profile=mercator -z 1-6 -w none " +

@@ -31,7 +31,7 @@
 
         var counter = parseInt(data["counter"] - 1, 10);
 
-        var layer = WE.tileLayer('tms/tms' + data["" + counter] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
+        var layer = WE.tileLayer('tmsA/tms' + data["" + counter] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7});
 
         layer.addTo(earth);
       }
