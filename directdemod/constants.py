@@ -26,6 +26,7 @@ NOAA_COLORCORRECT_FIFOLEN = 10000
 NOAA_DETECTMAXCHANGE = 5
 NOAA_DETECTCONSSYNCSNUM = 10
 NOAA_SATS = {137620000:"NOAA 15", 137100000:"NOAA 19", 137912500:"NOAA 18"}
+SAT_FREQ = {"NOAA 15": 137620000, "NOAA 19": 137100000, "NOAA 18": 137912500}
 
 ## Merger settings
 RESOLUTION = 500
@@ -42,6 +43,12 @@ BORDERS = MODULE_PATH + "/misc/shapes/borders.shp"  # should be used in directde
 ## MAP
 MAP_TEMPLATE = MODULE_PATH + "/misc/map.html"
 GLOBE_TEMPLATE = MODULE_PATH + "/misc/globe.html"
+
+## SSH settings
+USER = "main"
+IP = "206.81.21.147"
+PASS = "globeproject1769"
+DIR = "/home/main/DirectDemod/directdemod/server/ftp"
 
 ###### Do not change these
 

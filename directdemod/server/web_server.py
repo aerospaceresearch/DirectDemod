@@ -117,6 +117,8 @@ def valid(path: str) -> bool:
 
 
 def move_files(ftp_dir: str, dir_path: str) -> None:
+    if not os.path.isdir(dir_path):
+        os.mkdir(dir_path)
     for f in os.listdir(ftp_dir):
         move(f, dir_path)
 
@@ -223,3 +225,6 @@ def main() -> None:
 
 
 main()  # DON'T  ADD __name__ == '__main__'
+
+if __name__ == "__main__":
+    APP.run()
