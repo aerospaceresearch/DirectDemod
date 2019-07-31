@@ -45,9 +45,9 @@ MAP_TEMPLATE = MODULE_PATH + "/misc/map.html"
 GLOBE_TEMPLATE = MODULE_PATH + "/misc/globe.html"
 
 ## SSH settings
-USER = "main"
-IP = "206.81.21.147"
-PASS = "globeproject1769"
+USER = ""
+IP = ""
+PASS = ""
 DIR = "/home/main/DirectDemod/directdemod/server/ftp"
 
 ###### Do not change these
