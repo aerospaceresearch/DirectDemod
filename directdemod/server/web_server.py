@@ -120,7 +120,7 @@ def move_files(ftp_dir: str, dir_path: str) -> None:
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
     for f in os.listdir(ftp_dir):
-        move(f, dir_path)
+        move(ftp_dir + "/" + f, dir_path)
 
 
 def update() -> None:

@@ -59,10 +59,10 @@ def process(path: str, sat_type: str) -> None:
     os.system("sshpass -p '" + constants.PASS + "' scp " + image_b + " " + constants.USER +
               "@" + constants.IP + ":" + constants.DIR)
 
-    #if os.path.isfile(image_a):
-    #    os.remove(image_a)
-    #if os.path.isfile(image_b):
-    #    os.remove(image_b)
+    if os.path.isfile(image_a):
+        os.remove(image_a)
+    if os.path.isfile(image_b):
+        os.remove(image_b)
 
 
 def process_files(files: List[str], sat_types: List[str]) -> None:
