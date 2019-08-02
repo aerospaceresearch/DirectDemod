@@ -10,6 +10,16 @@ This section presents several usage examples of directdemod package.
 Each usage example is accompanied with thorough explanation and
 an appropriate data, which is stored in `tutorial/data/` folder.
 
+*Note:* python version should be higher then 3.6, preferably 3.7.
+In tutorials below `python` command refers to python3.
+
+*Note on warnings*: depending on your python version you can see the following warnings,
+which is ok, they are not the errors of the program.
+
+ - YAMLLoadWarning: calling yaml.load() without Loader=... is deprecated
+ - Warning 1: TIFFReadDirectoryCheckOrder:Invalid TIFF directory; tags are
+   not sorted in ascending order
+
 Data extraction (misc.py)
 --------------------------
 
@@ -28,7 +38,7 @@ Sample command:
 ::
 
     python directdemod/misc.py -f tutorial/data/metadata/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav \
-    -i tutorial/tutorial/data/metadata/image.png
+    -i tutorial/data/metadata/image.png
 
 Created `image.tif` file will contain the satellite data (orbit parameters, satellite type etc. )
 in json format along with the image itself; it will be ready for performing georeferencing.
@@ -59,7 +69,7 @@ To extract data `misc.py` command is used (see misc.py docs).
 ::
 
     python directdemod/misc.py -f tutorial/data/georef/SDRSharp_20190521_170204Z_137500000Hz_IQ.wav \
-    -i tutorial/tutorial/data/georef/start.png
+    -i tutorial/data/georef/start.png
 
 
 To georeference the file we use `georeferencer.py` file. `start.tif` will contain georeferenced image.
@@ -119,7 +129,14 @@ The following command will generate a TMS (Tile Map Service) and 2 visualization
 
 You can run `map.html` by opening it directly in the browser.
 To run `globe.html` go to tms directory and start the http server on port 8000 (python3):
+::
 
-``python -m http.server 8000``
+   python -m http.server 8000
 
 Then open browser and go to `http://localhost:8000/globe.html`.
+
+Help
+-----------------------
+
+If you encountered an error or want to add a fix, you can contact us directly on
+``github.com/aerospaceresearch/DirectDemod``.
