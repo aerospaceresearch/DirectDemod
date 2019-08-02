@@ -148,36 +148,9 @@ def update() -> None:
     process(dir_path, tms_path_b, "b", images_b)
 
     start_date += RATE
-    # move_unprocessed_files(dir_path, images)
 
     conf[conf["counter"]] = interval
     conf["counter"] += 1
-
-
-#  FIXME: delete?
-def move_unprocessed_files(dir_path: str, images: List[str]) -> None:
-    """moves all unprocessed files to the next time interval
-
-    Args:
-        dir_path (:obj:`str`): path to images directory
-        images (:obj:list[str]): list of images paths
-    """
-
-    dimages = set(images)
-    dgeo = set(map(lambda x: os.path.splitext(x)[0] + "_geo.tif", dimages))
-    not_processed = []
-
-    for file in os.listdir(dir_path):
-        if file not in dimages and file not in dgeo and file != "merged.tif":
-            not_processed.append(file)
-
-    if not_processed:
-        new_dir_path = APP.root_path + "/images/img" + get_interval(
-            start_date, RATE)
-        os.mkdir(new_dir_path)
-
-        for file in not_processed:
-            os.rename(dir_path + "/" + file, new_dir_path + "/" + file)
 
 
 def process(dir_path: str, tms_path: str, image_part: str, images: List[str]) -> None:

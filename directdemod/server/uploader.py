@@ -1,3 +1,7 @@
+"""
+This module contains functions needed for easy upload of files
+to the web server.
+"""
 import os
 
 from PIL import Image
@@ -9,14 +13,26 @@ from directdemod.georeferencer import Georeferencer
 
 
 def preprocess_a(image_name: str, output_file: str) -> None:
+    """preprocesses first part of image"""
     preprocess(image_name, output_file, 85, 995)
 
 
 def preprocess_b(image_name: str, output_file: str) -> None:
+    """preprocesses second part of image"""
     preprocess(image_name, output_file, 1125, 2035)
 
 
 def preprocess(image_name: str, output_file: str, lo: int, hi: int) -> None:
+    """function opens the image, crops it according to given bounds, rotates it on 180
+    degrees and saves to output_file
+
+    Args:
+        image_name (:obj:`string`): path to the input image
+        output_file (:obj:`string`): path to output file, where result image will be saved
+        lo (:obj:`int`): left cropping bound of the image
+        hi (:obj:`int`): right cropping bound of the image
+    """
+
     image = Image.open(image_name)
     _, height = image.size
     image = image.crop((lo, 0, hi, height))
@@ -25,6 +41,14 @@ def preprocess(image_name: str, output_file: str, lo: int, hi: int) -> None:
 
 
 def process(path: str, sat_type: str) -> None:
+    """decodes recording in path (should be in .wav format), applies preprocessing, georeferencing both parts
+    and sends both parts of the image to the server via ssh (scp command)
+
+    Args:
+        path (:obj:`str`): path to NOAA recording
+        sat_type (:obj:`str`): type of the NOAA satellite (i. e. "NOAA 19")
+    """
+
     file_name = os.path.basename(path)
     dir_path = os.path.dirname(path)
 
@@ -66,5 +90,6 @@ def process(path: str, sat_type: str) -> None:
 
 
 def process_files(files: List[str], sat_types: List[str]) -> None:
+    """processes list of files, calls process() one each pair"""
     for index, val in enumerate(files):
         process(val, sat_types[index])
