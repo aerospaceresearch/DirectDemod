@@ -100,10 +100,6 @@ class Georeferencer(object):
                   srcDSOrSrcDSTab=constants.TEMP_TIFF_FILE,
                   options=options)
 
-        # save descriptor to new tif?
-        # with tifffile.TiffFile(output_file) as t:
-        #   t.imsave(output_file, image, description=JSON.stringify(descriptor))
-
         os.remove(constants.TEMP_TIFF_FILE)
 
     def georef_os(self, descriptor: dict, output_file: str) -> None:

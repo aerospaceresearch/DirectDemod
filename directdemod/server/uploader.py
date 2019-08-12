@@ -40,7 +40,7 @@ def preprocess(image_name: str, output_file: str, lo: int, hi: int) -> None:
     Image.fromarray(image).save(output_file)
 
 
-def process(path: str, sat_type: str) -> None:
+def process(path: str, sat_type: str) -> List[str]:
     """decodes recording in path (should be in .wav format), applies preprocessing, georeferencing both parts
     and sends both parts of the image to the server via ssh (scp command)
 
@@ -55,7 +55,7 @@ def process(path: str, sat_type: str) -> None:
     os.system("python3 " + constants.MODULE_PATH + "/main.py --tle=" + constants.TLE_NOAA + " -f " +
               str(constants.SAT_FREQ[sat_type]) + " -d noaa " + path)
 
-    image_name = os.path.splitext(file_name)[0] + ".png"
+    image_name = os.path.splitext(file_name)[0] + "_f1.png"
     tiff_name = os.path.splitext(file_name)[0] + ".tif"
     image_a, image_b = dir_path + "/" + "A_" + tiff_name, dir_path + "/" + "B_" + tiff_name
 
@@ -77,19 +77,28 @@ def process(path: str, sat_type: str) -> None:
     referencer.georef_tif(image_a, image_a)
     referencer.georef_tif(image_b, image_b)
 
-    os.system("sshpass -p '" + constants.PASS + "' scp " + image_a + " " + constants.USER +
-              "@" + constants.IP + ":" + constants.DIR)
+    return [image_a, image_b]
 
-    os.system("sshpass -p '" + constants.PASS + "' scp " + image_b + " " + constants.USER +
-              "@" + constants.IP + ":" + constants.DIR)
 
-    if os.path.isfile(image_a):
-        os.remove(image_a)
-    if os.path.isfile(image_b):
-        os.remove(image_b)
+def send(files: List[str]) -> None:
+    """sends all images to web server"""
+    for image in files:
+        os.system("sshpass -p '" + constants.PASS + "' scp " + image + " " + constants.USER +
+                  "@" + constants.IP + ":" + constants.DIR)
+
+
+def remove(files: List[str]) -> None:
+    """removes all passed files"""
+    for image in files:
+        if os.path.isfile(image):
+            os.remove(image)
 
 
 def process_files(files: List[str], sat_types: List[str]) -> None:
     """processes list of files, calls process() one each pair"""
+    processed = []
     for index, val in enumerate(files):
-        process(val, sat_types[index])
+        processed.extend(process(val, sat_types[index]))
+
+    send(processed)
+    remove(processed)
