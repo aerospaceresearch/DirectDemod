@@ -36,17 +36,43 @@
 
         var data = JSON.parse($("#json-data").text());
 
-        var layers = [], labels = [];
+        var layers_a = [], layers_b = [], labels = [], flag = true; // flag checks isAToggle()
 
         var counter = parseInt(data["counter"] - 1, 10);
 
         for (let i = 1; i <= counter; i++) {
             labels.push(data["" + (counter - i + 1)]);
-            layers.push(L.tileLayer('tms/tms' + data["" + (counter - i + 1)] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
+            layers_a.push(L.tileLayer('tmsA/tms' + data["" + (counter - i + 1)] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
+            layers_b.push(L.tileLayer('tmsB/tms' + data["" + (counter - i + 1)] + '/{z}/{x}/{y}.png', {tms: true, opacity: 0.7}));
         }
 
-        var current = layers[0];
-        $("#slider-caption").text(labels[0]);
+        var current = layers_a[0];
+        $("#slider-caption").text(format(labels[0]));
+
+        var customControl = L.Control.extend({
+            options: {
+                position: 'topleft'
+            },
+
+            onAdd: function(map) {
+                var container = L.DomUtil.create('input');
+                container.type = "button";
+                container.value = "Toggle channels";
+                container.style.backgroundColor = 'white';
+                container.style.width = '150px';
+                container.style.height = '30px';
+
+                container.onclick = function() {
+                    if (flag)
+                        switch_layers(layers_a, layers_b);
+                    else
+                        switch_layers(layers_b, layers_a);
+                    flag = !flag;
+                }
+
+                return container;
+            }
+        });
 
         var map = L.map('map', {
             center: [51.507, 0.1278], // London coordinates
@@ -56,30 +82,43 @@
             layers: [osm, current]
         });
 
+        map.addControl(new customControl());
+
+        function switch_layers(layers_from, layers_to) {
+            let index = layers_from.indexOf(current);
+            map.removeLayer(current);
+            current = layers_to[index];
+            map.addLayer(current);
+        }
+
         function format(date) {
-            parts = date.split("_");
+            let parts = date.split("_");
             if (parts.length != 4) return date;
             return parts[0] + " " + parts[1] + "  -  " + parts[2] + " " + parts[3];
         }
 
         function refreshTime(event, ui) {
-            var value = ui.value - 1;
-            if (value >= 0 && value < layers.length) {
-                if (layers[value] === current) {
-                   return;
-                } else {
-                   map.removeLayer(current);
-                   current = layers[value];
-                   map.addLayer(current);
-                   $("#slider-caption").text(format(labels[value]));
-                }
+            let value = ui.value - 1;
+            if (value >= 0 && value < layers_a.length) {
+                refresh(value, (flag) ? layers_a : layers_b);
             }
+        }
+
+        function refresh(value, layers) {
+            if (layers[value] === current) {
+                return;
+            } else {
+                map.removeLayer(current);
+                current = layers[value];
+                map.addLayer(current);
+                $("#slider-caption").text(format(labels[value]));
+             }
         }
 
         $("#slider-time").slider({
             orientation: "horizontal",
             range: "min",
-            max: layers.length,
+            max: layers_a.length,
             min: 1,
             step: 1,
             value: 1,

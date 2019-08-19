@@ -33,6 +33,7 @@ git clone https://github.com/aerospaceresearch/DirectDemod
 cd DirectDemod/
 conda env create -f environment.yml -n env_name
 conda activate env_name
+pip install -r requirements.txt
 ```
 
 You should add `directdemod` package to your `PYTHONPATH`. 
