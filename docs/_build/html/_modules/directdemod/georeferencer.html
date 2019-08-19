@@ -249,10 +249,6 @@
                   <span class="n">srcDSOrSrcDSTab</span><span class="o">=</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">,</span>
                   <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
-        <span class="c1"># save descriptor to new tif?</span>
-        <span class="c1"># with tifffile.TiffFile(output_file) as t:</span>
-        <span class="c1">#   t.imsave(output_file, image, description=JSON.stringify(descriptor))</span>
-
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">TEMP_TIFF_FILE</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Georeferencer.georef_os"><a class="viewcode-back" href="../../visualization.html#directdemod.georeferencer.Georeferencer.georef_os">[docs]</a>    <span class="k">def</span> <span class="nf">georef_os</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

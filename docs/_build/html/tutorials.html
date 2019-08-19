@@ -90,6 +90,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#map-overlay">Map Overlay</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#merger">Merger</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#map-generation-tutorial">Map generation tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-server-with-timeline">Running server with timeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#help">Help</a></li>
 </ul>
 </li>
@@ -310,6 +311,21 @@ To run <cite>globe.html</cite> go to tms directory and start the http server on 
 </pre></div>
 </div>
 <p>Then open browser and go to <cite>http://localhost:8000/globe.html</cite>.</p>
+</div>
+<div class="section" id="running-server-with-timeline">
+<h2>Running server with timeline<a class="headerlink" href="#running-server-with-timeline" title="Permalink to this headline">¶</a></h2>
+<p>To run a server with timeline on a local machine (Linux) please do the following tasks.
+Navigate to <cite>directdemod/server/</cite> and execute following commands.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">FLASK_APP</span><span class="o">=</span><span class="n">web_server</span><span class="o">.</span><span class="n">py</span>
+<span class="n">flask</span> <span class="n">run</span>
+</pre></div>
+</div>
+<p>This will start a server at port 5000. Open the page in your browser
+<cite>http://localhost:5000/map.html</cite>. You can upload images via the <cite>upload.html</cite> page.
+To configure update interval please edit <cite>conf.json</cite> file <cite>update_rate</cite> parameter, set it in seconds
+and restart the server. The server contains two channels (left and right parts of NOAA image), you
+can toggle between them using toggle button in the left top corner, you can switch between images
+on the timeline using switcher widget in the bottom of the page.</p>
 </div>
 <div class="section" id="help">
 <h2>Help<a class="headerlink" href="#help" title="Permalink to this headline">¶</a></h2>

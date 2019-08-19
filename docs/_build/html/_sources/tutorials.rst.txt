@@ -135,6 +135,24 @@ To run `globe.html` go to tms directory and start the http server on port 8000 (
 
 Then open browser and go to `http://localhost:8000/globe.html`.
 
+Running server with timeline
+----------------------------
+
+To run a server with timeline on a local machine (Linux) please do the following tasks.
+Navigate to `directdemod/server/` and execute following commands.
+
+::
+
+   export FLASK_APP=web_server.py
+   flask run
+
+This will start a server at port 5000. Open the page in your browser
+`http://localhost:5000/map.html`. You can upload images via the `upload.html` page.
+To configure update interval please edit `conf.json` file `update_rate` parameter, set it in seconds
+and restart the server. The server contains two channels (left and right parts of NOAA image), you
+can toggle between them using toggle button in the left top corner, you can switch between images
+on the timeline using switcher widget in the bottom of the page.
+
 Help
 -----------------------
 
