@@ -1,12 +1,12 @@
 # DirectDemod
-Direct Demodulation of Radio-signals
+Direct Demodulation of Radio-signals.
 
 ## Decoders
-* NOAA images (Under progress)
-* AFSK1200 (Under progress)
+* NOAA images (Under progress).
+* AFSK1200 (Under progress).
 
 ## Run example
-To run: run 'python main.py IQ.wav'
+To run: run 'python main.py IQ.wav'.
 
 (using Docker)
 ```
@@ -18,7 +18,7 @@ sudo docker run --rm -it \
 
 
 ## Documentation
-Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io)
+Please find the docs at: [directdemod.readthedocs.io](https://directdemod.readthedocs.io).
 
 ## Experiments
 The experiments performed to make design decisions are in the folder experiments, as jupyter notebooks. (click the binder badge for an online version)
