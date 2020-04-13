@@ -28,7 +28,7 @@ When conda is installed, clone the repository and create conda a new conda envir
 git clone https://github.com/aerospaceresearch/DirectDemod
 cd DirectDemod/
 conda create -n env_name
-conda activate env_name (or source activate env_name, if the previous doesn't work, In some environments, it might be deprecated)
+conda activate env_name (or source activate env_name, if the previous doesn't work)
 conda config --add channels conda-forge
 conda install --file requirements.txt
 
