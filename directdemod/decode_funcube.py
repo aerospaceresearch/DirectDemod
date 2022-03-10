@@ -167,7 +167,38 @@ class decode_funcube:
         pllObj = costas()
         ctr = 0
 
-        sync = np.array([int(i) for i in "101000110001000000000001010111100"])
+        #asm from # https://public.ccsds.org/Pubs/131x0b3e1.pdf
+        code_sync_marker = "1ACFFC1D"
+        hexadecimal = code_sync_marker
+        end_length = len(hexadecimal) * 4
+
+        hex_as_int = int(hexadecimal, 16)
+        hex_as_binary = bin(hex_as_int)
+        padded_binary = hex_as_binary[2:].zfill(end_length)
+        code_sync_marker = padded_binary
+
+        code_sync_marker_binary = "0"
+        for b in range(len(code_sync_marker)):
+            if code_sync_marker[b] == "1":
+                code_sync_marker_binary += code_sync_marker_binary[-1]
+            else:
+                if code_sync_marker_binary[-1] == "1":
+                    code_sync_marker_binary += "0"
+                else:
+                    code_sync_marker_binary += "1"
+
+        sync = np.array([int(i) for i in code_sync_marker_binary])
+        #sync = np.array([int(i) for i in "101000110001000000000001010111100"])
+
+        # just a test
+        code_sync_hex = ""
+        for b in range(len(code_sync_marker_binary) - 1):
+            if code_sync_marker_binary[b] != code_sync_marker_binary[b + 1]:
+                code_sync_hex += "0"
+            else:
+                code_sync_hex += "1"
+
+        print("sync marker is", hex(int(code_sync_hex, 2)))
 
         sync12khz = np.repeat(sync, 10)
 
